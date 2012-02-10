@@ -1,0 +1,7 @@
+Dette er serverdelen av SMS og MMS-applikasjonen for STF.
+
+Den skal ha en MySQL-server og noen PHP-sider som:
+* Ta imot SMS fra serviceleverandør og legger dem inn i db
+* Visning av SMS-resultater
+* Godkjenning av MMS
+* Visning av MMS-karusell.
