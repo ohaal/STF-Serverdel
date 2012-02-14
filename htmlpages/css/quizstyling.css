@@ -1,0 +1,52 @@
+div.dialog {
+	display: none;
+}
+
+div.answers {
+	margin-left: 1em;
+	color: #666666;
+}
+div.answers .correct {
+	color: #000000;
+	font-style:italic;
+}
+
+div#newquestionoverlay div#questiontitle {
+	width: 550px;
+	height: 50px;
+	margin-bottom: 15px;
+}
+div#newquestionoverlay div#questiontitle input {
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-top: 7px;
+	width: 520px;
+}
+div#newquestionoverlay div.answer {
+	margin-bottom: 5px;
+}
+
+div#newquestionoverlay div.answer input[type=text] {
+	width: 500px;
+	margin-left: 15px;
+}
+div#newquestionoverlay div.answer input[type=radio] {
+	margin-left: 12px;
+}
+
+h1 {
+	font-size: 1.1em;
+}
+
+span.ui-icon {
+	display: inline-block;
+}
+
+html { font-family: Verdana,Arial,sans-serif; font-size: 0.9em; color: #000000 }
+input, select, textarea, button { font-family: Verdana,Arial,sans-serif; font-size: 1em; }
+div.box { border: 1px solid #aaaaaa; background: #ffffff url(custom-theme/images/ui-bg_flat_75_ffffff_40x100.png) 50% 50% repeat-x; color: #000000; }
+a { color: #222222; }
+div.header {font-size: 1.5em; border: 1px solid #aaaaaa; background: #cccccc url(custom-theme/images/ui-bg_highlight-soft_75_cccccc_1x100.png) 50% 50% repeat-x; color: #222222; font-weight: bold; }
+a:visited { color: #222222; }
+a:hover {color: #666666; }
+a.nounderline {text-decoration: none;}
