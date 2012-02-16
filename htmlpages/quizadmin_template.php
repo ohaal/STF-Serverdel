@@ -10,16 +10,23 @@
 <title>Quiz admin</title>
 </head>
 <body>
+<div id="mainbody">
+<div class="header center ui-corner-all"><h1 class="center">Quiz administration</h1></div>
+
+<div id="dialog-confirm" class="dialog" title="Delete question?">
+	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This question will be deleted forever. Are you sure?</p>
+</div>
+
 <div id="newquizoverlay" class="dialog">
 <input type="text" name="quizname" id="inputquizname" />
 <button value="addquiz" id="addquiznamebutton">Add Quiz</button>
 </div>
+
 <div id="newquestionoverlay" class="dialog">
 <form id="newquestionform">
 <div class="header" id="questiontitle">
 
 <input type="text" name="questiontext" id="inputquestiontext" />
-<input type="hidden" name="questionid" id="hiddenquestionid" />
 <input type="hidden" name="quizid" id="hiddenquizid" />
 <input type="hidden" name="questionnumber" id="hiddenquestionnumber" />
 </div>
@@ -37,14 +44,14 @@ for ($i=1;$i<6;$i++) {
 </div>
 
 
-
-<select id="quizname">
-</select>
-
-<a id="newquiz" href="">New Quiz</a>
+<div id="quizselect">
+	<select id="quizname"></select>
+	<a id="newquiz" href="#">New Quiz</a>
+</div>
 <div id="questions"></div>
-<div>
-<a id="newquestion" href="">New Question</a>
+<div id="newquestiondiv">
+<a id="newquestion" href="#">New Question</a>
+</div>
 </div>
 </body>
 </html>

@@ -7,11 +7,17 @@ class quizAdmin {
 		$this->db = new dbConnection();
 	}
 	
+	function removeHtmlChars($string) {
+		$ret = htmlspecialchars ($string);
+		return $ret;
+	}
+	
 	function getAllQuizNames() {
 		return $this->db->getQuizNames();
 	}
 	
 	function addQuizName($quizname) {
+		$quizname = $this->removeHtmlChars($quizname);
 		return $this->db->addQuizName($quizname);
 	}
 	
@@ -20,16 +26,28 @@ class quizAdmin {
 		return $questions;
 	}
 	
-	function getQuestion($questionid) {
-		$question = $this->db->getQuestion($questionid);
+	function getQuestion($quizid, $questionnumber) {
+		$question = $this->db->getQuestion($quizid, $questionnumber);
 		return $question;
 	}
-	function addOrEditQuestion($quizid, $questionid, $questionnumber, $questiontext, $correctanswer, $answer) {
-		if (is_numeric($questionid)) {
-			return $this->db->editQuestion($quizid, $questionid, $questionnumber, $questiontext, $correctanswer, $answer);
-		} else {
-			return $this->db->addQuestion($quizid, $questionid, $questionnumber, $questiontext, $correctanswer, $answer);
+	function addOrEditQuestion($quizid, $questionnumber, $questiontext, $correctanswer, $answers) {
+		$questiontext = $this->removeHtmlChars($questiontext);
+		$ans = array();
+		foreach ($answers as $key => $a) {
+			$ans[$key]=$this->removeHtmlChars($a);
 		}
+		if (is_numeric($questionnumber)) {
+			return $this->db->editQuestion($quizid, $questionnumber, $questiontext, $correctanswer, $ans);
+		} else {
+			return $this->db->addQuestion($quizid, $questionnumber, $questiontext, $correctanswer, $ans);
+		}
+	}
+	function sortQuestions($quizid, $neworder) {
+		// neworder should be an array of {questionorder, questionid (primary key)}
+		$this->db->sortQuestions($quizid, $neworder);
+	}
+	function deleteQuestion($quizid, $questionid) {
+		$this->db->deleteQuestion($quizid, $questionid);
 	}
 }
 ?>

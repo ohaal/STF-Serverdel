@@ -7,10 +7,31 @@ div.answers {
 	color: #666666;
 }
 div.answers .correct {
-	color: #000000;
+	color: #226622;
 	font-style:italic;
 }
 
+div#mainbody {
+	width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+}
+div.center {
+	width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+}
+h1.center {
+	text-align: center
+}
+div.question {
+	cursor: move;
+	border: 1px solid #aaaaaa; background: #ffffff; color: #000000;
+	-moz-border-radius: 6px; -webkit-border-radius: 6px; -khtml-border-radius: 6px; border-radius: 6px; 
+	margin-top: 5px;
+	padding: 5px;
+	width: 790px;
+}
 div#newquestionoverlay div#questiontitle {
 	width: 550px;
 	height: 50px;
@@ -40,6 +61,19 @@ h1 {
 
 span.ui-icon {
 	display: inline-block;
+}
+span.deleteanswer {
+	right: 0px;
+	float: right;
+}
+div#quizselect, div#newquestiondiv {
+	font-size: 1.2em;
+	text-align: right;
+	margin-bottom: 18px;
+	margin-top: 6px;
+}
+select#quizname {
+	
 }
 
 html { font-family: Verdana,Arial,sans-serif; font-size: 0.9em; color: #000000 }

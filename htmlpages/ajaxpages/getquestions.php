@@ -11,7 +11,7 @@ if (isset ($_GET['quizid'])) {
 $ret = "";
 $ret .= "[ ";
 foreach ( $questionsArray as $key => $question ) {
-		$ret .= '{"idquestions":' . $key . ', "questionnumber":' . $question ['questionnumber'] . ', "questiontext": "' . $question ['questiontext'] . '", "correctanswer": ' . $question ['correctanswer'];
+		$ret .= '{"idquestions": "' . $key . '", "quizid":'.$question['quizid'].', "questionnumber":' . $question ['questionnumber'] . ', "questiontext": "' . $question ['questiontext'] . '", "correctanswer": ' . $question ['correctanswer'];
 		if (isset($question['answers']) && sizeof ( $question ['answers'] ) > 0) {
 			$ret .=', "answers": [';
 			foreach ( $question ['answers'] as $answer ) {

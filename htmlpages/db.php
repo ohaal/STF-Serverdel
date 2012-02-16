@@ -69,16 +69,16 @@ class dbConnection {
 			die();
 		}
 		$ret = array ();
-		$sql = "SELECT questions.idquestions, questions.quizid, questions.questionnumber, questions.questiontext, questions.correctanswer, answers.idanswers, answers.questionid, answers.answernumber, answers.answertext FROM questions LEFT JOIN answers ON questions.idquestions = answers.questionid  WHERE questions.quizid = $quiz ORDER BY questions.questionnumber, answers.answernumber";
+		$sql = "SELECT questions.idquestion, questions.quizid as quizid, questions.questionnumber as questionnumber, questions.questiontext, questions.correctanswer, answers.quizid as aquizid, answers.answernumber, answers.answertext FROM questions LEFT JOIN answers ON (questions.quizid = answers.quizid AND questions.idquestion = answers.questionid)  WHERE questions.quizid = $quiz ORDER BY questions.questionnumber, answers.answernumber";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
-				while ( $row = $result->fetch_object () ) {
-					$q= $row;
-					if (!array_key_exists($q->idquestions, $ret)) {
-						$ret[$q->idquestions] = array('idquestions' =>$q->idquestions, 'questionnumber' => $q->questionnumber, 'questiontext' => $q->questiontext, 'correctanswer' => $q->correctanswer);
+				while ( $q = $result->fetch_object () ) {
+					$key = "".$q->quizid.".".$q->questionnumber.".".$q->idquestion;
+					if (!array_key_exists($key, $ret)) {
+						$ret[$key] = array('idquestion'=> $q->idquestion,'quizid' =>$q->quizid, 'questionnumber' => $q->questionnumber, 'questiontext' => $q->questiontext, 'correctanswer' => $q->correctanswer);
 					}
 					if ($q->answernumber) {
-						$ret[$q->idquestions]['answers'][$q->idanswers] = array('answernumber' => $q->answernumber, 'answertext' => $q->answertext);
+						$ret[$key]['answers'][$q->answernumber] = array('answernumber' => $q->answernumber, 'answertext' => $q->answertext);
 					}
 				}
 			}		
@@ -88,21 +88,19 @@ class dbConnection {
 		return $ret;
 	}
 	
-	function getQuestion($questionid) {
-		if (!is_numeric($questionid)) {
+	function getQuestion($quizid, $questionnumber) {
+		if (!is_numeric($quizid) || ! is_numeric($questionnumber)) {
 			die();
 		}
-		$ret = array ();
-		$sql = "SELECT questions.idquestions, questions.quizid, questions.questionnumber, questions.questiontext, questions.correctanswer, answers.idanswers, answers.questionid, answers.answernumber, answers.answertext FROM questions LEFT JOIN answers ON questions.idquestions = answers.questionid WHERE questions.idquestions = $questionid ORDER BY answers.answernumber";
+		$sql = "SELECT questions.idquestion, questions.quizid as quizid, questions.questionnumber as questionnumber, questions.questiontext, questions.correctanswer, answers.quizid as aquizid, answers.questionid as aquestionid, answers.answernumber, answers.answertext FROM questions LEFT JOIN answers ON (questions.quizid = answers.quizid AND questions.idquestion = answers.questionid) WHERE questions.quizid = $quizid AND questions.questionnumber = $questionnumber ORDER BY answers.answernumber";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
-				while ( $row = $result->fetch_object () ) {
-					$q= $row;
-					if (!array_key_exists('idquestions', $ret)) {
-						$ret = array('idquestions' =>$q->idquestions, 'questionnumber' => $q->questionnumber, 'questiontext' => $q->questiontext, 'correctanswer' => $q->correctanswer);
+				while ( $q = $result->fetch_object () ) {
+					if (!isset($ret)) {
+						$ret = array('idquestion'=> $q->idquestion, 'quizid' =>$q->quizid, 'questionnumber' => $q->questionnumber, 'questiontext' => $q->questiontext, 'correctanswer' => $q->correctanswer);
 					}
 					if ($q->answernumber) {
-						$ret['answers'][$q->idanswers] = array('answernumber' => $q->answernumber, 'answertext' => $q->answertext);
+						$ret['answers'][$q->answernumber] = array('answernumber' => $q->answernumber, 'answertext' => $q->answertext);
 					}
 				}
 			}
@@ -112,19 +110,25 @@ class dbConnection {
 		return $ret;	
 	}
 	
-	function editQuestion($quizid, $questionid, $questionnumber, $questiontext, $correctanswer, $answers) {
-		if ($stmt = $this->dbconn->prepare("UPDATE questions SET questiontext=?, correctanswer=?, questionnumber=?, quizid=? WHERE idquestions=?;")) {
-			$stmt->bind_param('siiii', $questiontext,$correctanswer,$questionnumber,$quizid,$questionid);
+	function editQuestion($quizid, $questionnumber, $questiontext, $correctanswer, $answers) {
+		if ($stmt = $this->dbconn->prepare("UPDATE questions SET questiontext=?, correctanswer=? WHERE quizid=? AND questionnumber=?;")) {
+			$stmt->bind_param('siii', $questiontext,$correctanswer,$quizid, $questionnumber);
 			$stmt->execute();
 			$stmt->close();
-			$this->addAnswers($questionid, $answers);
+			$this->addAnswers($quizid, $questionnumber, $answers);
 		} else {
 			printf("Prepared Statement Error: %s\n", $mysqli->error);
 		}
 	}
 	
-	function addQuestion($quizid, $questionid, $questionnumber, $questiontext, $correctanswer, $answers) {
+	function addQuestion($quizid, $questionnumber, $questiontext, $correctanswer, $answers) {
 		$max=0;
+		if (!$correctanswer) {
+			$correctanswer =0;
+		}
+		if (!$questiontext || $questiontext == "") {
+			die();
+		}
 		if ($stmt = $this->dbconn->prepare("SELECT MAX(questionnumber) FROM questions WHERE quizid = ?;")) {
 			$stmt->bind_param('i', $quizid);
 			$stmt->execute();
@@ -143,27 +147,35 @@ class dbConnection {
 			$stmt->execute();
 			$stmt->close();
 			$questionid = $this->dbconn->insert_id;
-			$this->addAnswers($questionid, $answers);
+			$this->addAnswers($quizid, $questionnumber, $answers);
 		} else {
 			printf("Prepared Statement Error: %s\n", $this->dbconn->error);
 		}
 	}
 	
-	function addAnswers($questionid, $answers) {
-		// remove all answers first. Simpler this way.
-		print_r($questionid);
-		print_r($answers);
-		if ($stmt = $this->dbconn->prepare ( "DELETE FROM answers WHERE questionid=?" )) {
-			$stmt->bind_param ( 'i', $questionid );
-			$stmt->execute();
-			$stmt->close();
-		} else {
-			printf("Prepared Statement Error: %s\n", $stmt->error);
+	function getQuestionid($quizid, $questionnumber) {
+		// get the question id (autoincremented int)
+		$idquestion = - 1;
+		if ($stmt = $this->dbconn->prepare ( "SELECT idquestion FROM questions WHERE quizid=? AND questionnumber=?" )) {
+			$stmt->bind_param ( 'ii', $quizid, $questionnumber );
+			$stmt->execute ();
+			$stmt->bind_result ( $idquestion );
+			$stmt->fetch ();
+			$stmt->close ();
 		}
+		
+		return $idquestion;
+	} 
+	
+	function addAnswers($quizid, $questionnumber, $answers) {
+		$idquestion = $this->getQuestionid($quizid, $questionnumber);
+		
+		// remove all answers first. Simpler this way.
+		$this->deleteAnswersForQuestion($quizid, $idquestion);
 		foreach ($answers as $key => $a) {
 			if ($a != '') {
-				if ($stmt = $this->dbconn->prepare ( "INSERT INTO answers (questionid, answernumber, answertext) VALUES (?,?,?);" )) {
-					$stmt->bind_param ( 'iis', $questionid, $key, $a );
+				if ($stmt = $this->dbconn->prepare ( "INSERT INTO answers (quizid, questionid, answernumber, answertext) VALUES (?,?,?,?);" )) {
+					$stmt->bind_param ( 'iiis', $quizid, $idquestion, $key, $a );
 					$stmt->execute ();
 					$stmt->close ();
 				} else {
@@ -172,14 +184,69 @@ class dbConnection {
 			}
 		}
 	}
-	function getAlternativesForQuestion($question) {
-
+	
+	function sortQuestions($quizid, $neworder) {
+		if (!is_numeric($quizid)) {
+			die();
+		}
+		foreach ($neworder as $qnumber => $primarykey) {
+			if ($stmt = $this->dbconn->prepare("UPDATE questions SET questionnumber=? WHERE quizid=? AND idquestion=?;")) {
+				$stmt->bind_param( 'iii', $qnumber, $quizid, $primarykey);
+				$stmt->execute();
+				$stmt->close();
+			} else {
+				printf("Prepared Statement Error: %s\n", $stmt->error);
+			}
+		}
+	}
+	
+	function deleteQuestion($quizid, $questionid) {
+		//We use questionid instead of questionnumber here, more secure this way, I guess.
+		if(!(is_numeric($quizid)) || !(is_numeric($questionid))) {
+			die();
+		}
+		$this->deleteAnswersForQuestion($quizid, $questionid);
+		if ($stmt = $this->dbconn->prepare ( "DELETE FROM questions WHERE quizid=? AND idquestion=?;" )) {
+			$stmt->bind_param('ii', $quizid, $questionid);
+			$stmt->execute();
+			$stmt->close();
+		} else {
+			printf ( "Prepared Statement Error: %s\n", $stmt->error );
+		}
+		//After deletion, we need to reorder the remaining questions
+		$sql = "SELECT idquestion, questionnumber FROM questions WHERE quizid=$quizid ORDER BY questionnumber;";
+		if ($result = $this->dbconn->query ( $sql )) {
+			if ($result->num_rows > 0) {
+				$qn = 0;
+				while ( $row = $result->fetch_object () ) {
+					$qn ++;
+					$idquestion = $row->idquestion;
+					$sql = "UPDATE questions SET questionnumber=$qn WHERE idquestion=$idquestion;";
+					$this->dbconn->query ($sql);
+				}
+			}
+		} else {
+			print_r($this->dbconn->error);
+		}		
+	}
+	
+	function deleteAnswersForQuestion($quizid, $questionid) {
+		if (! (is_numeric ( $quizid )) || ! (is_numeric ( $questionid ))) {
+			die ();
+		}
+		if ($stmt = $this->dbconn->prepare ( "DELETE FROM answers WHERE (quizid=? AND questionid=?)" )) {
+			$stmt->bind_param ( 'ii', $quizid, $questionid );
+			$stmt->execute ();
+			$stmt->close ();
+		} else {
+			printf ( "Prepared Statement Error: %s\n", $stmt->error );
+		}
 	}
 	function getAllTeamNames() {
 		
 	}
 	function getTeamNamesForQuiz($quiz) {	
-		
+		//return all teamnames which has sent at least one answer to a given quiz.		
 	}
 	function getAnswersForTeam($team, $quiz) {
 	

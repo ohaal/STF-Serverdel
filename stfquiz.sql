@@ -23,22 +23,13 @@ DROP TABLE IF EXISTS `answers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `answers` (
-  `idanswers` int(11) NOT NULL,
+  `quizid` int(11) NOT NULL,
   `questionid` int(11) NOT NULL,
   `answernumber` int(11) NOT NULL,
-  `answertext` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`idanswers`)
+  `answertext` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`quizid`,`questionid`,`answernumber`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `answers`
---
-
-LOCK TABLES `answers` WRITE;
-/*!40000 ALTER TABLE `answers` DISABLE KEYS */;
-/*!40000 ALTER TABLE `answers` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `questions`
@@ -48,23 +39,14 @@ DROP TABLE IF EXISTS `questions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `questions` (
-  `idquestions` int(11) NOT NULL AUTO_INCREMENT,
   `quizid` int(11) NOT NULL,
   `questionnumber` int(11) NOT NULL,
-  `questiontext` varchar(200) NOT NULL,
-  `correctanswer` int(11) NOT NULL,
-  PRIMARY KEY (`idquestions`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+  `questiontext` varchar(200) NOT NULL DEFAULT '',
+  `correctanswer` int(11) NOT NULL DEFAULT '0',
+  `idquestion` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`idquestion`)
+) ENGINE=MyISAM AUTO_INCREMENT=0;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `questions`
---
-
-LOCK TABLES `questions` WRITE;
-/*!40000 ALTER TABLE `questions` DISABLE KEYS */;
-/*!40000 ALTER TABLE `questions` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `quiz`
@@ -78,17 +60,8 @@ CREATE TABLE `quiz` (
   `quizname` varchar(45) NOT NULL,
   `expiredate` datetime DEFAULT NULL,
   PRIMARY KEY (`idquiz`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=0;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `quiz`
---
-
-LOCK TABLES `quiz` WRITE;
-/*!40000 ALTER TABLE `quiz` DISABLE KEYS */;
-/*!40000 ALTER TABLE `quiz` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `useranswers`
@@ -100,20 +73,12 @@ DROP TABLE IF EXISTS `useranswers`;
 CREATE TABLE `useranswers` (
   `idanswers` int(11) NOT NULL,
   `userid` int(11) NOT NULL,
-  `questionid` int(11) NOT NULL,
+  `questionnumber` int(11) NOT NULL,
   `answerid` int(11) NOT NULL,
+  `quizid` int(11) NOT NULL,
   PRIMARY KEY (`idanswers`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `useranswers`
---
-
-LOCK TABLES `useranswers` WRITE;
-/*!40000 ALTER TABLE `useranswers` DISABLE KEYS */;
-/*!40000 ALTER TABLE `useranswers` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `users`
@@ -129,15 +94,6 @@ CREATE TABLE `users` (
   PRIMARY KEY (`idusers`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `users`
---
-
-LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -148,4 +104,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2012-02-10 13:18:56
+-- Dump completed on 2012-02-16 15:02:15

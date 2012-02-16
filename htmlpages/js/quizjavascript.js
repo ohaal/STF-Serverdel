@@ -15,10 +15,14 @@ function getQuestions(resultdiv, quiz) {
 	$.getJSON("ajaxpages/getquestions.php", {quizid: quiz, ajax : 'true'}, function(j) {
 		var questions = '';
 		for (var i = 0; i<j.length; i++) {
+			questions += "<div class=\"question\" id=\"q_"+j[i].idquestions+"\">";
 			questions += "<div class=\"answerheader\">";
-			questions += "<a href=\"\" id=\"editquestion"+j[i].idquestions+"\" class=\"nounderline editanswer\">"
+			questions += "<a href=\"#\" id=\"editquestion"+j[i].idquestions+"\" class=\"nounderline editanswer\">";
 			questions += "<strong>"+j[i].questionnumber+"</strong> <span class=\"questiontext\" id=\"questiontext"+j[i].idquestions+"\">"+j[i].questiontext+"</span>";
 			questions += "<span class=\"ui-icon ui-icon-wrench\">edit</span>";
+			questions += "</a>";
+			questions += "<a href=\"#\" id=\"deletequestion"+j[i].idquestions+"\" class=\"nounderline deleteanswer\">";
+			questions += "<span class=\"ui-icon ui-icon-trash deleteanswer\">delete</span>";
 			questions += "</a>";
 			questions += "</div>";
 			questions += "<div class=\"answers\">";
@@ -34,19 +38,27 @@ function getQuestions(resultdiv, quiz) {
 				}
 			}
 			questions += '</div>';
+			questions += '</div>';
 		}
 		$(resultdiv).html(questions);
 		$("a.editanswer").click(function(event) {
-			editquestions(event.target);
+			editquestions(this);
 			return false;
 		});
+		$("a.deleteanswer").click(function(event) {
+			confirmdeletequestion(this);
+			return false;
+		})
 	});
 }
 
 function editquestions(el) {
 	var questionid = el.id.substring(12,el.id.length);
-	$.getJSON("ajaxpages/getquestion.php", {questionid: questionid, ajax : 'true'}, function(j) {
-		$("div#newquestionoverlay input#hiddenquestionid").val(j.idquestions);
+	var qidarray=questionid.split(".");
+	var quizid=qidarray[0];
+	var questionnumber=qidarray[1];
+	
+	$.getJSON("ajaxpages/getquestion.php", {quizid: quizid, questionnumber: questionnumber, ajax : 'true'}, function(j) {
 		$("div#newquestionoverlay input#hiddenquestionnumber").val(j.questionnumber);
 		$("div#newquestionoverlay input#hiddenquizid").val($("select#quizname").val());
 		$("div#newquestionoverlay input#inputquestiontext").val(j.questiontext);
@@ -62,6 +74,34 @@ function editquestions(el) {
 		$("div#newquestionoverlay").dialog("open");
 	});
 	return false;
+}
+
+function confirmdeletequestion(el) {
+	$( "#dialog-confirm" ).dialog({
+		resizable: false,
+		modal: true,
+		buttons: {
+			"Delete": function() {
+				deletequestion(el);
+				$( this ).dialog( "close" );
+			},
+			Cancel: function() {
+				$( this ).dialog( "close" );
+			}
+		}
+	});	
+}
+
+function deletequestion(el) {
+	var questionid = el.id.substring(14,el.id.length);
+	var qidarray=questionid.split(".");
+	var quizid=qidarray[0];
+	var questionnumber=qidarray[1];
+	var questionid = qidarray[2];
+
+	$.post("ajaxpages/deletequestion.php", {quizid: quizid, questionid: questionid, ajax : 'true'}, function(j) {
+		getQuestions($("div#questions"),$("select#quizname").val());
+	});
 }
 
 $(document).ready(function() {
@@ -122,10 +162,22 @@ $(document).ready(function() {
 		$("div#newquestionoverlay input#inputquestiontext").val("");
 		$("div#newquestionoverlay input.newanswer").val("");
 		$("div#newquestionoverlay input:radio").removeAttr("checked");
-		$("div#newquestionoverlay input#hiddenquestionid").val("");
 		$("div#newquestionoverlay input#hiddenquestionnumber").val("");
 		$("div#newquestionoverlay input#hiddenquizid").val($("select#quizname").val());
 		$("div#newquestionoverlay").dialog("open");
 		return false;
 	});
+	
+	$( "#questions" ).sortable({
+		axis: 'y',
+		opacity : '0.6',
+		update: function(event, ui) {
+			var order = $('#questions').sortable('serialize');
+     		$.post("ajaxpages/sortquestions.php?"+order, function(data) {
+     			getQuestions($("div#questions"),$("select#quizname").val());	
+     		});
+		}
+	});
+	$( "#questions" ).disableSelection();
+
 });
