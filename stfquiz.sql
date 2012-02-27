@@ -45,7 +45,7 @@ CREATE TABLE `questions` (
   `correctanswer` int(11) NOT NULL DEFAULT '0',
   `idquestion` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`idquestion`)
-) ENGINE=MyISAM AUTO_INCREMENT=0;
+) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -60,7 +60,7 @@ CREATE TABLE `quiz` (
   `quizname` varchar(45) NOT NULL,
   `expiredate` datetime DEFAULT NULL,
   PRIMARY KEY (`idquiz`)
-) ENGINE=MyISAM AUTO_INCREMENT=0;
+) ENGINE=MyISAM AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -71,13 +71,12 @@ DROP TABLE IF EXISTS `useranswers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `useranswers` (
-  `idanswers` int(11) NOT NULL,
+  `idanswers` int(11) NOT NULL AUTO_INCREMENT,
   `userid` int(11) NOT NULL,
-  `questionnumber` int(11) NOT NULL,
-  `answerid` int(11) NOT NULL,
-  `quizid` int(11) NOT NULL,
+  `questionid` int(11) NOT NULL,
+  `answer` int(11) NOT NULL,
   PRIMARY KEY (`idanswers`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -89,8 +88,8 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
   `idusers` int(11) NOT NULL,
-  `username` varchar(80) DEFAULT NULL,
-  `phonenumber` varchar(20) DEFAULT NULL,
+  `username` varchar(80) NOT NULL,
+  `phonenumber` varchar(20) NOT NULL,
   PRIMARY KEY (`idusers`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -104,4 +103,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2012-02-16 15:02:15
+-- Dump completed on 2012-02-27 14:55:49
