@@ -11,7 +11,7 @@ div.answers .correct {
 	font-style:italic;
 }
 
-div#mainbody {
+div.mainbody {
 	width: 800px;
 	margin-left: auto;
 	margin-right: auto;

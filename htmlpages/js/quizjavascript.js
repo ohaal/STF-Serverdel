@@ -8,7 +8,11 @@ function getQuizNames(selecttag) {
 		$(selecttag).html(options);
 		var lastValue = $('select#quizname option:last-child').val();
 		$("select#quizname").val(lastValue);
-		getQuestions($("div#questions"),$("select#quizname").val());
+
+		if ($("div#quizadmin div#questions").length) {
+			getQuestions($("div#questions"),$("select#quizname").val());
+		}
+		
 	});
 }
 function getQuestions(resultdiv, quiz) {
@@ -104,9 +108,30 @@ function deletequestion(el) {
 	});
 }
 
+function getHighScores(resultdiv, quiz) {
+	$.getJSON("ajaxpages/gethighscore.php", {quizid: quiz, ajax : 'true'}, function(j) {
+		var data = new google.visualization.DataTable(j);
+		data.addColumn('string', 'Team');
+		data.addColumn('number', 'Score');
+		for (num in j) {
+			var srow = j[num];
+			console.debug(srow['score']);
+			data.addRow([srow['username'], srow['score']]);
+		}
+		var options = {
+			legend: 'none',
+			vAxis: {viewWindow: {min: 0, max: 5}, minValue: 0, viewWindowMode: 'explicit'}
+		};
+		var chart = new google.visualization.ColumnChart(document.getElementById('highscoretable_div'));
+		chart.draw(data, options);
+	});
+}
+
 $(document).ready(function() {
 	getQuizNames("select#quizname");
-	$("div#newquizoverlay").dialog({
+	
+	//quizadmin bindings
+	$("div#quizadmin div#newquizoverlay").dialog({
 		modal : true,
 		title : 'New quiz',
 		resizable : false,
@@ -119,7 +144,7 @@ $(document).ready(function() {
 		close : function(event, ui) { getQuizNames("select#quizname") }
 	});
 	
-	$("div#newquestionoverlay").dialog({
+	$("div#quizadmin div#newquestionoverlay").dialog({
 		modal : true,
 		title : 'New question',
 		resizable : false,
@@ -134,18 +159,18 @@ $(document).ready(function() {
 	});
 	
 
-	$("a#newquiz").click(function() {
+	$("div#quizadmin a#newquiz").click(function() {
 		$("div#newquizoverlay").dialog("open");
 		return false;
 	});
 	
-	$("button#addquiznamebutton").click(function() {
+	$("div#quizadmin button#addquiznamebutton").click(function() {
 		$.getJSON("ajaxpages/addquizname.php", {quizname : $("#inputquizname").val(), ajax : 'true'});
 		$("div#newquizoverlay").dialog("close");
 		return false;
 	});
 
-	$("#newquestionform").submit(function() {
+	$("div#quizadmin #newquestionform").submit(function() {
 		//TODO: validation here.
 		$.post("ajaxpages/addquestion.php", $("#newquestionform").serialize(), function(data) {
 			$("div#newquestionoverlay").dialog("close");
@@ -154,11 +179,11 @@ $(document).ready(function() {
 	});
 	
 	
-	$("select#quizname").change(function() {
+	$("div#quizadmin select#quizname").change(function() {
 		getQuestions($("div#questions"),$("select#quizname").val());
 	});
 	
-	$("a#newquestion").click(function() {
+	$("div#quizadmin a#newquestion").click(function() {
 		$("div#newquestionoverlay input#inputquestiontext").val("");
 		$("div#newquestionoverlay input.newanswer").val("");
 		$("div#newquestionoverlay input:radio").removeAttr("checked");
@@ -168,7 +193,7 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	$( "#questions" ).sortable({
+	$( "div#quizadmin #questions" ).sortable({
 		axis: 'y',
 		opacity : '0.6',
 		update: function(event, ui) {
@@ -178,6 +203,13 @@ $(document).ready(function() {
      		});
 		}
 	});
-	$( "#questions" ).disableSelection();
+	$( "div#quizadmin #questions" ).disableSelection();
 
+	//highscore bindings
+	
+	 $("div#quizscore select#quizname").change(function() {
+		 getHighScores($("div#highscoretable_div"),$("select#quizname").val());
+	 });
+	
+	
 });

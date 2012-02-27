@@ -242,6 +242,25 @@ class dbConnection {
 			printf ( "Prepared Statement Error: %s\n", $stmt->error );
 		}
 	}
+	
+	function getCorrectAnswersForQuiz($quizid) {
+		if (! (is_numeric ( $quizid ))) {
+			die ();
+		}
+		$ret = array();
+		$sql = "SELECT DISTINCT users.idusers, useranswers.questionid, users.username, users.phonenumber, useranswers.answer, questions.questionnumber FROM useranswers, users, questions WHERE questions.quizid= $quizid AND useranswers.userid = users.idusers AND (useranswers.answer = questions.correctanswer AND useranswers.questionid = questions.idquestion) ORDER BY users.idusers, questions.questionnumber;";
+		if ($result = $this->dbconn->query ( $sql )) {
+			if ($result->num_rows > 0) {
+				while ( $row = $result->fetch_object () ) {
+					$ret[] = $row;
+				}
+			}
+		}
+		return $ret;
+	}
+	
+	
+	
 	function getAllTeamNames() {
 		
 	}

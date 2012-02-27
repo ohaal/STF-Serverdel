@@ -49,5 +49,10 @@ class quizAdmin {
 	function deleteQuestion($quizid, $questionid) {
 		$this->db->deleteQuestion($quizid, $questionid);
 	}
+	
+	function getCorrectAnswers($quizid) {
+		$ret = $this->db->getCorrectAnswersForQuiz($quizid);
+		return $ret;
+	}
 }
 ?>
