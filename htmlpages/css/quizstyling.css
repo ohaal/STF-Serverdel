@@ -24,8 +24,11 @@ div.center {
 h1.center {
 	text-align: center
 }
-div.question {
+div#quizadmin div.question {
 	cursor: move;
+}
+
+div.question {
 	border: 1px solid #aaaaaa; background: #ffffff; color: #000000;
 	-moz-border-radius: 6px; -webkit-border-radius: 6px; -khtml-border-radius: 6px; border-radius: 6px; 
 	margin-top: 5px;
@@ -59,6 +62,10 @@ h1 {
 	font-size: 1.1em;
 }
 
+h2 {
+	font-size: 0.8em;
+}
+
 span.ui-icon {
 	display: inline-block;
 }
@@ -74,6 +81,50 @@ div#quizselect, div#newquestiondiv {
 }
 select#quizname {
 	
+}
+
+div.answers div span.answered {
+	background-image: url(custom-theme/images/ui-icons_cd0a0a_256x240.png);
+	background-position: -80px -128px;
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	text-indent: -99999px;
+	overflow: hidden;
+	background-repeat: no-repeat;
+	float: right;
+}
+
+div.answers div.correct span.answered {
+	background-image: url(custom-theme/images/ui-icons_2e83ff_256x240.png);
+	background-position: -64px -144px;
+}
+
+div#quizscore div#useranswers_div h2 , div#quizscore div#useranswers_div form#editteamname input {
+	display: inline-block;
+	width: 45%;
+	margin-left: 40px;
+	margin-right: 40px;
+	font-size: 0.8em;
+}
+div#quizscore div#useranswers_div form#editteamname input {
+	 display:none;
+}
+
+div#quizscore div#useranswers_div {
+	margin-top: 40px;
+}
+
+div#quizscore div#useranswers_div div.phone {
+	font-size: 0.6em;
+	width: 35%;
+	margin-right: 40px;
+	display: inline-block;
+	text-align: right;
+}
+
+div.clearboth {
+	clear: both;
 }
 
 html { font-family: Verdana,Arial,sans-serif; font-size: 0.9em; color: #000000 }

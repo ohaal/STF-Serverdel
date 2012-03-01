@@ -248,7 +248,7 @@ class dbConnection {
 			die ();
 		}
 		$ret = array();
-		$sql = "SELECT DISTINCT users.idusers, useranswers.questionid, users.username, users.phonenumber, useranswers.answer, questions.questionnumber FROM useranswers, users, questions WHERE questions.quizid= $quizid AND useranswers.userid = users.idusers AND (useranswers.answer = questions.correctanswer AND useranswers.questionid = questions.idquestion) ORDER BY users.idusers, questions.questionnumber;";
+		$sql = "SELECT DISTINCT users.idusers, users.username, users.phonenumber, COUNT(DISTINCT users.idusers, users.username, users.phonenumber, questions.idquestion) as correct FROM useranswers, users, questions WHERE questions.quizid= $quizid AND useranswers.userid = users.idusers AND (useranswers.answer = questions.correctanswer AND useranswers.questionid = questions.idquestion) GROUP BY users.idusers ORDER BY correct DESC, users.idusers, questions.questionnumber;";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
 				while ( $row = $result->fetch_object () ) {
@@ -259,7 +259,18 @@ class dbConnection {
 		return $ret;
 	}
 	
-	
+	function getTeamInfo($teamid) {
+		if (! is_numeric ( $teamid )) {
+			die ();
+		}
+		$sql = "SELECT username, phonenumber FROM users WHERE idusers=$teamid;";
+		if ($result = $this->dbconn->query ( $sql )) {
+			if ($result->num_rows > 0) {
+				$row = $result->fetch_object ();
+				return $row;
+			}
+		}
+	}
 	
 	function getAllTeamNames() {
 		
@@ -267,8 +278,30 @@ class dbConnection {
 	function getTeamNamesForQuiz($quiz) {	
 		//return all teamnames which has sent at least one answer to a given quiz.		
 	}
-	function getAnswersForTeam($team, $quiz) {
+	function getTeamAnswers($teamid, $quizid) {
+		if (! is_numeric ( $teamid ) || ! is_numeric ( $quizid )) {
+			die ();
+		}
+		$ret = array();
+		$sql = "SELECT questions.idquestion, questions.questionnumber, questions.correctanswer, useranswers.answer FROM questions, useranswers WHERE useranswers.questionid = questions.idquestion AND questions.quizid=$quizid AND useranswers.userid=$teamid ORDER BY questionnumber;";
+		if ($result = $this->dbconn->query ( $sql )) {
+			if ($result->num_rows > 0) {
+				while ( $row = $result->fetch_object () ) {
+					$ret[] = $row;
+				}
+			}
+		}
+		return $ret;
+	}
 	
+	function setTeamName($teamid, $newname) {
+		if ($stmt = $this->dbconn->prepare("UPDATE users SET username=? WHERE idusers=?")) {
+			$stmt->bind_param('si', $newname, $teamid);
+			$stmt->execute();
+			$stmt->close();
+		} else {
+			printf("Prepared Statement Error: %s\n", $mysqli->error);
+		}
 	}
 }
 ?>

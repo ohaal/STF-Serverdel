@@ -12,6 +12,9 @@ function getQuizNames(selecttag) {
 		if ($("div#quizadmin div#questions").length) {
 			getQuestions($("div#questions"),$("select#quizname").val());
 		}
+		if ($("div#quizscore div#highscoretable_div").length) {
+			getHighScores($("div#highscoretable_div"),$("select#quizname").val());
+		}
 		
 	});
 }
@@ -109,21 +112,127 @@ function deletequestion(el) {
 }
 
 function getHighScores(resultdiv, quiz) {
+	$("#useranswers_div").html('');
 	$.getJSON("ajaxpages/gethighscore.php", {quizid: quiz, ajax : 'true'}, function(j) {
 		var data = new google.visualization.DataTable(j);
 		data.addColumn('string', 'Team');
 		data.addColumn('number', 'Score');
+		data.addColumn('string', 'teamid');
+		var maxscore= 0;
 		for (num in j) {
-			var srow = j[num];
-			console.debug(srow['score']);
-			data.addRow([srow['username'], srow['score']]);
+			var srow=j[num];
+			if (srow['score'] > maxscore) {
+				maxscore = srow['score'];
+			}
+			data.addRow([srow['username'], srow['score'], srow['userid']]);
 		}
+		maxscore = maxscore+1;
+		
+		//1,2,3,7,11,12 will give non-integer axis labels with the default lines.
+		if (maxscore < 4) {
+			maxscore = 4;
+		} else if (maxscore == 7) {
+			maxscore = 8;
+		} else if (maxscore == 11 || maxscore == 12) {
+			maxscore=13;
+		}
+		
+		
+		var view=new google.visualization.DataView(data);
+		view.setColumns([0,1]);
+		
 		var options = {
 			legend: 'none',
-			vAxis: {viewWindow: {min: 0, max: 5}, minValue: 0, viewWindowMode: 'explicit'}
+			vAxis: {viewWindow: {min: 0, max: maxscore}, minValue: 0, viewWindowMode: 'explicit', interval: 1},
 		};
 		var chart = new google.visualization.ColumnChart(document.getElementById('highscoretable_div'));
-		chart.draw(data, options);
+		
+		function scoreClicked() {
+			var selectedItem = chart.getSelection()[0];
+			var teamid = data.getValue(selectedItem.row,2);
+			getTeaminfoForQuiz(teamid, quiz);
+		}
+		
+		google.visualization.events.addListener(chart, 'select', scoreClicked);
+		chart.draw(view, options);
+	});
+}
+
+function getTeaminfoForQuiz(teamid, quiz) {
+	$.getJSON("ajaxpages/getteaminfoforquiz.php", {teamid: teamid, quizid: quiz, ajax : 'true'}, function(j) {
+			
+		var html ='';
+		var phone = j['info']['phonenumber'];
+		var teamname = j['info']['teamname'];
+		html += '<div class="header">';
+		html += '<form id="editteamname">';
+		html += '<a href="#" id="editteamnamelink"><h2 id="teamnameheader">' + teamname + '<span class="ui-icon ui-icon-wrench">edit</span></h2></a>';
+		html += '<input id="teamidinput" type="hidden" value="'+ teamid + '"/>';
+		html += '<input id="teamnameinput" value="'+ teamname + '"/>';
+		html += '<div class="phone">'+phone+'</div>';
+		html += '</form>';
+		html += '</div>';
+		var qa=j['answersarray'];
+		for ( var k = 0; k < qa.length; k++) {
+			q=qa[k];
+			var corr = qa['correctanswer'];
+			html += '<div class="question">';
+			html += '<div class="answerheader"><strong>'+q['questionnumber']+'</strong><span class="questiontext">'+q['questiontext']+'</span></div>';
+			
+			var useranswers = new Array();
+			// looping through answers given.
+			if (q['useranswers'] != undefined) {
+				for ( var l = 0; l < q['useranswers'].length; l++) {
+					if (useranswers[q['useranswers'][l]] == undefined) {
+						useranswers[q['useranswers'][l]] = 0;
+					}
+					useranswers[q['useranswers'][l]]++;
+				}
+			}
+			html += '<div class="answers">';
+			if (q.answers) {
+				
+				for (var l in q.answers) {
+					if (q['answers'][l].answernumber == q.correctanswer) {
+						html += "<div class=\"correct\">";
+					} else {
+						html += "<div>";
+					}
+					html += '<strong>'+q.answers[l].answernumber+'</strong>:'+q.answers[l].answertext;
+					if (useranswers[q.answers[l].answernumber] != undefined) {
+						for (var m =0; m<useranswers[q.answers[l].answernumber]; m++) {
+							html += '<span class="answered" />';
+						}
+					}
+					html += "</div>";
+				}
+			}
+			
+			
+			html += '</div>';
+			html += '</div>';
+					
+		}
+		$("#useranswers_div").html(html);
+		$("div#quizscore div#useranswers_div a#editteamnamelink").click(function() {
+			$("div#quizscore div#useranswers_div h2#teamnameheader").hide();
+			$("div#quizscore div#useranswers_div input#teamnameinput").show();
+		});
+		$("div#quizscore div#useranswers_div form#editteamname").submit(function() {
+			
+			var teamname = $("div#quizscore div#useranswers_div input#teamnameinput").val();
+			var teamid = $("div#quizscore div#useranswers_div input#teamidinput").val();
+			if (teamname.length < 1) {
+				return false;
+			}
+			$.getJSON("ajaxpages/editteamname.php", {teamid: teamid, teamname: teamname, ajax : 'true'}, function(j) {
+				$("div#quizscore div#useranswers_div h2#teamnameheader").html($("div#quizscore div#useranswers_div input#teamnameinput").val());
+				$("div#quizscore div#useranswers_div input#teamnameinput").hide();
+				$("div#quizscore div#useranswers_div h2#teamnameheader").show();
+			});
+			return false;
+		});
+
 	});
 }
 
@@ -170,7 +279,7 @@ $(document).ready(function() {
 		return false;
 	});
 
-	$("div#quizadmin #newquestionform").submit(function() {
+	$("#newquestionform").submit(function() {
 		//TODO: validation here.
 		$.post("ajaxpages/addquestion.php", $("#newquestionform").serialize(), function(data) {
 			$("div#newquestionoverlay").dialog("close");
@@ -210,6 +319,4 @@ $(document).ready(function() {
 	 $("div#quizscore select#quizname").change(function() {
 		 getHighScores($("div#highscoretable_div"),$("select#quizname").val());
 	 });
-	
-	
 });

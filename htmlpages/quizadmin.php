@@ -54,5 +54,19 @@ class quizAdmin {
 		$ret = $this->db->getCorrectAnswersForQuiz($quizid);
 		return $ret;
 	}
+	
+	function getTeamInfo($teamid) {
+		$ret = $this->db->getTeamInfo($teamid);
+		return $ret;
+	}
+	
+	function getTeamAnswers($teamid, $quizid) {
+		return $this->db->getTeamAnswers($teamid, $quizid);
+	}
+
+	function setTeamName($teamid, $newname) {
+		$newname = $this->removeHtmlChars($newname);
+		return $this->db->setTeamName($teamid, $newname);
+	}
 }
 ?>
