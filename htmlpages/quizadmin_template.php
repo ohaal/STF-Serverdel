@@ -48,6 +48,9 @@ for ($i=1;$i<6;$i++) {
 
 
 <div id="quizselect">
+<?
+ //TODO: Need to either have a codeword set for a quiz or have a default quiz. 
+?>
 	<select id="quizname"></select>
 	<a id="newquiz" href="#">New Quiz</a>
 </div>
