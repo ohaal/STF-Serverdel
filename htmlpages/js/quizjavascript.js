@@ -1,13 +1,18 @@
-function getQuizNames(selecttag) {
+function getQuizNames(spantag) {
 	$.getJSON("ajaxpages/getquiznames.php", {ajax : 'true'}, function(j) {
 		var options = '';
 		for ( var i = 0; i < j.length; i++) {
 			options += '<option value="' + j[i].quizid + '">'
 					+ j[i].quizname + '</option>';
 		}
-		$(selecttag).html(options);
-		var lastValue = $('select#quizname option:last-child').val();
-		$("select#quizname").val(lastValue);
+		// Only show dropdown if we have >0 quizzes
+		if (j.length > 0) {
+			selectcontainer = '<select id="quizname"></select>';
+			$(spantag).html(selectcontainer);
+			$("select#quizname").html(options);
+			var lastValue = $('select#quizname option:last-child').val();
+			$("select#quizname").val(lastValue);
+		}
 
 		if ($("div#quizadmin div#questions").length) {
 			getQuestions($("div#questions"),$("select#quizname").val());
@@ -21,6 +26,9 @@ function getQuizNames(selecttag) {
 function getQuestions(resultdiv, quiz) {
 	$.getJSON("ajaxpages/getquestions.php", {quizid: quiz, ajax : 'true'}, function(j) {
 		var questions = '';
+		// Check if we actually get any questions from the JSON
+		if (j == null) { return false; }
+
 		for (var i = 0; i<j.length; i++) {
 			questions += "<div class=\"question\" id=\"q_"+j[i].idquestions+"\">";
 			questions += "<div class=\"answerheader\">";
@@ -237,7 +245,7 @@ function getTeaminfoForQuiz(teamid, quiz) {
 }
 
 $(document).ready(function() {
-	getQuizNames("select#quizname");
+	getQuizNames("span#quizselectholder");
 	
 	//quizadmin bindings
 	$("div#quizadmin div#newquizoverlay").dialog({
@@ -250,7 +258,7 @@ $(document).ready(function() {
 				$("div#newquizoverlay").dialog('close');
 			});
 		},
-		close : function(event, ui) { getQuizNames("select#quizname") }
+		close : function(event, ui) { getQuizNames("span#quizselectholder") }
 	});
 	
 	$("div#quizadmin div#newquestionoverlay").dialog({
@@ -273,7 +281,7 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	$("div#quizadmin button#addquiznamebutton").click(function() {
+	$("button#addquiznamebutton").click(function() {
 		$.getJSON("ajaxpages/addquizname.php", {quizname : $("#inputquizname").val(), ajax : 'true'});
 		$("div#newquizoverlay").dialog("close");
 		return false;

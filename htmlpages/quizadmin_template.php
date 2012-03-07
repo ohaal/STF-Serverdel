@@ -46,12 +46,11 @@ for ($i=1;$i<6;$i++) {
 </form>
 </div>
 
-
 <div id="quizselect">
 <?
  //TODO: Need to either have a codeword set for a quiz or have a default quiz. 
 ?>
-	<select id="quizname"></select>
+	<span id="quizselectholder"></span>
 	<a id="newquiz" href="#">New Quiz</a>
 </div>
 <div id="questions"></div>
