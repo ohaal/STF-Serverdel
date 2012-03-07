@@ -1,4 +1,8 @@
-<?php 
+<?php
+// CALLED WHEN ADDING A NEW QUESTION TO QUIZ
+// Parameters from _POST:
+// quizid		: int : id of quiz question is in
+// questionid	: int : id question to delete
 include_once 'ajaxheader.php';
 require_once ('../quizadmin.php');
 $quizadmin = new quizAdmin ();

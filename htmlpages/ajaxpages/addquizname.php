@@ -1,4 +1,7 @@
 <?php
+// CALLED WHEN ADDING A NEW QUIZ
+// Parameters from _GET:
+// quizname : string : name of quiz we are going to add
 include_once 'ajaxheader.php';
 require_once ('../quizadmin.php');
 $quizadmin = new quizAdmin ();

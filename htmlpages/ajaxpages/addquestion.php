@@ -1,4 +1,11 @@
 <?php
+// CALLED WHEN ADDING A NEW QUESTION TO QUIZ
+// Parameters from _POST:
+// quizid			: int 	 : id of quiz to add question to
+// questiontext 	: string : the question itself
+// questionnumber 	: int	 : the question number (used for sort) TODO: confirm
+// correctanswer 	: int	 : the correct answer number
+// answerX 			: string : the answers
 include_once 'ajaxheader.php';
 require_once ('../quizadmin.php');
 $quizadmin = new quizAdmin ();
