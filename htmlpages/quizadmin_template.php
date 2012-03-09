@@ -39,23 +39,26 @@ for ($i=1;$i<6;$i++) {
 	print('<input type="text" class="newanswer" name="answer'.$i.'" />');
 	print('<input type="radio" name="correctanswer" value='.$i.' />');
 	print('</div>');
-	
 }
 ?>
 <button value="submitnewquestion" id="submitnewquestionbutton">OK</button>
 </form>
 </div>
 
-<div id="quizselect">
+<div id="newquizdiv">
+	<a id="newquiz" href="#">New Quiz</a>
+</div>
+<div id="quizselect" class="hideifnoquiz">
 <?
  //TODO: Need to either have a codeword set for a quiz or have a default quiz. 
 ?>
-	<span id="quizselectholder"></span>
-	<a id="newquiz" href="#">New Quiz</a>
+	<a id="createpdf" href="#">Create PDF</a>
+	<a id="activatequiz" href="#">Set active</a>
+	<select id="quizname"></select>
 </div>
 <div id="questions"></div>
 <div id="newquestiondiv">
-<a id="newquestion" href="#">New Question</a>
+<a id="newquestion" href="#" class="hideifnoquiz">New Question</a>
 </div>
 </div>
 </body>

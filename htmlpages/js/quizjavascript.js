@@ -1,24 +1,34 @@
-function getQuizNames(spantag) {
-	$.getJSON("ajaxpages/getquiznames.php", {ajax : 'true'}, function(j) {
+function getQuizNames() {
+	$.getJSON("ajaxpages/getquiznames.php", function(j) {
 		var options = '';
 		for ( var i = 0; i < j.length; i++) {
 			options += '<option value="' + j[i].quizid + '">'
 					+ j[i].quizname + '</option>';
 		}
-		// Only show dropdown if we have >0 quizzes
+	
+		// Only add options to select dropdown and show it if we have >0 quizzes
 		if (j.length > 0) {
-			selectcontainer = '<select id="quizname"></select>';
-			$(spantag).html(selectcontainer);
-			$("select#quizname").html(options);
-			var lastValue = $('select#quizname option:last-child').val();
-			$("select#quizname").val(lastValue);
+			// Add options to select tag
+			$('select#quizname').html(options);
+			var lastValue = $('select#quizname'+' option:last-child').val();
+			$('select#quizname').val(lastValue);
+
+            // Update PDF link
+			$('a#createpdf').attr('href', 'createquizpdf.php?quizid=' + lastValue)
+
+			// Unhide tags
+			$('.hideifnoquiz').show();
+		}
+		else {
+			// Hide tags if we have no quizzes
+			$('.hideifnoquiz').hide();
 		}
 
 		if ($("div#quizadmin div#questions").length) {
-			getQuestions($("div#questions"),$("select#quizname").val());
+			getQuestions($("div#questions"),$('select#quizname').val());
 		}
 		if ($("div#quizscore div#highscoretable_div").length) {
-			getHighScores($("div#highscoretable_div"),$("select#quizname").val());
+			getHighScores($("div#highscoretable_div"),$('select#quizname').val());
 		}
 		
 	});
@@ -26,6 +36,7 @@ function getQuizNames(spantag) {
 function getQuestions(resultdiv, quiz) {
 	$.getJSON("ajaxpages/getquestions.php", {quizid: quiz, ajax : 'true'}, function(j) {
 		var questions = '';
+		
 		// Check if we actually get any questions from the JSON
 		if (j == null) { return false; }
 
@@ -245,7 +256,7 @@ function getTeaminfoForQuiz(teamid, quiz) {
 }
 
 $(document).ready(function() {
-	getQuizNames("span#quizselectholder");
+	getQuizNames();
 	
 	//quizadmin bindings
 	$("div#quizadmin div#newquizoverlay").dialog({
@@ -258,7 +269,6 @@ $(document).ready(function() {
 				$("div#newquizoverlay").dialog('close');
 			});
 		},
-		close : function(event, ui) { getQuizNames("span#quizselectholder") }
 	});
 	
 	$("div#quizadmin div#newquestionoverlay").dialog({
@@ -282,7 +292,7 @@ $(document).ready(function() {
 	});
 	
 	$("button#addquiznamebutton").click(function() {
-		$.getJSON("ajaxpages/addquizname.php", {quizname : $("#inputquizname").val(), ajax : 'true'});
+		$.getJSON("ajaxpages/addquizname.php", {quizname : $("#inputquizname").val(), ajax : 'true'}, getQuizNames());
 		$("div#newquizoverlay").dialog("close");
 		return false;
 	});
@@ -297,6 +307,9 @@ $(document).ready(function() {
 	
 	
 	$("div#quizadmin select#quizname").change(function() {
+		// Update create PDF link so it links to correct content 
+		$('a#createpdf').attr('href', 'createquizpdf.php?quizid=' + $('select#quizname').val());
+		// Show questions for selected quiz
 		getQuestions($("div#questions"),$("select#quizname").val());
 	});
 	

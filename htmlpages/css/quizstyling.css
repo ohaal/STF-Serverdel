@@ -73,11 +73,16 @@ span.deleteanswer {
 	right: 0px;
 	float: right;
 }
-div#quizselect, div#newquestiondiv {
+div#quizselect, div#newquestiondiv, div#newquizdiv {
 	font-size: 1.2em;
-	text-align: right;
 	margin-bottom: 18px;
 	margin-top: 6px;
+}
+div#quizselect, div#newquestiondiv {
+	text-align: right;
+}
+div#newquizdiv {
+	text-align: left;
 }
 select#quizname {
 	
