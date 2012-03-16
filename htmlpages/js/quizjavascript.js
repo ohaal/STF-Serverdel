@@ -1,72 +1,79 @@
 function getQuizNames() {
-	$.getJSON("ajaxpages/getquiznames.php", function(j) {
+	$.getJSON("ajaxpages/getquiznames.php", function(quizlist) {
 		var options = '';
-		for ( var i = 0; i < j.length; i++) {
-			options += '<option value="' + j[i].quizid + '">'
-					+ j[i].quizname + '</option>';
+		for ( var i = 0; i < quizlist.length; i++) {
+			options += '<option value="' + quizlist[i].quizid + '">'
+					+ quizlist[i].quizname + '</option>';
 		}
-	
+
 		// Only add options to select dropdown and show it if we have >0 quizzes
-		if (j.length > 0) {
+		if (quizlist.length > 0) {
 			// Add options to select tag
 			$('select#quizname').html(options);
 			var lastValue = $('select#quizname'+' option:last-child').val();
 			$('select#quizname').val(lastValue);
 
-            // Update PDF link
-			$('a#createpdf').attr('href', 'createquizpdf.php?quizid=' + lastValue)
-
 			// Unhide tags
-			$('.hideifnoquiz').show();
+    		$('.hideifnoquiz').show();
 		}
 		else {
 			// Hide tags if we have no quizzes
 			$('.hideifnoquiz').hide();
 		}
-
+		
 		if ($("div#quizadmin div#questions").length) {
 			getQuestions($("div#questions"),$('select#quizname').val());
 		}
 		if ($("div#quizscore div#highscoretable_div").length) {
 			getHighScores($("div#highscoretable_div"),$('select#quizname').val());
 		}
-		
+		return false;
 	});
 }
 function getQuestions(resultdiv, quiz) {
-	$.getJSON("ajaxpages/getquestions.php", {quizid: quiz, ajax : 'true'}, function(j) {
+	$.getJSON("ajaxpages/getquestions.php", {quizid: quiz, ajax : 'true'}, function(questionlist) {
 		var questions = '';
+		var pdfquestions = '';
+
+	    updatelinksandforms();
 		
 		// Check if we actually get any questions from the JSON
-		if (j == null) { return false; }
+		if (questionlist == null) { return false; }
 
-		for (var i = 0; i<j.length; i++) {
-			questions += "<div class=\"question\" id=\"q_"+j[i].idquestions+"\">";
+		// Show question list
+		for (var i = 0; i<questionlist.length; i++) {
+			questions += "<div class=\"question\" id=\"q_"+questionlist[i].idquestions+"\">";
 			questions += "<div class=\"answerheader\">";
-			questions += "<a href=\"#\" id=\"editquestion"+j[i].idquestions+"\" class=\"nounderline editanswer\">";
-			questions += "<strong>"+j[i].questionnumber+"</strong> <span class=\"questiontext\" id=\"questiontext"+j[i].idquestions+"\">"+j[i].questiontext+"</span>";
+			questions += "<a href=\"#\" id=\"editquestion"+questionlist[i].idquestions+"\" class=\"nounderline editanswer\">";
+			questions += "<strong>"+questionlist[i].questionnumber+"</strong> <span class=\"questiontext\" id=\"questiontext"+questionlist[i].idquestions+"\">"+questionlist[i].questiontext+"</span>";
 			questions += "<span class=\"ui-icon ui-icon-wrench\">edit</span>";
 			questions += "</a>";
-			questions += "<a href=\"#\" id=\"deletequestion"+j[i].idquestions+"\" class=\"nounderline deleteanswer\">";
+			questions += "<a href=\"#\" id=\"deletequestion"+questionlist[i].idquestions+"\" class=\"nounderline deleteanswer\">";
 			questions += "<span class=\"ui-icon ui-icon-trash deleteanswer\">delete</span>";
 			questions += "</a>";
 			questions += "</div>";
 			questions += "<div class=\"answers\">";
-			if (j[i].answers) {
-				for (var k = 0; k<j[i].answers.length; k++) {
-					if (j[i].answers[k].answernumber == j[i].correctanswer) {
+			if (questionlist[i].answers) {
+				for (var k = 0; k<questionlist[i].answers.length; k++) {
+					if (questionlist[i].answers[k].answernumber == questionlist[i].correctanswer) {
 						questions += "<div class=\"correct\">";
 					} else {
 						questions += "<div>";
 					}
-					questions += '<strong>'+j[i].answers[k].answernumber+'</strong>:'+j[i].answers[k].answertext;
+					questions += '<strong>'+questionlist[i].answers[k].answernumber+'</strong>:'+questionlist[i].answers[k].answertext;
 					questions += "</div>";
 				}
 			}
 			questions += '</div>';
 			questions += '</div>';
+			
+			pdfquestions += "<b>Question "+questionlist[i].questionnumber+": "+questionlist[i].questiontext+"</b><br />";
+			pdfquestions += "Header <input type=\"text\" name=\"quizheader-"+questionlist[i].questionnumber+"\" /><br />";
+			pdfquestions += "<input type=\"file\" name=\"quizimage-"+questionlist[i].questionnumber+"\" />";
+			pdfquestions += "<hr />";
 		}
 		$(resultdiv).html(questions);
+		$('div#pdfquestions').html(pdfquestions);
 		$("a.editanswer").click(function(event) {
 			editquestions(this);
 			return false;
@@ -76,6 +83,14 @@ function getQuestions(resultdiv, quiz) {
 			return false;
 		})
 	});
+}
+
+function updatelinksandforms() {
+	var quizid = $('select#quizname').val();
+	// Update forms
+	$('input.quizidvalue').attr('value', quizid);
+    // Update links
+	$('a#highscorelink').attr('href', 'highscore_template.php?quizid=' + quizid);
 }
 
 function editquestions(el) {
@@ -285,16 +300,31 @@ $(document).ready(function() {
 		close : function(event, ui) {getQuestions($("div#questions"),$("select#quizname").val()) }
 	});
 	
-
+	$("div#quizadmin div#createpdfoverlay").dialog({
+		modal : true,
+		title : 'Create PDF',
+		resizable : false,
+		autoOpen : false,
+		minWidth : 600,
+		open : function(event, ui) {
+			$('.ui-widget-overlay').bind('click', function() {
+				$("div#createpdfoverlay").dialog('close');
+			});
+		},
+//		close : function(event, ui) {getQuestions($("div#questions"),$("select#quizname").val()) }
+	});
+	
 	$("div#quizadmin a#newquiz").click(function() {
 		$("div#newquizoverlay").dialog("open");
 		return false;
 	});
 	
 	$("button#addquiznamebutton").click(function() {
-		$.getJSON("ajaxpages/addquizname.php", {quizname : $("#inputquizname").val(), ajax : 'true'}, getQuizNames());
-		$("div#newquizoverlay").dialog("close");
-		return false;
+		$.get("ajaxpages/addquizname.php", {quizname : $("#inputquizname").val()}, function() {
+			getQuizNames();
+			$("div#newquizoverlay").dialog("close");
+			return false;
+		});
 	});
 
 	$("#newquestionform").submit(function() {
@@ -305,10 +335,7 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	
 	$("div#quizadmin select#quizname").change(function() {
-		// Update create PDF link so it links to correct content 
-		$('a#createpdf').attr('href', 'createquizpdf.php?quizid=' + $('select#quizname').val());
 		// Show questions for selected quiz
 		getQuestions($("div#questions"),$("select#quizname").val());
 	});
@@ -320,6 +347,11 @@ $(document).ready(function() {
 		$("div#newquestionoverlay input#hiddenquestionnumber").val("");
 		$("div#newquestionoverlay input#hiddenquizid").val($("select#quizname").val());
 		$("div#newquestionoverlay").dialog("open");
+		return false;
+	});
+	
+	$("div#quizadmin a#createpdf").click(function() {
+		$("div#createpdfoverlay").dialog("open");
 		return false;
 	});
 	

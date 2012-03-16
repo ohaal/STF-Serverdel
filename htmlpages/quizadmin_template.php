@@ -1,38 +1,60 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript">
-	google.load("jquery", "1.7.1");
-	google.load("jqueryui", "1.8.17");
-</script>
-<link rel="stylesheet" href="css/quizstyling.css">
-<link type="text/css" href="css/custom-theme/jquery-ui-1.8.17.custom.css" rel="stylesheet" />
-<script type="text/javascript" src="js/quizjavascript.js"></script>
+  <head>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+		google.load("jquery", "1.7.1");
+		google.load("jqueryui", "1.8.17");
+    </script>
+    <link rel="stylesheet" href="css/quizstyling.css">
+    <link type="text/css" href="css/custom-theme/jquery-ui-1.8.17.custom.css" rel="stylesheet" />
+    <script type="text/javascript" src="js/quizjavascript.js"></script>
 
-<title>Quiz admin</title>
-</head>
-<body>
-<div id="quizadmin" class="mainbody">
-<div class="header center ui-corner-all"><h1 class="center">Quiz administration</h1></div>
+    <title>
+      Quiz admin
+    </title>
+  </head>
+  <body>
+    <div id="quizadmin" class="mainbody">
+      <div class="header center ui-corner-all">
+        <h1 class="center">Quiz administration</h1>
+      </div>
 
-<div id="dialog-confirm" class="dialog" title="Delete question?">
-	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This question will be deleted forever. Are you sure?</p>
-</div>
+      <div id="dialog-confirm" class="dialog" title="Delete question?">
+	    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This question will be deleted forever. Are you sure?</p>
+      </div>
 
-<div id="newquizoverlay" class="dialog">
-<input type="text" name="quizname" id="inputquizname" />
-<button value="addquiz" id="addquiznamebutton">Add Quiz</button>
-</div>
+      <div id="createpdfoverlay" class="dialog">
+        <form name="createpdf" action="getquizpdf.php" method="post" enctype="multipart/form-data">
+          <input class="quizidvalue" type="hidden" name="quizid" value="" />
+          Header: <input type="text" name="header" /><br/>
+          Ingress: <textarea name="ingress"></textarea><br/>
+          <br />
+          <hr />
+          <div id="pdfquestions"></div>
+          <br />
+          Footer: <input type="text" name="footer" value='Send SMS med "STF blahquizid $qnum &lt;svar&gt;" til 2000'/> TODO: Fiks teksten her :-)<br/>
+          <b>$qnum</b> will be replaced with the question number.
+          <hr />
+          Image bottom left: <input type="file" name="imgbottomleft" /><br/>
+          Image bottom right: <input type="file" name="imgbottomright" /><br />
+          <input type="submit" value="OK" onclick="this.form.target='_blank';return true;"/>
+        </form>
+      </div>
 
-<div id="newquestionoverlay" class="dialog">
-<form id="newquestionform">
-<div class="header" id="questiontitle">
+      <div id="newquizoverlay" class="dialog">
+        <input type="text" name="quizname" id="inputquizname" />
+        <button value="addquiz" id="addquiznamebutton">Add Quiz</button>
+      </div>
 
-<input type="text" name="questiontext" id="inputquestiontext" />
-<input type="hidden" name="quizid" id="hiddenquizid" />
-<input type="hidden" name="questionnumber" id="hiddenquestionnumber" />
-</div>
+      <div id="newquestionoverlay" class="dialog">
+        <form id="newquestionform">
+          <div class="header" id="questiontitle">
+
+            <input type="text" name="questiontext" id="inputquestiontext" />
+            <input type="hidden" name="quizid" id="hiddenquizid" />
+            <input type="hidden" name="questionnumber" id="hiddenquestionnumber" />
+          </div>
 <?
 for ($i=1;$i<6;$i++) {
 	print('<div class="answer" id="answer'.$i.'">');
@@ -41,25 +63,24 @@ for ($i=1;$i<6;$i++) {
 	print('</div>');
 }
 ?>
-<button value="submitnewquestion" id="submitnewquestionbutton">OK</button>
-</form>
-</div>
+          <button value="submitnewquestion" id="submitnewquestionbutton">Add question</button>
+        </form>
+      </div>
 
-<div id="newquizdiv">
-	<a id="newquiz" href="#">New Quiz</a>
-</div>
-<div id="quizselect" class="hideifnoquiz">
+      <div id="newquizdiv">
+	    <a id="newquiz" href="#">New Quiz</a>
+      </div>
+      <div id="quizselect" class="hideifnoquiz">
 <?
  //TODO: Need to either have a codeword set for a quiz or have a default quiz. 
 ?>
-	<a id="createpdf" href="#">Create PDF</a>
-	<a id="activatequiz" href="#">Set active</a>
-	<select id="quizname"></select>
-</div>
-<div id="questions"></div>
-<div id="newquestiondiv">
-<a id="newquestion" href="#" class="hideifnoquiz">New Question</a>
-</div>
-</div>
-</body>
+        <a id="newquestion" href="#">New Question</a><br />
+	    <a id="createpdf" href="#">Create PDF</a><br />
+	    <a id="activatequiz" href="#">Lock and activate</a><br />
+	    <a id="highscorelink" href="#" target="_blank">View results</a><br />
+	    <select id="quizname"></select>
+      </div>
+      <div id="questions"></div>
+    </div>
+  </body>
 </html>
