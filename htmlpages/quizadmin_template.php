@@ -33,7 +33,7 @@
           <hr />
           <div id="pdfquestions"></div>
           <br />
-          Footer: <input type="text" name="footer" value='Send SMS med "STF blahquizid $qnum &lt;svar&gt;" til 2000'/> TODO: Fiks teksten her :-)<br/>
+          Footer: <input type="text" name="footer" value='Send SMS med "STF $qnum &lt;svar&gt;" til 2000'/><br/>
           <b>$qnum</b> will be replaced with the question number.
           <hr />
           Image bottom left: <input type="file" name="imgbottomleft" /><br/>
@@ -76,8 +76,8 @@ for ($i=1;$i<6;$i++) {
 ?>
         <a id="newquestion" href="#">New Question</a><br />
 	    <a id="createpdf" href="#">Create PDF</a><br />
-	    <a id="activatequiz" href="#">Lock and activate</a><br />
-	    <a id="highscorelink" href="#" target="_blank">View results</a><br />
+	    <a id="activatequiz" href="#">Activate and lock</a><br />
+	    <a id="highscorelink" href="#" target="_blank">Submitted answers</a><br />
 	    <select id="quizname"></select>
       </div>
       <div id="questions"></div>
