@@ -23,16 +23,22 @@
       <div id="dialog-confirm" class="dialog" title="Delete question?">
 	    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This question will be deleted forever. Are you sure?</p>
       </div>
+      
+      <div id="confirm-activate" class="dialog" title="Activate and lock quiz?">
+	    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>You cannot make changes to the quiz once it is activated. Are you sure?</p>
+      </div>
+      
+      <div id="confirm-deactivate" class="dialog" title="Deactivate and end quiz?">
+	    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This will end the quiz and answers will no longer be accepted. There is no going back from this. Are you sure?</p>
+      </div>
 
       <div id="createpdfoverlay" class="dialog">
         <form name="createpdf" action="getquizpdf.php" method="post" enctype="multipart/form-data">
           <input class="quizidvalue" type="hidden" name="quizid" value="" />
           Header: <input type="text" name="header" /><br/>
           Ingress: <textarea name="ingress"></textarea><br/>
-          <br />
           <hr />
           <div id="pdfquestions"></div>
-          <br />
           Footer: <input type="text" name="footer" value='Send SMS med "STF $qnum &lt;svar&gt;" til 2000'/><br/>
           <b>$qnum</b> will be replaced with the question number.
           <hr />
@@ -76,8 +82,8 @@ for ($i=1;$i<6;$i++) {
 ?>
         <a id="newquestion" href="#">New Question</a><br />
 	    <a id="createpdf" href="#">Create PDF</a><br />
-	    <a id="activatequiz" href="#">Activate and lock</a><br />
-	    <a id="highscorelink" href="#" target="_blank">Submitted answers</a><br />
+	    <a id="changequizstate" href="#"></a><br />
+	    <a id="highscorelink" href="#" target="_blank">Show scores</a><br />
 	    <select id="quizname"></select>
       </div>
       <div id="questions"></div>

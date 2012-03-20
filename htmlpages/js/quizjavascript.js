@@ -36,7 +36,8 @@ function getQuestions(resultdiv, quiz) {
 		var pdfquestions = '';
 
 	    updatelinksandforms();
-		
+		getQuizActive(quiz);
+	    
 		// Check if we actually get any questions from the JSON
 		if (questionlist == null) { return false; }
 
@@ -93,6 +94,30 @@ function updatelinksandforms() {
 	$('a#highscorelink').attr('href', 'highscore_template.php?quizid=' + quizid);
 }
 
+function getQuizActive(quizid) {
+	$.getJSON("ajaxpages/getquizactive.php", {quizid: quizid}, function(quizactive) {
+		// Update text and events accordingly
+    	$("a#changequizstate").unbind('click');
+		if (quizactive) {
+        	$('a#changequizstate').text('Deactivate and end');
+        	// Update events
+        	$("a#changequizstate").click(function(event) {
+        		confirmdeactivatequiz(quizid);
+        		return false;
+        	});
+        }
+        else {
+        	$('a#changequizstate').text('Activate and lock');
+        	// Update events
+        	$("a#changequizstate").click(function(event) {
+        		confirmactivatequiz(quizid);
+        		return false;
+        	});
+        }
+		return false;
+	});
+}
+
 function editquestions(el) {
 	var questionid = el.id.substring(12,el.id.length);
 	var qidarray=questionid.split(".");
@@ -115,6 +140,50 @@ function editquestions(el) {
 		$("div#newquestionoverlay").dialog("open");
 	});
 	return false;
+}
+
+function confirmactivatequiz(quizid) {
+	$( "#confirm-activate" ).dialog({
+		resizable: false,
+		modal: true,
+		buttons: {
+			"Activate and lock": function() {
+				activatequiz(quizid);
+				$( this ).dialog( "close" );
+			},
+			Cancel: function() {
+				$( this ).dialog( "close" );
+			}
+		}
+	});
+}
+
+function confirmdeactivatequiz(quizid) {
+	$( "#confirm-deactivate" ).dialog({
+		resizable: false,
+		modal: true,
+		buttons: {
+			"Deactivate and end": function() {
+				deactivatequiz(quizid);
+				$( this ).dialog( "close" );
+			},
+			Cancel: function() {
+				$( this ).dialog( "close" );
+			}
+		}
+	});
+}
+
+function activatequiz(quizid) {
+	$.get("ajaxpages/activatequiz.php", {quizid: quizid}, function(j) {
+		getQuizActive(quizid);
+	});
+}
+
+function deactivatequiz(quizid) {
+	$.get("ajaxpages/deactivatequiz.php", {quizid: quizid}, function(j) {
+		getQuizActive(quizid);
+	});
 }
 
 function confirmdeletequestion(el) {
@@ -311,7 +380,6 @@ $(document).ready(function() {
 				$("div#createpdfoverlay").dialog('close');
 			});
 		},
-//		close : function(event, ui) {getQuestions($("div#questions"),$("select#quizname").val()) }
 	});
 	
 	$("div#quizadmin a#newquiz").click(function() {

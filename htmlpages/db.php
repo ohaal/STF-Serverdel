@@ -117,9 +117,35 @@ class dbConnection {
 			$stmt->close();
 			$this->addAnswers($quizid, $questionnumber, $answers);
 		} else {
-			printf("Prepared Statement Error: %s\n", $mysqli->error);
+			printf("Prepared Statement Error: %s\n", $stmt->error);
 		}
 	}
+	
+	function setQuizActive($quizid, $active) {
+		if ($stmt = $this->dbconn->prepare( "UPDATE quiz SET active=? WHERE idquiz=?;" )) {
+			$stmt->bind_param( 'ii', $active, $quizid );
+			$stmt->execute();
+			$stmt->close();
+		}
+		else {
+			printf( "Prepared Statement Error: %s\n", $stmt->error );
+		}
+	}
+	
+	function getQuizActive($quizid) {
+		$active = false;
+		if ($stmt = $this->dbconn->prepare( "SELECT active FROM quiz WHERE idquiz=?;" )) {
+			$stmt->bind_param( 'i', $quizid );
+			$stmt->execute();
+			$stmt->bind_result( $active );
+			$stmt->fetch();
+			$stmt->close();
+		}
+		else {
+			printf( "Prepared Statement Error: %s\n", $stmt->error );
+		}
+		return $active;
+	} 
 	
 	function addQuestion($quizid, $questionnumber, $questiontext, $correctanswer, $answers) {
 		$max=0;
