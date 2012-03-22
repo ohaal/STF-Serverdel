@@ -1,17 +1,27 @@
-function getQuizNames() {
+function getQuizNames(dontselectlast) {
 	$.getJSON("ajaxpages/getquiznames.php", function(quizlist) {
 		var options = '';
+		var states = new Array("Inactive", "Active", "Finished");
 		for ( var i = 0; i < quizlist.length; i++) {
-			options += '<option value="' + quizlist[i].quizid + '">'
-					+ quizlist[i].quizname + '</option>';
+			options += '<option class="' + states[quizlist[i].state].toLowerCase() + '" value="' + quizlist[i].quizid + '">'
+					+ quizlist[i].quizname + ' (' + states[quizlist[i].state] + ')</option>';
 		}
 
 		// Only add options to select dropdown and show it if we have >0 quizzes
 		if (quizlist.length > 0) {
+			// Save previously selected option
+			var prevValue = $('select#quizname').val();
 			// Add options to select tag
 			$('select#quizname').html(options);
-			var lastValue = $('select#quizname'+' option:last-child').val();
-			$('select#quizname').val(lastValue);
+			if (dontselectlast) {
+				// Set to previous selection
+				$('select#quizname').val(prevValue);
+			}
+			else {
+				// Set to last option in dropdown
+				var lastValue = $('select#quizname'+' option:last-child').val();
+				$('select#quizname').val(lastValue);
+			}
 
 			// Unhide tags
     		$('.hideifnoquiz').show();
@@ -36,7 +46,6 @@ function getQuestions(resultdiv, quiz) {
 		var pdfquestions = '';
 
 	    updatelinksandforms();
-		getQuizActive(quiz);
 	    
 		// Check if we actually get any questions from the JSON
 		if (questionlist == null) { return false; }
@@ -86,60 +95,37 @@ function getQuestions(resultdiv, quiz) {
 	});
 }
 
+// This will always be triggered after quizid is changed (from getQuestions)
 function updatelinksandforms() {
 	var quizid = $('select#quizname').val();
 	// Update forms
 	$('input.quizidvalue').attr('value', quizid);
     // Update links
 	$('a#highscorelink').attr('href', 'highscore_template.php?quizid=' + quizid);
-}
-
-function getQuizActive(quizid) {
-	$.getJSON("ajaxpages/getquizactive.php", {quizid: quizid}, function(quizactive) {
-		// Update text and events accordingly
-    	$("a#changequizstate").unbind('click');
-		if (quizactive) {
-        	$('a#changequizstate').text('Deactivate and end');
-        	// Update events
-        	$("a#changequizstate").click(function(event) {
-        		confirmdeactivatequiz(quizid);
-        		return false;
-        	});
-        }
-        else {
-        	$('a#changequizstate').text('Activate and lock');
-        	// Update events
-        	$("a#changequizstate").click(function(event) {
-        		confirmactivatequiz(quizid);
-        		return false;
-        	});
-        }
-		return false;
-	});
-}
-
-function editquestions(el) {
-	var questionid = el.id.substring(12,el.id.length);
-	var qidarray=questionid.split(".");
-	var quizid=qidarray[0];
-	var questionnumber=qidarray[1];
 	
-	$.getJSON("ajaxpages/getquestion.php", {quizid: quizid, questionnumber: questionnumber, ajax : 'true'}, function(j) {
-		$("div#newquestionoverlay input#hiddenquestionnumber").val(j.questionnumber);
-		$("div#newquestionoverlay input#hiddenquizid").val($("select#quizname").val());
-		$("div#newquestionoverlay input#inputquestiontext").val(j.questiontext);
-		$("div#newquestionoverlay input.newanswer").val("");
-		$("div#newquestionoverlay input:radio").removeAttr("checked");
-		if (j.answers) {
-			for ( var k = 0; k < j.answers.length; k++) {
-				$('div#newquestionoverlay input[name*="answer'+ (k + 1) + '"]').val(j.answers[k].answertext);
-			}
-		}
-		$('div#newquestionoverlay input:radio[name*="correctanswer"]').filter("[value="+j.correctanswer+"]").prop("checked", true);
-		
-		$("div#newquestionoverlay").dialog("open");
-	});
-	return false;
+	// Update activation link and bind related events
+	var finished = $("select#quizname option:selected").hasClass('finished');
+	var inactive = $("select#quizname option:selected").hasClass('inactive');
+	var active = $("select#quizname option:selected").hasClass('active');
+	
+	$("a#changequizstate").unbind('click');
+	if (active) {
+		// TODO: if no answers, allow deactivate without ending
+    	$('a#changequizstate').text('Deactivate and end');
+    	// Update events
+    	$("a#changequizstate").click(function(event) {
+    		confirmdeactivatequiz(quizid);
+    		return false;
+    	});
+    }
+    else if (inactive) {
+    	$('a#changequizstate').text('Activate and lock');
+    	// Update events
+    	$("a#changequizstate").click(function(event) {
+    		confirmactivatequiz(quizid);
+    		return false;
+    	});
+    }
 }
 
 function confirmactivatequiz(quizid) {
@@ -176,14 +162,38 @@ function confirmdeactivatequiz(quizid) {
 
 function activatequiz(quizid) {
 	$.get("ajaxpages/activatequiz.php", {quizid: quizid}, function(j) {
-		getQuizActive(quizid);
+		getQuizNames(1);
 	});
 }
 
 function deactivatequiz(quizid) {
 	$.get("ajaxpages/deactivatequiz.php", {quizid: quizid}, function(j) {
-		getQuizActive(quizid);
+		getQuizNames(1);
 	});
+}
+
+function editquestions(el) {
+	var questionid = el.id.substring(12,el.id.length);
+	var qidarray=questionid.split(".");
+	var quizid=qidarray[0];
+	var questionnumber=qidarray[1];
+	
+	$.getJSON("ajaxpages/getquestion.php", {quizid: quizid, questionnumber: questionnumber, ajax : 'true'}, function(j) {
+		$("div#newquestionoverlay input#hiddenquestionnumber").val(j.questionnumber);
+		$("div#newquestionoverlay input#hiddenquizid").val($("select#quizname").val());
+		$("div#newquestionoverlay input#inputquestiontext").val(j.questiontext);
+		$("div#newquestionoverlay input.newanswer").val("");
+		$("div#newquestionoverlay input:radio").removeAttr("checked");
+		if (j.answers) {
+			for ( var k = 0; k < j.answers.length; k++) {
+				$('div#newquestionoverlay input[name*="answer'+ (k + 1) + '"]').val(j.answers[k].answertext);
+			}
+		}
+		$('div#newquestionoverlay input:radio[name*="correctanswer"]').filter("[value="+j.correctanswer+"]").prop("checked", true);
+		
+		$("div#newquestionoverlay").dialog("open");
+	});
+	return false;
 }
 
 function confirmdeletequestion(el) {

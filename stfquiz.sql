@@ -59,7 +59,7 @@ CREATE TABLE `quiz` (
   `idquiz` int(11) NOT NULL AUTO_INCREMENT,
   `quizname` varchar(45) NOT NULL,
   `expiredate` datetime DEFAULT NULL,
-  `active` tinyint(1) NOT NULL DEFAULT '0',
+  `state` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idquiz`)
 ) ENGINE=MyISAM AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;

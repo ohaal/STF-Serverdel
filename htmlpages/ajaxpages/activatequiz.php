@@ -10,6 +10,6 @@ if (isset ( $_GET ['quizid'] )) {
 } else {
 	die ();
 }
-$quizactive = $quizadmin->activateQuiz( $quizid );
 
+$quizadmin->activateQuiz( $quizid );
 ?>

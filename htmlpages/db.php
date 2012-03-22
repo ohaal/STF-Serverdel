@@ -41,11 +41,11 @@ class dbConnection {
 	
 	function getQuizNames () {
 		$ret = array ();
-		$sql = "SELECT idquiz, quizname FROM quiz ORDER BY idquiz";
+		$sql = "SELECT idquiz, quizname, state FROM quiz ORDER BY idquiz";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
 				while ( $row = $result->fetch_object () ) {
-					$ret [$row->idquiz] = $row->quizname;
+					$ret [$row->idquiz] = array($row->quizname, $row->state);
 				}
 			}
 		} else {
@@ -55,12 +55,14 @@ class dbConnection {
 	}
 	
 	function addQuizName($quizName) {
-		if ($stmt = $this->dbconn->prepare("INSERT INTO quiz (quizname) values(?)")) {
-			$stmt->bind_param('s', $quizName);
+		if ($stmt = $this->dbconn->prepare("INSERT INTO quiz (quizname, state) VALUES (?, ?)")) {
+			// bind_param only accepts variables...
+			$state = 0; // 0 = inactive, all quizzes will start off as inactive
+			$stmt->bind_param('si', $quizName, $state);
 			$stmt->execute();
 			$stmt->close();
 		} else {
-			printf("Prepared Statement Error: %s\n", $mysqli->error);
+			printf("Prepared Statement Error: %s\n", $stmt->error);
 		}
 	}
 	
@@ -121,9 +123,9 @@ class dbConnection {
 		}
 	}
 	
-	function setQuizActive($quizid, $active) {
-		if ($stmt = $this->dbconn->prepare( "UPDATE quiz SET active=? WHERE idquiz=?;" )) {
-			$stmt->bind_param( 'ii', $active, $quizid );
+	function setQuizState($quizid, $state) {
+		if ($stmt = $this->dbconn->prepare( "UPDATE quiz SET state=? WHERE idquiz=?;" )) {
+			$stmt->bind_param( 'ii', $state, $quizid );
 			$stmt->execute();
 			$stmt->close();
 		}
@@ -131,21 +133,6 @@ class dbConnection {
 			printf( "Prepared Statement Error: %s\n", $stmt->error );
 		}
 	}
-	
-	function getQuizActive($quizid) {
-		$active = false;
-		if ($stmt = $this->dbconn->prepare( "SELECT active FROM quiz WHERE idquiz=?;" )) {
-			$stmt->bind_param( 'i', $quizid );
-			$stmt->execute();
-			$stmt->bind_result( $active );
-			$stmt->fetch();
-			$stmt->close();
-		}
-		else {
-			printf( "Prepared Statement Error: %s\n", $stmt->error );
-		}
-		return $active;
-	} 
 	
 	function addQuestion($quizid, $questionnumber, $questiontext, $correctanswer, $answers) {
 		$max=0;

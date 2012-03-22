@@ -11,6 +11,5 @@ if (isset ( $_GET ['quizid'] )) {
 	die ();
 }
 
-$quizactive = $quizadmin->deactivateQuiz( $quizid );
-
+$quizadmin->deactivateQuiz( $quizid );
 ?>

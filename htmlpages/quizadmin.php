@@ -27,17 +27,13 @@ class quizAdmin {
 	}
 	
 	function activateQuiz($quizid) {
-		$this->db->setQuizActive( $quizid, 1 );
+		$this->db->setQuizState( $quizid, 1 );
 	}
 	
 	function deactivateQuiz($quizid) {
-		$this->db->setQuizActive( $quizid, 0 );
+		$this->db->setQuizState( $quizid, 0 );
 	}
 	
-	function getQuizActive($quizid) {
-		return $this->db->getQuizActive( $quizid );
-	}
-
 	function getQuestion($quizid, $questionnumber) {
 		$question = $this->db->getQuestion($quizid, $questionnumber);
 		return $question;
