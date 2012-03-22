@@ -28,7 +28,7 @@
 	    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>You cannot make changes to the quiz once it is activated. Are you sure?</p>
       </div>
       
-      <div id="confirm-deactivate" class="dialog" title="Deactivate and end quiz?">
+      <div id="confirm-end" class="dialog" title="Deactivate and end quiz?">
 	    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This will end the quiz and answers will no longer be accepted. There is no going back from this. Are you sure?</p>
       </div>
 

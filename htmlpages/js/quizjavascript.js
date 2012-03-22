@@ -114,7 +114,7 @@ function updatelinksandforms() {
     	$('a#changequizstate').text('Deactivate and end');
     	// Update events
     	$("a#changequizstate").click(function(event) {
-    		confirmdeactivatequiz(quizid);
+    		confirmendquiz(quizid);
     		return false;
     	});
     }
@@ -144,13 +144,13 @@ function confirmactivatequiz(quizid) {
 	});
 }
 
-function confirmdeactivatequiz(quizid) {
-	$( "#confirm-deactivate" ).dialog({
+function confirmendquiz(quizid) {
+	$( "#confirm-end" ).dialog({
 		resizable: false,
 		modal: true,
 		buttons: {
 			"Deactivate and end": function() {
-				deactivatequiz(quizid);
+				endquiz(quizid);
 				$( this ).dialog( "close" );
 			},
 			Cancel: function() {
@@ -168,6 +168,12 @@ function activatequiz(quizid) {
 
 function deactivatequiz(quizid) {
 	$.get("ajaxpages/deactivatequiz.php", {quizid: quizid}, function(j) {
+		getQuizNames(1);
+	});
+}
+
+function endquiz(quizid) {
+	$.get("ajaxpages/endquiz.php", {quizid: quizid}, function(j) {
 		getQuizNames(1);
 	});
 }

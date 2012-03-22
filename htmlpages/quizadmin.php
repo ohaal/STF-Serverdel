@@ -34,6 +34,10 @@ class quizAdmin {
 		$this->db->setQuizState( $quizid, 0 );
 	}
 	
+	function endQuiz($quizid) {
+		$this->db->setQuizState( $quizid, 2 );
+	}
+	
 	function getQuestion($quizid, $questionnumber) {
 		$question = $this->db->getQuestion($quizid, $questionnumber);
 		return $question;
