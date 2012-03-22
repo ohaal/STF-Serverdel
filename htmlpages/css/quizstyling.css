@@ -92,6 +92,15 @@ div#questions {
 select#quizname {
 	
 }
+option.inactive {
+	background-color: #FAEF99;
+}
+option.active {
+	background-color: #FAA0A0;
+}
+option.finished {
+	background-color: #DEEF23;
+}
 
 div.answers div span.answered {
 	background-image: url(custom-theme/images/ui-icons_cd0a0a_256x240.png);
