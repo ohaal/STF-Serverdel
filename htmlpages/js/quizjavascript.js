@@ -401,6 +401,7 @@ $(document).ready(function() {
 		$.get("ajaxpages/addquizname.php", {quizname : $("#inputquizname").val()}, function() {
 			getQuizNames();
 			$("div#newquizoverlay").dialog("close");
+			$("div#newquizoverlay input#inputquizname").val("");
 			return false;
 		});
 	});
