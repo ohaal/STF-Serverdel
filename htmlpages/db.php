@@ -134,6 +134,21 @@ class dbConnection {
 		}
 	}
 	
+	function getQuizState($quizid) {
+		$quizstate = 0;
+		if ($stmt = $this->dbconn->prepare( "SELECT state FROM quiz WHERE idquiz=?;" )) {
+			$stmt->bind_param( 'i', $quizid );
+			$stmt->execute();
+			$stmt->bind_result( $quizstate );
+			$stmt->fetch();
+			$stmt->close();
+		}
+		else {
+			printf( "Prepared Statement Error: %s\n", $stmt->error );
+		}
+		return $quizstate;
+	}
+	
 	function addQuestion($quizid, $questionnumber, $questiontext, $correctanswer, $answers) {
 		$max=0;
 		if (!$correctanswer) {

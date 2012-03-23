@@ -11,5 +11,9 @@ if (isset ( $_GET ['quizid'] )) {
 	die ();
 }
 
+// Can only end quiz if quiz state is active
+if ($quizadmin->getQuizState($quizid) != '1') {
+	die();
+}
 $quizadmin->endQuiz( $quizid );
 ?>

@@ -14,6 +14,10 @@ if (isset ( $_POST ['quizid'] )) {
 } else {
 	die ();
 }
+// Can only delete question if quiz state is inactive
+if ($quizadmin->getQuizState($quizid) != '0') {
+	die();
+}
 if (isset ( $_POST ['questionid'] )) {
 	$questionid = $_POST ['questionid'];
 	if (! is_numeric ( $questionid )) {

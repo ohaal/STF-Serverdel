@@ -11,5 +11,9 @@ if (isset ( $_GET ['quizid'] )) {
 	die ();
 }
 
+// Can only activate quiz if quiz state is inactive
+if ($quizadmin->getQuizState($quizid) != '0') {
+	die();
+}
 $quizadmin->activateQuiz( $quizid );
 ?>

@@ -11,5 +11,9 @@ if (isset ( $_GET ['quizid'] )) {
 	die ();
 }
 
+// Can only deactivate quiz if quiz is active (TODO: and has no answers)
+if ($quizadmin->getQuizState($quizid) != '1') {
+	die();
+}
 $quizadmin->deactivateQuiz( $quizid );
 ?>

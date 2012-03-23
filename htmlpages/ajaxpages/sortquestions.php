@@ -11,5 +11,10 @@ foreach ($_GET['q'] as $newpos => $item) {
 if (count($neworder) == 0 || !isset($quizid)) {
 	die();
 }
+
+// Can only change question order if quiz state is inactive
+if ($quizadmin->getQuizState($quizid) != '0') {
+	die();
+}
 $quizadmin->sortQuestions($quizid, $neworder);
 ?>

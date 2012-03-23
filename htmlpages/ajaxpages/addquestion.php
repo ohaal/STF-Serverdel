@@ -13,6 +13,10 @@ if (!isset ($_POST['quizid'])) {
 	//not a proper post. Ignore and die
 	die();
 }
+// Can only add question if quiz state is inactive
+if ($quizadmin->getQuizState($quizid) != '0') {
+	die();
+}
 $questionnumber = $_POST['questionnumber'];
 //might be NULL if new question
 $questiontext = $_POST['questiontext'];
