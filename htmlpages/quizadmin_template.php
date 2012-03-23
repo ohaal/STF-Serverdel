@@ -80,11 +80,11 @@ for ($i=1;$i<6;$i++) {
 <?
  //TODO: Need to either have a codeword set for a quiz or have a default quiz. 
 ?>
-        <a id="newquestion" href="#">New Question</a><br />
+	    <select id="quizname"></select><br />
 	    <a id="createpdf" href="#">Create PDF</a><br />
-	    <a id="changequizstate" href="#"></a><br />
 	    <a id="highscorelink" href="#" target="_blank">Show scores</a><br />
-	    <select id="quizname"></select>
+	    <a id="changequizstate" href="#"></a><br />
+        <a id="newquestion" href="#">New Question</a>
       </div>
       <div id="questions"></div>
     </div>
