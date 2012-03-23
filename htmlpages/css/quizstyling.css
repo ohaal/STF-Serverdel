@@ -27,7 +27,9 @@ h1.center {
 div#quizadmin div.question {
 	cursor: move;
 }
-
+div#quizadmin div.questionlocked {
+	cursor: default;
+}
 div.question {
 	border: 1px solid #aaaaaa; background: #ffffff; color: #000000;
 	-moz-border-radius: 6px; -webkit-border-radius: 6px; -khtml-border-radius: 6px; border-radius: 6px; 
@@ -69,7 +71,7 @@ h2 {
 span.ui-icon {
 	display: inline-block;
 }
-span.deleteanswer {
+span.deletequestion, span.lockedquestion {
 	right: 0px;
 	float: right;
 }

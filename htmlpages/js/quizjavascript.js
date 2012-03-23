@@ -1,6 +1,8 @@
 function getQuizNames(dontselectlast) {
 	$.getJSON("ajaxpages/getquiznames.php", function(quizlist) {
 		var options = '';
+		
+		// States used for class names in HTML
 		var states = new Array("Inactive", "Active", "Finished");
 		for ( var i = 0; i < quizlist.length; i++) {
 			options += '<option class="' + states[quizlist[i].state].toLowerCase() + '" value="' + quizlist[i].quizid + '">'
@@ -50,17 +52,49 @@ function getQuestions(resultdiv, quiz) {
 		// Check if we actually get any questions from the JSON
 		if (questionlist == null) { return false; }
 
+		var lockedquiz = !$("select#quizname option:selected").hasClass('inactive');
+
+		// Only allow re-ordering if quiz is not locked
+		if (!lockedquiz) {
+			$( "div#quizadmin #questions" ).sortable({
+				axis: 'y',
+				opacity : '0.6',
+				update: function(event, ui) {
+					var order = $('#questions').sortable('serialize');
+		     		$.post("ajaxpages/sortquestions.php?"+order, function(data) {
+		     			getQuestions($("div#questions"),$("select#quizname").val());	
+		     		});
+				}
+			});
+		} else {
+			$( "div#quizadmin #questions" ).sortable('disable');
+		}
+		$( "div#quizadmin #questions" ).disableSelection();
+		
 		// Show question list
 		for (var i = 0; i<questionlist.length; i++) {
-			questions += "<div class=\"question\" id=\"q_"+questionlist[i].idquestions+"\">";
+			var extraclass = '';
+			if (lockedquiz) {
+				extraclass = ' questionlocked';
+			}
+			questions += "<div class=\"question"+extraclass+"\" id=\"q_"+questionlist[i].idquestions+"\">";
 			questions += "<div class=\"answerheader\">";
-			questions += "<a href=\"#\" id=\"editquestion"+questionlist[i].idquestions+"\" class=\"nounderline editanswer\">";
+			if (!lockedquiz) {
+				questions += "<a href=\"#\" id=\"editquestion"+questionlist[i].idquestions+"\" class=\"nounderline editanswer\">";
+			}
 			questions += "<strong>"+questionlist[i].questionnumber+"</strong> <span class=\"questiontext\" id=\"questiontext"+questionlist[i].idquestions+"\">"+questionlist[i].questiontext+"</span>";
-			questions += "<span class=\"ui-icon ui-icon-wrench\">edit</span>";
-			questions += "</a>";
-			questions += "<a href=\"#\" id=\"deletequestion"+questionlist[i].idquestions+"\" class=\"nounderline deleteanswer\">";
-			questions += "<span class=\"ui-icon ui-icon-trash deleteanswer\">delete</span>";
-			questions += "</a>";
+			if (!lockedquiz) {
+				questions += "<span class=\"ui-icon ui-icon-wrench\">edit</span>";
+				questions += "</a>";
+			}
+			if (!lockedquiz) {
+				questions += "<a href=\"#\" id=\"deletequestion"+questionlist[i].idquestions+"\" class=\"nounderline deletequestion\">";
+				questions += "<span class=\"ui-icon ui-icon-trash deletequestion\">delete</span>";
+				questions += "</a>";
+			}
+			else {
+				questions += "<span class=\"ui-icon ui-icon-locked lockedquestion\">locked</span>";
+			}
 			questions += "</div>";
 			questions += "<div class=\"answers\">";
 			if (questionlist[i].answers) {
@@ -450,18 +484,6 @@ $(document).ready(function() {
 		$("div#createpdfoverlay").dialog("open");
 		return false;
 	});
-	
-	$( "div#quizadmin #questions" ).sortable({
-		axis: 'y',
-		opacity : '0.6',
-		update: function(event, ui) {
-			var order = $('#questions').sortable('serialize');
-     		$.post("ajaxpages/sortquestions.php?"+order, function(data) {
-     			getQuestions($("div#questions"),$("select#quizname").val());	
-     		});
-		}
-	});
-	$( "div#quizadmin #questions" ).disableSelection();
 
 	//highscore bindings
 	
