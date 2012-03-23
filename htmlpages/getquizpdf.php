@@ -121,8 +121,6 @@ foreach ($questionsArray as $key => $question) {
 		$pdf->Image( $_FILES[$file]['tmp_name'], $imgX, null, $imgW_force, $imgH_force, $type );
 	
 	}
-	//	$pdf->Cell(0,10,'',0,1,'L');
-	
 
 	//////////////////////////////////////////////////////////////
 	// Question header
@@ -267,6 +265,9 @@ foreach ($questionsArray as $key => $question) {
 	//////////////////////////////////////////////////////////////
 	// Footer
 	//////////////////////////////////////////////////////////////
+	if (!isset($minY)) {
+		$minY = MAXHEIGHT - 20;
+	}
 	$pdf->SetFont( 'Arial', 'B', 16 );
 	//	$pdf->Cell(0,15,'',0,1,'L');
 	// Allow usage of question number in footer by using key '$qnum' in text
@@ -274,7 +275,10 @@ foreach ($questionsArray as $key => $question) {
 	$pdf->SetY( $minY - 10 ); // Place footer 10mm above tallest bottom image
 	$pdf->MultiCell( null, 8, $bottom, 0, 'C' );
 }
-$pdf->Output( "quizposter.pdf", 'I' );
+if (count($questionsArray) > 0) {
+	$pdf->Output( "quizposter.pdf", 'I' );
+}
+else {
+	echo 'No questions in quiz!';
+}
 ?>
-
-

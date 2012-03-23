@@ -44,7 +44,7 @@
           <hr />
           Image bottom left: <input type="file" name="imgbottomleft" /><br/>
           Image bottom right: <input type="file" name="imgbottomright" /><br />
-          <input type="submit" value="OK" onclick="this.form.target='_blank';return true;"/>
+          <input type="submit" value="Create PDF" onclick="this.form.target='_blank';return true;"/>
         </form>
       </div>
 
