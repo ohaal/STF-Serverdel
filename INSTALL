@@ -1,0 +1,18 @@
+CREATE A DATABASE AND USER
+    - Log in to your MySQL database as a user which can create databases and set privileges
+	- Example in MySQL:
+		- CREATE DATABASE stfquiz;
+		- GRANT ALL PRIVILEGES ON stfquiz.* TO 'stf' IDENTIFIED BY 'stf';
+	- To import the database, in the shell type (the stfquiz.sql-file is the file contained in the STFquiz installation):
+		- `mysql -u stf -pstf stfquiz < stfquiz.sql`
+    - Create a file named dbdetails.php and put it in the "htmlpages" directory
+        - Look at dbdetails_example.php in the same directory for inspiration
+
+INSTALL FPDF
+	- Go to http://www.fpdf.org/en/download.php
+	- Download v1.7 (known to work) or latest
+	- Untar/unzip it
+		- `tar xzvf fpdf17.tgz`
+	- Enter the unzipped directory
+		- `cd fpdf17`
+	- Copy the main file, "fpdf.php" and the directory named "font" into the "htmlpages" directory of your STFquiz installation
