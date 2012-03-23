@@ -41,7 +41,7 @@ function getQuizNames(dontselectlast) {
 	});
 }
 function getQuestions(resultdiv, quiz) {
-	$.getJSON("ajaxpages/getquestions.php", {quizid: quiz, ajax : 'true'}, function(questionlist) {
+	$.getJSON("ajaxpages/getquestions.php", {quizid: quiz}, function(questionlist) {
 		var questions = '';
 		var pdfquestions = '';
 
@@ -103,7 +103,7 @@ function updatelinksandforms() {
     // Update links
 	$('a#highscorelink').attr('href', 'highscore_template.php?quizid=' + quizid);
 	
-	// Update activation link and bind related events
+	// Update link and rebind related events
 	var finished = $("select#quizname option:selected").hasClass('finished');
 	var inactive = $("select#quizname option:selected").hasClass('inactive');
 	var active = $("select#quizname option:selected").hasClass('active');
@@ -117,7 +117,10 @@ function updatelinksandforms() {
     		confirmendquiz(quizid);
     		return false;
     	});
-    }
+    	// Hide/show links
+		$('a#changequizstate').show();
+		$('a#newquestion').hide();
+	}
     else if (inactive) {
     	$('a#changequizstate').text('Activate and lock');
     	// Update events
@@ -125,6 +128,14 @@ function updatelinksandforms() {
     		confirmactivatequiz(quizid);
     		return false;
     	});
+    	// Hide/show links
+		$('a#changequizstate').show();
+		$('a#newquestion').show();
+    }
+    else if (finished) {
+    	// Hide/show links
+    	$('a#changequizstate').hide();
+    	$('a#newquestion').hide();
     }
 }
 
