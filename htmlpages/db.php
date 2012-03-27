@@ -41,11 +41,11 @@ class dbConnection {
 	
 	function getQuizNames () {
 		$ret = array ();
-		$sql = "SELECT idquiz, quizname, state FROM quiz ORDER BY idquiz";
+		$sql = "SELECT idquiz, quizname, state, keyword FROM quiz ORDER BY idquiz";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
 				while ( $row = $result->fetch_object () ) {
-					$ret [$row->idquiz] = array($row->quizname, $row->state);
+					$ret [$row->idquiz] = array($row->quizname, $row->state, $row->keyword);
 				}
 			}
 		} else {
@@ -54,8 +54,35 @@ class dbConnection {
 		return $ret;
 	}
 	
-	function addQuizName($quizName) {
-		if ($stmt = $this->dbconn->prepare("INSERT INTO quiz (quizname, state) VALUES (?, ?)")) {
+	function addQuizName($quizName, $quizKeyword) {
+		if ($stmt = $this->dbconn->prepare("INSERT INTO quiz (quizname, keyword, state) VALUES (?, ?, ?)")) {
+			// bind_param only accepts variables...
+			$state = 0; // 0 = inactive, all quizzes will start off as inactive
+			$stmt->bind_param('ssi', $quizName, $quizKeyword, $state);
+			$stmt->execute();
+			$stmt->close();
+		} else {
+			printf("Prepared Statement Error: %s\n", $stmt->error);
+		}
+	}
+	
+	function getQuizStatesByKeyword($keyword) {
+		$ret = array();
+		$sql = "SELECT state FROM quiz WHERE keyword = '$keyword'";
+		if ($result = $this->dbconn->query ( $sql )) {
+			if ($result->num_rows > 0) {
+				while ( $row = $result->fetch_object () ) {
+					$ret[] = $row->state;
+				}
+			}
+		} else {
+			print_r($this->dbconn->error);
+		}
+		return $ret;
+	}
+	
+	function addUserAnswer($phonenumber, $questionnumber, $answer) {
+		if ($stmt = $this->dbconn->prepare("INSERT INTO useranswers (quizname, state) VALUES (?, ?)")) {
 			// bind_param only accepts variables...
 			$state = 0; // 0 = inactive, all quizzes will start off as inactive
 			$stmt->bind_param('si', $quizName, $state);
@@ -147,6 +174,21 @@ class dbConnection {
 			printf( "Prepared Statement Error: %s\n", $stmt->error );
 		}
 		return $quizstate;
+	}
+	
+	function getQuizKeyword($quizid) {
+		$quizkeyword = '';
+		if ($stmt = $this->dbconn->prepare( "SELECT keyword FROM quiz WHERE idquiz=?;" )) {
+			$stmt->bind_param( 'i', $quizid );
+			$stmt->execute();
+			$stmt->bind_result( $quizkeyword );
+			$stmt->fetch();
+			$stmt->close();
+		}
+		else {
+			printf( "Prepared Statement Error: %s\n", $stmt->error );
+		}
+		return $quizkeyword;
 	}
 	
 	function addQuestion($quizid, $questionnumber, $questiontext, $correctanswer, $answers) {

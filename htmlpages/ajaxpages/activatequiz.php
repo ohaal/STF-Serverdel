@@ -15,5 +15,10 @@ if (isset ( $_GET ['quizid'] )) {
 if ($quizadmin->getQuizState($quizid) != '0') {
 	die();
 }
+$quizKeyword = $quizadmin->getQuizKeyword($quizid);
+// Can only activate quiz if other quiz with same keyword is not active
+if ( $quizadmin->getQuizKeywordExistsAndActive( $quizKeyword ) ) {
+	die();
+}
 $quizadmin->activateQuiz( $quizid );
 ?>

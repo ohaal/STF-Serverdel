@@ -60,6 +60,7 @@ CREATE TABLE `quiz` (
   `quizname` varchar(45) NOT NULL,
   `expiredate` datetime DEFAULT NULL,
   `state` tinyint(1) NOT NULL DEFAULT '0',
+  `keyword` varchar(20) NOT NULL,
   PRIMARY KEY (`idquiz`)
 ) ENGINE=MyISAM AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;

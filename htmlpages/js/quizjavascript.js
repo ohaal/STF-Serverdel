@@ -6,7 +6,7 @@ function getQuizNames(dontselectlast) {
 		var states = new Array("Inactive", "Active", "Finished");
 		for ( var i = 0; i < quizlist.length; i++) {
 			options += '<option class="' + states[quizlist[i].state].toLowerCase() + '" value="' + quizlist[i].quizid + '">'
-					+ quizlist[i].quizname + ' (' + states[quizlist[i].state] + ')</option>';
+					+'['+quizlist[i].keyword+'] '+ quizlist[i].quizname + ' (' + states[quizlist[i].state] + ')</option>';
 		}
 
 		// Only add options to select dropdown and show it if we have >0 quizzes
@@ -62,7 +62,7 @@ function getQuestions(resultdiv, quiz) {
 				update: function(event, ui) {
 					var order = $('#questions').sortable('serialize');
 		     		$.post("ajaxpages/sortquestions.php?"+order, function(data) {
-		     			getQuestions($("div#questions"),$("select#quizname").val());	
+		     			getQuestions($("div#questions"),$("select#quizname").val());
 		     		});
 				}
 			});
@@ -156,6 +156,7 @@ function updatelinksandforms() {
 		$('a#newquestion').hide();
 	}
     else if (inactive) {
+    	// TODO: Check if other quiz already active with same keyword and give feedback to user (this is already covered server side)
     	$('a#changequizstate').text('Activate and lock');
     	// Update events
     	$("a#changequizstate").click(function(event) {
@@ -449,10 +450,10 @@ $(document).ready(function() {
 	});
 	
 	$("button#addquiznamebutton").click(function() {
-		$.get("ajaxpages/addquizname.php", {quizname : $("#inputquizname").val()}, function() {
+		$.get("ajaxpages/addquizname.php", {quizname: $("#inputquizname").val(), quizkeyword: $("#inputquizkeyword").val()}, function() {
 			getQuizNames();
 			$("div#newquizoverlay").dialog("close");
-			$("div#newquizoverlay input#inputquizname").val("");
+			$("div#newquizoverlay input.inputquiz").val("");
 			return false;
 		});
 	});

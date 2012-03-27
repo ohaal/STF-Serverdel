@@ -16,9 +16,10 @@ class quizAdmin {
 		return $this->db->getQuizNames();
 	}
 	
-	function addQuizName($quizname) {
+	function addQuizName($quizname, $quizkeyword) {
 		$quizname = $this->removeHtmlChars($quizname);
-		return $this->db->addQuizName($quizname);
+		$quizkeyword = $this->removeHtmlChars($quizkeyword);
+		return $this->db->addQuizName($quizname, $quizkeyword);
 	}
 	
 	function getAllQuestionsForQuiz($quizid) {
@@ -40,6 +41,21 @@ class quizAdmin {
 	
 	function getQuizState($quizid) {
 		return $this->db->getQuizState($quizid);
+	}
+	
+	function getQuizKeywordExistsAndActive($keyword) {
+		// TODO: Escape keyword
+		$quizStates = $this->db->getQuizStatesByKeyword($keyword);
+		foreach ($quizStates as $value) {
+			if ($value == 1) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	function getQuizKeyword($quizid) {
+		return $this->db->getQuizKeyword($quizid);
 	}
 	
 	function getQuestion($quizid, $questionnumber) {

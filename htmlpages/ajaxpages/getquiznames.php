@@ -7,7 +7,7 @@ $quiznamesArray = $quizadmin->getAllQuizNames ();
 $ret = "";
 $ret .= "[ ";
 foreach ($quiznamesArray as $key => $value) {
-	$ret.= '{"quizid":'.$key.', "quizname": "'.$value[0].'", "state":'.$value[1].'},';
+	$ret.= '{"quizid":'.$key.', "quizname": "'.$value[0].'", "state":'.$value[1].', "keyword":"'.$value[2].'"},';
 }
 $ret = substr($ret, 0, -1); //remove last ","
 $ret .= "]";

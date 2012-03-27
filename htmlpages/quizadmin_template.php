@@ -39,7 +39,7 @@
           Ingress: <textarea name="ingress"></textarea><br/>
           <hr />
           <div id="pdfquestions"></div>
-          Footer: <input type="text" name="footer" value='Send SMS med "STF $qnum &lt;svar&gt;" til 2000'/><br/>
+          Footer: <input type="text" name="footer" value='Send SMS med "STF $qnum &lt;riktig svarnummer&gt;" til 2000'/><br/>
           <b>$qnum</b> will be replaced with the question number.
           <hr />
           Image bottom left: <input type="file" name="imgbottomleft" /><br/>
@@ -49,7 +49,8 @@
       </div>
 
       <div id="newquizoverlay" class="dialog">
-        <input type="text" name="quizname" id="inputquizname" />
+        Name: <input type="text" name="quizname" class="inputquiz" id="inputquizname" />
+        Keyword: <input type="text" name="quizkeyword" class="inputquiz" id="inputquizkeyword" />
         <button value="addquiz" id="addquiznamebutton">Add Quiz</button>
       </div>
 
@@ -77,9 +78,6 @@ for ($i=1;$i<6;$i++) {
 	    <a id="newquiz" href="#">New Quiz</a>
       </div>
       <div id="quizselect" class="hideifnoquiz">
-<?
- //TODO: Need to either have a codeword set for a quiz or have a default quiz. 
-?>
 	    <select id="quizname"></select><br />
 	    <a id="createpdf" href="#">Create PDF</a><br />
 	    <a id="highscorelink" href="#" target="_blank">Show scores</a><br />
