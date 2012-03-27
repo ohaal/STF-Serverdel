@@ -56,20 +56,10 @@ function getQuestions(resultdiv, quiz) {
 
 		// Only allow re-ordering if quiz is not locked
 		if (!lockedquiz) {
-			$( "div#quizadmin #questions" ).sortable({
-				axis: 'y',
-				opacity : '0.6',
-				update: function(event, ui) {
-					var order = $('#questions').sortable('serialize');
-		     		$.post("ajaxpages/sortquestions.php?"+order, function(data) {
-		     			getQuestions($("div#questions"),$("select#quizname").val());
-		     		});
-				}
-			});
+			$( "div#quizadmin #questions" ).sortable('enable');
 		} else {
 			$( "div#quizadmin #questions" ).sortable('disable');
 		}
-		$( "div#quizadmin #questions" ).disableSelection();
 		
 		// Show question list
 		for (var i = 0; i<questionlist.length; i++) {
@@ -82,7 +72,8 @@ function getQuestions(resultdiv, quiz) {
 			if (!lockedquiz) {
 				questions += "<a href=\"#\" id=\"editquestion"+questionlist[i].idquestions+"\" class=\"nounderline editanswer\">";
 			}
-			questions += "<strong>"+questionlist[i].questionnumber+"</strong> <span class=\"questiontext\" id=\"questiontext"+questionlist[i].idquestions+"\">"+questionlist[i].questiontext+"</span>";
+			questions += "<strong>"+questionlist[i].questionnumber+"</strong> ";
+			questions += "<span class=\"questiontext\" id=\"questiontext"+questionlist[i].idquestions+"\">"+questionlist[i].questiontext+"</span>";
 			if (!lockedquiz) {
 				questions += "<span class=\"ui-icon ui-icon-wrench\">edit</span>";
 				questions += "</a>";
@@ -430,6 +421,18 @@ $(document).ready(function() {
 		},
 		close : function(event, ui) {getQuestions($("div#questions"),$("select#quizname").val()) }
 	});
+	
+	$( "div#quizadmin #questions" ).sortable({
+		axis: 'y',
+		opacity : '0.6',
+		update: function(event, ui) {
+			var order = $('#questions').sortable('serialize');
+     		$.post("ajaxpages/sortquestions.php?"+order, function(data) {
+     			getQuestions($("div#questions"),$("select#quizname").val());
+     		});
+		}
+	});
+	$( "div#quizadmin #questions" ).disableSelection();
 	
 	$("div#quizadmin div#createpdfoverlay").dialog({
 		modal : true,
