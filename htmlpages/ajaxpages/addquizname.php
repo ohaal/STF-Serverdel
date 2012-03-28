@@ -10,6 +10,14 @@ if (isset ( $_GET ['quizname'] ) && isset( $_GET ['quizkeyword'] ) ) {
 	$quizName = $_GET ['quizname'];
 	$quizKeyword = $_GET ['quizkeyword'];
 	
+	// Restricted keywords (used for other commands)
+	$restrictedKeywords = array( 'lag', 'lagnavn' );
+	foreach ($restrictedKeywords as $restrictedKeyword) {
+		if ($quizKeyword == $restrictedKeyword) {
+			die();
+		}
+	}
+	
 	if (strlen ( $quizName ) > 0 && strlen( $quizKeyword ) > 0) {
 		$quizadmin->addQuizName ( $quizName, $quizKeyword );
 	}
