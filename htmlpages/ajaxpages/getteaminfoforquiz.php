@@ -34,7 +34,7 @@ if (isset ( $_GET ['teamid'] )) {
 $ret = array();
 
 $info = $quizadmin->getTeamInfo($teamid);
-$ret['info']['teamname'] = $info->username;
+$ret['info']['teamname'] = $info->teamname;
 $ret['info']['phonenumber'] = $info->phonenumber;
 
 $questions = $quizadmin->getAllQuestionsForQuiz($quizid);
@@ -42,9 +42,9 @@ $answerarray = array();
 foreach ($questions as $q) {
 	$answerarray[$q["idquestion"]]= $q;
 }
-$useranswers = $quizadmin->getTeamAnswers($teamid, $quizid);
-foreach ($useranswers as $a) {
-	$answerarray[$a->idquestion]['useranswers'][]= intval($a->answer);
+$teamanswers = $quizadmin->getTeamAnswers($teamid, $quizid);
+foreach ($teamanswers as $a) {
+	$answerarray[$a->idquestion]['teamanswers'][]= intval($a->answer);
 }
 usort ($answerarray, "questionSort" );
 

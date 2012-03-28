@@ -81,8 +81,8 @@ class dbConnection {
 		return $ret;
 	}
 	
-	function addUserAnswer($phonenumber, $questionnumber, $answer) {
-		if ($stmt = $this->dbconn->prepare("INSERT INTO useranswers (quizname, state) VALUES (?, ?)")) {
+	function addTeamAnswer($phonenumber, $questionnumber, $answer) {
+		if ($stmt = $this->dbconn->prepare("INSERT INTO teamanswers (quizname, state) VALUES (?, ?)")) {
 			// bind_param only accepts variables...
 			$state = 0; // 0 = inactive, all quizzes will start off as inactive
 			$stmt->bind_param('si', $quizName, $state);
@@ -318,7 +318,7 @@ class dbConnection {
 			die ();
 		}
 		$ret = array();
-		$sql = "SELECT DISTINCT users.idusers, users.username, users.phonenumber, COUNT(DISTINCT users.idusers, users.username, users.phonenumber, questions.idquestion) as correct FROM useranswers, users, questions WHERE questions.quizid= $quizid AND useranswers.userid = users.idusers AND (useranswers.answer = questions.correctanswer AND useranswers.questionid = questions.idquestion) GROUP BY users.idusers ORDER BY correct DESC, users.idusers, questions.questionnumber;";
+		$sql = "SELECT DISTINCT teams.idteam, teams.teamname, teams.phonenumber, COUNT(DISTINCT teams.idteam, teams.teamname, teams.phonenumber, questions.idquestion) as correct FROM teamanswers, teams, questions WHERE questions.quizid= $quizid AND teamanswers.teamid = teams.idteam AND (teamanswers.answer = questions.correctanswer AND teamanswers.questionid = questions.idquestion) GROUP BY teams.idteam ORDER BY correct DESC, teams.idteam, questions.questionnumber;";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
 				while ( $row = $result->fetch_object () ) {
@@ -333,7 +333,7 @@ class dbConnection {
 		if (! is_numeric ( $teamid )) {
 			die ();
 		}
-		$sql = "SELECT username, phonenumber FROM users WHERE idusers=$teamid;";
+		$sql = "SELECT teamname, phonenumber FROM teams WHERE idteam=$teamid;";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
 				$row = $result->fetch_object ();
@@ -353,7 +353,7 @@ class dbConnection {
 			die ();
 		}
 		$ret = array();
-		$sql = "SELECT questions.idquestion, questions.questionnumber, questions.correctanswer, useranswers.answer FROM questions, useranswers WHERE useranswers.questionid = questions.idquestion AND questions.quizid=$quizid AND useranswers.userid=$teamid ORDER BY questionnumber;";
+		$sql = "SELECT questions.idquestion, questions.questionnumber, questions.correctanswer, teamanswers.answer FROM questions, teamanswers WHERE teamanswers.questionid = questions.idquestion AND questions.quizid=$quizid AND teamanswers.teamid=$teamid ORDER BY questionnumber;";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
 				while ( $row = $result->fetch_object () ) {
@@ -365,7 +365,7 @@ class dbConnection {
 	}
 	
 	function setTeamName($teamid, $newname) {
-		if ($stmt = $this->dbconn->prepare("UPDATE users SET username=? WHERE idusers=?")) {
+		if ($stmt = $this->dbconn->prepare("UPDATE teams SET teamname=? WHERE idteam=?")) {
 			$stmt->bind_param('si', $newname, $teamid);
 			$stmt->execute();
 			$stmt->close();

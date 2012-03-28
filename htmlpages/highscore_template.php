@@ -24,7 +24,7 @@
 <div id="quizscores">
 
 <div id="highscoretable_div"></div>
-<div id="useranswers_div"></div>
+<div id="teamanswers_div"></div>
 </div>
 </div>
 </body>

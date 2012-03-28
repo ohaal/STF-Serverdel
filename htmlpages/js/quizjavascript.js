@@ -268,7 +268,7 @@ function deletequestion(el) {
 }
 
 function getHighScores(resultdiv, quiz) {
-	$("#useranswers_div").html('');
+	$("#teamanswers_div").html('');
 	$.getJSON("ajaxpages/gethighscore.php", {quizid: quiz, ajax : 'true'}, function(j) {
 		var data = new google.visualization.DataTable(j);
 		data.addColumn('string', 'Team');
@@ -280,7 +280,7 @@ function getHighScores(resultdiv, quiz) {
 			if (srow['score'] > maxscore) {
 				maxscore = srow['score'];
 			}
-			data.addRow([srow['username'], srow['score'], srow['userid']]);
+			data.addRow([srow['teamname'], srow['score'], srow['teamid']]);
 		}
 		maxscore = maxscore+1;
 		
@@ -335,14 +335,14 @@ function getTeaminfoForQuiz(teamid, quiz) {
 			html += '<div class="question">';
 			html += '<div class="answerheader"><strong>'+q['questionnumber']+'</strong><span class="questiontext">'+q['questiontext']+'</span></div>';
 			
-			var useranswers = new Array();
+			var teamanswers = new Array();
 			// looping through answers given.
-			if (q['useranswers'] != undefined) {
-				for ( var l = 0; l < q['useranswers'].length; l++) {
-					if (useranswers[q['useranswers'][l]] == undefined) {
-						useranswers[q['useranswers'][l]] = 0;
+			if (q['teamanswers'] != undefined) {
+				for ( var l = 0; l < q['teamanswers'].length; l++) {
+					if (teamanswers[q['teamanswers'][l]] == undefined) {
+						teamanswers[q['teamanswers'][l]] = 0;
 					}
-					useranswers[q['useranswers'][l]]++;
+					teamanswers[q['teamanswers'][l]]++;
 				}
 			}
 			html += '<div class="answers">';
@@ -355,8 +355,8 @@ function getTeaminfoForQuiz(teamid, quiz) {
 						html += "<div>";
 					}
 					html += '<strong>'+q.answers[l].answernumber+'</strong>:'+q.answers[l].answertext;
-					if (useranswers[q.answers[l].answernumber] != undefined) {
-						for (var m =0; m<useranswers[q.answers[l].answernumber]; m++) {
+					if (teamanswers[q.answers[l].answernumber] != undefined) {
+						for (var m =0; m<teamanswers[q.answers[l].answernumber]; m++) {
 							html += '<span class="answered" />';
 						}
 					}
@@ -369,22 +369,22 @@ function getTeaminfoForQuiz(teamid, quiz) {
 			html += '</div>';
 					
 		}
-		$("#useranswers_div").html(html);
-		$("div#quizscore div#useranswers_div a#editteamnamelink").click(function() {
-			$("div#quizscore div#useranswers_div h2#teamnameheader").hide();
-			$("div#quizscore div#useranswers_div input#teamnameinput").show();
+		$("#teamanswers_div").html(html);
+		$("div#quizscore div#teamanswers_div a#editteamnamelink").click(function() {
+			$("div#quizscore div#teamanswers_div h2#teamnameheader").hide();
+			$("div#quizscore div#teamanswers_div input#teamnameinput").show();
 		});
-		$("div#quizscore div#useranswers_div form#editteamname").submit(function() {
+		$("div#quizscore div#teamanswers_div form#editteamname").submit(function() {
 			
-			var teamname = $("div#quizscore div#useranswers_div input#teamnameinput").val();
-			var teamid = $("div#quizscore div#useranswers_div input#teamidinput").val();
+			var teamname = $("div#quizscore div#teamanswers_div input#teamnameinput").val();
+			var teamid = $("div#quizscore div#teamanswers_div input#teamidinput").val();
 			if (teamname.length < 1) {
 				return false;
 			}
 			$.getJSON("ajaxpages/editteamname.php", {teamid: teamid, teamname: teamname, ajax : 'true'}, function(j) {
-				$("div#quizscore div#useranswers_div h2#teamnameheader").html($("div#quizscore div#useranswers_div input#teamnameinput").val());
-				$("div#quizscore div#useranswers_div input#teamnameinput").hide();
-				$("div#quizscore div#useranswers_div h2#teamnameheader").show();
+				$("div#quizscore div#teamanswers_div h2#teamnameheader").html($("div#quizscore div#teamanswers_div input#teamnameinput").val());
+				$("div#quizscore div#teamanswers_div input#teamnameinput").hide();
+				$("div#quizscore div#teamanswers_div h2#teamnameheader").show();
 			});
 			return false;
 		});

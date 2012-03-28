@@ -121,22 +121,22 @@ div.answers div.correct span.answered {
 	background-position: -64px -144px;
 }
 
-div#quizscore div#useranswers_div h2 , div#quizscore div#useranswers_div form#editteamname input {
+div#quizscore div#teamanswers_div h2 , div#quizscore div#teamanswers_div form#editteamname input {
 	display: inline-block;
 	width: 45%;
 	margin-left: 40px;
 	margin-right: 40px;
 	font-size: 0.8em;
 }
-div#quizscore div#useranswers_div form#editteamname input {
+div#quizscore div#teamanswers_div form#editteamname input {
 	 display:none;
 }
 
-div#quizscore div#useranswers_div {
+div#quizscore div#teamanswers_div {
 	margin-top: 40px;
 }
 
-div#quizscore div#useranswers_div div.phone {
+div#quizscore div#teamanswers_div div.phone {
 	font-size: 0.6em;
 	width: 35%;
 	margin-right: 40px;

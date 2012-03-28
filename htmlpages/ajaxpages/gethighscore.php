@@ -16,8 +16,8 @@ $ret = array();
 $i=0;
 foreach ($scores as $score) {
 	$i++;
-	$ret[$i]['userid'] = $score->idusers;
-	$ret[$i]['username'] = $score->username;
+	$ret[$i]['teamid'] = $score->idteam;
+	$ret[$i]['teamname'] = $score->teamname;
 	$ret[$i]['phonenumber'] = $score->phonenumber;
 	$ret[$i]['score'] = intval($score->correct);
 }
