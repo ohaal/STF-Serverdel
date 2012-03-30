@@ -6,7 +6,7 @@ function getQuizNames(dontselectlast) {
 		var states = new Array("Inactive", "Active", "Finished");
 		for ( var i = 0; i < quizlist.length; i++) {
 			options += '<option class="' + states[quizlist[i].state].toLowerCase() + '" value="' + quizlist[i].quizid + '">'
-					+'['+quizlist[i].keyword+'] '+ quizlist[i].quizname + ' (' + states[quizlist[i].state] + ')</option>';
+					+'['+quizlist[i].keyword.toUpperCase()+'] '+ quizlist[i].quizname + ' (' + states[quizlist[i].state] + ')</option>';
 		}
 
 		// Only add options to select dropdown and show it if we have >0 quizzes
@@ -453,6 +453,7 @@ $(document).ready(function() {
 	});
 	
 	$("button#addquiznamebutton").click(function() {
+		// TODO: see if keyword contains spaces
 		$.get("ajaxpages/addquizname.php", {quizname: $("#inputquizname").val(), quizkeyword: $("#inputquizkeyword").val()}, function() {
 			getQuizNames();
 			$("div#newquizoverlay").dialog("close");

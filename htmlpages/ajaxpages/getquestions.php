@@ -1,5 +1,5 @@
 <?php
-// Parameters from _POST:
+// Parameters from _GET:
 // quizid			: int 	 : id of quiz to add question to
 //
 // Sample output:

@@ -8,16 +8,15 @@ require_once ('../quizadmin.php');
 $quizadmin = new quizAdmin ();
 if (isset ( $_GET ['quizname'] ) && isset( $_GET ['quizkeyword'] ) ) {
 	$quizName = $_GET ['quizname'];
-	$quizKeyword = $_GET ['quizkeyword'];
+	$quizKeyword = strtolower($_GET ['quizkeyword']);
 	
-	// Restricted keywords (used for other commands)
-	$restrictedKeywords = array( 'lag', 'lagnavn' );
-	foreach ($restrictedKeywords as $restrictedKeyword) {
-		if ($quizKeyword == $restrictedKeyword) {
-			die();
-		}
+	// Keyword can not contain spaces
+	$containsSpace = preg_match('/\s/', $quizKeyword);
+	if ($containsSpace) {
+		echo 'Keyword can not contain spaces';
+		die();
 	}
-	
+
 	if (strlen ( $quizName ) > 0 && strlen( $quizKeyword ) > 0) {
 		$quizadmin->addQuizName ( $quizName, $quizKeyword );
 	}
