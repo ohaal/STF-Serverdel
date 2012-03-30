@@ -81,18 +81,6 @@ class dbConnection {
 		return $ret;
 	}
 	
-	function addTeamAnswer($phonenumber, $questionnumber, $answer) {
-		if ($stmt = $this->dbconn->prepare("INSERT INTO teamanswers (quizname, state) VALUES (?, ?)")) {
-			// bind_param only accepts variables...
-			$state = 0; // 0 = inactive, all quizzes will start off as inactive
-			$stmt->bind_param('si', $quizName, $state);
-			$stmt->execute();
-			$stmt->close();
-		} else {
-			printf("Prepared Statement Error: %s\n", $stmt->error);
-		}
-	}
-	
 	function getAllQuestionsForQuiz($quiz) {
 		if (!is_numeric($quiz)) {
 			die();
@@ -189,6 +177,22 @@ class dbConnection {
 			printf( "Prepared Statement Error: %s\n", $stmt->error );
 		}
 		return $quizkeyword;
+	}
+	
+	function getQuizIdByKeyword($keyword) {
+		$quizid = -1;
+		if ($stmt = $this->dbconn->prepare( "SELECT idquiz FROM quiz WHERE keyword='?' AND state=?;" )) {
+			$state = 1; // 1 = active
+			$stmt->bind_param( 'si', $keyword, $state );
+			$stmt->execute();
+			$stmt->bind_result( $quizid );
+			$stmt->fetch();
+			$stmt->close();
+		}
+		else {
+			printf( "Prepared Statement Error: %s\n", $stmt->error );
+		}
+		return $quizid;
 	}
 	
 	function addQuestion($quizid, $questionnumber, $questiontext, $correctanswer, $answers) {
@@ -370,7 +374,83 @@ class dbConnection {
 			$stmt->execute();
 			$stmt->close();
 		} else {
-			printf("Prepared Statement Error: %s\n", $mysqli->error);
+			printf("Prepared Statement Error: %s\n", $stmt->error);
+		}
+	}
+	
+	function createTeam($name) {
+		if ($stmt = $this->dbconn->prepare("INSERT INTO teams (teamname) VALUES (?)")) {
+			$stmt->bind_param('s', $name);
+			$stmt->execute();
+			$stmt->close();
+		} else {
+			printf("Prepared Statement Error: %s\n", $stmt->error);
+		}
+		return mysql_insert_id();
+	}
+	
+	function addTeamMemberAnswer($answernumber, $questionnumber, $phonenumber, $quizid) {
+		$stmt = $this->dbconn->prepare(
+			"INSERT INTO teamanswers (answer, phonenumber, questionid)".
+			"SELECT ?, '?', questions.idquestion".
+			"FROM questions".
+			"WHERE questionnumber=? AND quizid=?");
+		if ($stmt) {
+			$stmt->bind_param('isii', $answernumber, $phonenumber, $questionnumber, $quizid);
+			$stmt->execute();
+			$stmt->close();
+		} else {
+			printf("Prepared Statement Error: %s\n", $stmt->error);
+		}
+	}
+
+	function getTeamIdByPhoneNumberAndQuizId($phonenumber, $quizid) {
+		$teamid = -1;
+		if ($stmt = $this->dbconn->prepare( "SELECT teamid FROM teammember WHERE phonenumber='?' AND quizid=?;" )) {
+			$stmt->bind_param( 'si', $phonenumber, $quizid );
+			$stmt->execute();
+			$stmt->bind_result( $teamid );
+			$stmt->fetch();
+			$stmt->close();
+		}
+		else {
+			printf( "Prepared Statement Error: %s\n", $stmt->error );
+		}
+		return $teamid;
+	}
+	
+	function getTeamIdByTeamName($teamname) {
+		$teamid = -1;
+		if ($stmt = $this->dbconn->prepare( "SELECT idteam FROM teams WHERE teamname='?';" )) {
+			$stmt->bind_param( 'si', $phonenumber, $quizid );
+			$stmt->execute();
+			$stmt->bind_result( $teamid );
+			$stmt->fetch();
+			$stmt->close();
+		}
+		else {
+			printf( "Prepared Statement Error: %s\n", $stmt->error );
+		}
+		return $teamid;
+	}
+	
+	function createTeamMember($phonenumber, $quizid, $teamid ) {
+		if ($stmt = $this->dbconn->prepare("INSERT INTO teammember (phonenumber, quizid, teamid) VALUES (?, ?, ?)")) {
+			$stmt->bind_param('sii', $phonenumber, $quizid, $teamid);
+			$stmt->execute();
+			$stmt->close();
+		} else {
+			printf("Prepared Statement Error: %s\n", $stmt->error);
+		}
+	}
+	
+	function setTeamMembership($phonenumber, $quizid, $teamid) {
+		if ($stmt = $this->dbconn->prepare("UPDATE teammember SET teamid=? WHERE phonenumber='?' AND quizid=?")) {
+			$stmt->bind_param('isi', $teamid, $phonenumber, $quizid);
+			$stmt->execute();
+			$stmt->close();
+		} else {
+			printf("Prepared Statement Error: %s\n", $stmt->error);
 		}
 	}
 }
