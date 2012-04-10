@@ -44,7 +44,6 @@ class quizAdmin {
 	}
 	
 	function getQuizKeywordExistsAndActive($keyword) {
-		// TODO: Escape keyword
 		$quizStates = $this->db->getQuizStatesByKeyword($keyword);
 		foreach ($quizStates as $value) {
 			if ($value == 1) {

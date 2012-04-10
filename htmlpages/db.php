@@ -1,4 +1,6 @@
 <?
+// TODO: mysql_real_escape_string()
+// TODO: http://stackoverflow.com/questions/4752026/do-i-need-to-sanitize-input-if-using-prepared-php-mysql-queries
 class dbConnection {
 	private $dbconn;
 	
@@ -67,20 +69,22 @@ class dbConnection {
 	}
 	
 	function getQuizStatesByKeyword($keyword) {
-		$ret = array();
-		$sql = "SELECT state FROM quiz WHERE keyword = '$keyword'";
-		if ($result = $this->dbconn->query ( $sql )) {
-			if ($result->num_rows > 0) {
-				while ( $row = $result->fetch_object () ) {
-					$ret[] = $row->state;
-				}
+		$quizstates = array();
+		if ($stmt = $this->dbconn->prepare( "SELECT state FROM quiz WHERE keyword=?;" )) {
+			$stmt->bind_param( 's', $keyword );
+			$stmt->execute();
+			$stmt->bind_result( $quizstate );
+			while ( $stmt->fetch() ) {
+				$quizstates[] = $quizstate;
 			}
-		} else {
-			print_r($this->dbconn->error);
+			$stmt->close();
 		}
-		return $ret;
+		else {
+			printf( "Prepared Statement Error: %s\n", $stmt->error );
+		}
+		return $quizstates;
 	}
-	
+
 	function getAllQuestionsForQuiz($quiz) {
 		if (!is_numeric($quiz)) {
 			die();
@@ -353,9 +357,6 @@ class dbConnection {
 		//return all teamnames which has sent at least one answer to a given quiz.		
 	}
 	function getTeamAnswers($teamid, $quizid) {
-		if (! is_numeric ( $teamid ) || ! is_numeric ( $quizid )) {
-			die ();
-		}
 		$ret = array();
 		$sql = "SELECT questions.idquestion, questions.questionnumber, questions.correctanswer, teamanswers.answer FROM questions, teamanswers WHERE teamanswers.questionid = questions.idquestion AND questions.quizid=$quizid AND teamanswers.teamid=$teamid ORDER BY questionnumber;";
 		if ($result = $this->dbconn->query ( $sql )) {
@@ -422,7 +423,7 @@ class dbConnection {
 	function getTeamIdByTeamName($teamname) {
 		$teamid = -1;
 		if ($stmt = $this->dbconn->prepare( "SELECT idteam FROM teams WHERE teamname='?';" )) {
-			$stmt->bind_param( 'si', $phonenumber, $quizid );
+			$stmt->bind_param( 's', $teamname );
 			$stmt->execute();
 			$stmt->bind_result( $teamid );
 			$stmt->fetch();
