@@ -75,6 +75,10 @@ span.deletequestion, span.lockedquestion {
 	right: 0px;
 	float: right;
 }
+span.errorlist ul li {
+	color: #f00;
+	font-size: 12px;
+}
 div#quizselect, div#newquizdiv {
 	font-size: 1.2em;
 	margin-bottom: 18px;

@@ -113,7 +113,7 @@ function getQuestions(resultdiv, quiz) {
 			editquestions(this);
 			return false;
 		});
-		$("a.deleteanswer").click(function(event) {
+		$("a.deletequestion").click(function(event) {
 			confirmdeletequestion(this);
 			return false;
 		})
@@ -453,20 +453,83 @@ $(document).ready(function() {
 	});
 	
 	$("button#addquiznamebutton").click(function() {
-		// TODO: see if keyword contains spaces
-		$.get("ajaxpages/addquizname.php", {quizname: $("#inputquizname").val(), quizkeyword: $("#inputquizkeyword").val()}, function() {
-			getQuizNames();
-			$("div#newquizoverlay").dialog("close");
-			$("div#newquizoverlay input.inputquiz").val("");
-			return false;
-		});
+		var qkey=$("#inputquizkeyword").val();
+		var qname=$("#inputquizname").val();
+		var qkeymatch=qkey.match(/^[a-z0-9æÆøØåÅ]{1,20}$/i);
+		
+		if (qkeymatch && qname.length >= 1 && qname.length <= 45) {
+			$.get("ajaxpages/addquizname.php", {quizname: qname, quizkeyword: qkey}, function() {
+				getQuizNames();
+				$("div#newquizoverlay").dialog("close");
+				$("div#newquizoverlay input.inputquiz").val("");
+				$("span#newquizerror").html("");
+			});
+		}
+		else {
+			// Keyword must only contain letters and/or numbers.
+			var newquizerror="<ul>";
+			if (!qkeymatch) {
+				newquizerror=newquizerror+"<li>Keyword must only contain letters and/or numbers, and must be between 1 and 20 characters.</li>";
+			}
+			// Quiz name is required
+			if (qname.length < 1 || qname.length > 45) {
+				newquizerror=newquizerror+"<li>Quiz name must be between 1 and 45 characters.</li>";
+			}
+			newquizerror=newquizerror+"</ul>";
+			if (newquizerror != "<ul></ul>") {
+				$("span#newquizerror").html(newquizerror);
+			}
+		}
+		return false;
 	});
 
 	$("#newquestionform").submit(function() {
-		//TODO: validation here.
-		$.post("ajaxpages/addquestion.php", $("#newquestionform").serialize(), function(data) {
-			$("div#newquestionoverlay").dialog("close");
-		});
+		var qtext=$("#inputquestiontext").val();
+		var atext=$('input[name="answer1"]').val();
+		var answertoolongorshort=false;
+		var correctanswertooshort=false;
+		// ?: First answer is required
+		if (atext.length < 1) {
+			answertoolongorshort=true;
+		}
+		else {
+			var correctanswer=$('input[name="correctanswer"]:checked').val();
+			for (i = 1; i <= $("div.answer").length; i++) {
+				atext=$('input[name="answer'+i+'"]').val();
+				// ?: Answer is too long
+				if (atext.length > 200) {
+					answertoolongorshort=true;
+				}
+				// ?: Length less than one and is correct answer?
+				else if (atext.length < 1 && i == correctanswer) {
+					correctanswertooshort=true;
+				}
+			}
+		}
+		// ?: All requirements met to proceed with adding the question?
+		if (qtext.length <= 200 && qtext.length >= 1 && !answertoolongorshort && !correctanswertooshort) {
+			// -> Add question and close dialog when done
+			$.post("ajaxpages/addquestion.php", $("#newquestionform").serialize(), function(data) {
+				$("div#newquestionoverlay").dialog("close");
+			});
+		}
+		else {
+			// -> Requirements not met, let's see what's wrong
+			var newquestionerror="<ul>";
+			if (qtext.length > 200 || qtext.length < 1) {
+				newquestionerror=newquestionerror+"<li>Question text must be between 1 and 200 characters.</li>";
+			}
+            if (answertoolongorshort) {
+				newquestionerror=newquestionerror+"<li>Answers must be between 1 and 200 characters.</li>";
+			}
+            if (correctanswertooshort) {
+				newquestionerror=newquestionerror+"<li>Answer marked as correct must contain an actual answer.</li>";
+			}
+			newquestionerror=newquestionerror+"</ul>";
+			if (newquestionerror != "<ul></ul>") {
+				$("span#newquestionerror").html(newquestionerror);
+			}
+		}
 		return false;
 	});
 	

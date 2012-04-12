@@ -52,6 +52,7 @@
         Name: <input type="text" name="quizname" class="inputquiz" id="inputquizname" />
         Keyword: <input type="text" name="quizkeyword" class="inputquiz" id="inputquizkeyword" />
         <button value="addquiz" id="addquiznamebutton">Add Quiz</button>
+        <span class="errorlist" id="newquizerror"></span>
       </div>
 
       <div id="newquestionoverlay" class="dialog">
@@ -63,7 +64,7 @@
             <input type="hidden" name="questionnumber" id="hiddenquestionnumber" />
           </div>
 <?
-for ($i=1;$i<6;$i++) {
+for ($i=1;$i<=5;$i++) {
 	print('<div class="answer" id="answer'.$i.'">');
 	print('<input type="text" class="newanswer" name="answer'.$i.'" />');
 	print('<input type="radio" name="correctanswer" value='.$i.' />');
@@ -72,6 +73,7 @@ for ($i=1;$i<6;$i++) {
 ?>
           <button value="submitnewquestion" id="submitnewquestionbutton">Add question</button>
         </form>
+        <span class="errorlist" id="newquestionerror"></span>
       </div>
 
       <div id="newquizdiv">
