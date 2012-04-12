@@ -35,16 +35,17 @@
       <div id="createpdfoverlay" class="dialog">
         <form name="createpdf" action="getquizpdf.php" method="post" enctype="multipart/form-data">
           <input class="quizidvalue" type="hidden" name="quizid" value="" />
-          Header: <input type="text" name="header" /><br/>
+          Header: <input type="text" name="header" />*<br/>
           Ingress: <textarea name="ingress"></textarea><br/>
           <hr />
           <div id="pdfquestions"></div>
-          Footer: <input type="text" name="footer" value='Send SMS med "STF $qnum &lt;riktig svarnummer&gt;" til 2000'/><br/>
+          Footer: <input type="text" name="footer"/>*<br/>
           <b>$qnum</b> will be replaced with the question number.
           <hr />
           Image bottom left: <input type="file" name="imgbottomleft" /><br/>
           Image bottom right: <input type="file" name="imgbottomright" /><br />
-          <input type="submit" value="Create PDF" onclick="this.form.target='_blank';return true;"/>
+          <input type="submit" value="Create PDF" id="createpdfsubmit"/>
+          <span class="errorlist" id="createpdferror"></span>
         </form>
       </div>
 

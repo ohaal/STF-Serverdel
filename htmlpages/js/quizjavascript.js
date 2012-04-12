@@ -5,6 +5,7 @@ function getQuizNames(dontselectlast) {
 		// States used for class names in HTML
 		var states = new Array("Inactive", "Active", "Finished");
 		for ( var i = 0; i < quizlist.length; i++) {
+			// Remember to update the regex used to find quiz name if you edit this layout! (For easy lookup, search code for #quiznameregex)
 			options += '<option class="' + states[quizlist[i].state].toLowerCase() + '" value="' + quizlist[i].quizid + '">'
 					+'['+quizlist[i].keyword.toUpperCase()+'] '+ quizlist[i].quizname + ' (' + states[quizlist[i].state] + ')</option>';
 		}
@@ -21,7 +22,7 @@ function getQuizNames(dontselectlast) {
 			}
 			else {
 				// Set to last option in dropdown
-				var lastValue = $('select#quizname'+' option:last-child').val();
+				var lastValue = $('select#quizname option:last-child').val();
 				$('select#quizname').val(lastValue);
 			}
 
@@ -125,6 +126,41 @@ function updatelinksandforms() {
 	var quizid = $('select#quizname').val();
 	// Update forms
 	$('input.quizidvalue').attr('value', quizid);
+	
+	// Grab the quizname and keyword from currently selected option in select list
+	var selectedquiz=$('select#quizname option:selected').text();
+	// Use a regex to grab the name of the quiz #quiznameregex
+	// (hacky, but we avoid doing an extra (unnecessary) ajax call to get the quizname and keyword by doing it this way)
+	var grabinforegex=/^\[([A-Z0-9∆ÿ≈]*)\] (.+) \((?:Inactive|Active|Finished)\)$/;
+	// Quick explanation of this regex:
+	// ^						= Start of line
+	// \[						= A normal '[' (needs to be escaped, since it has special meaning in regex)
+	// (						= Start (first) capture group
+	// [A-Z0-9∆ÿ≈]				= Match any of the characters inside []-brackets (A-Z means all letters in between and 0-9 means all numbers in between)
+	// *						= Any amount of previous pattern (the one matching specific characters)
+	// )						= End (first) capture group (contains keyword)
+	// \]						= A normal ']' (needs to be escaped, since it has special meaning in regex)
+	// (						= Start (second) capture group
+	// .						= Match any character (non-newline)
+	// +						= One or more of previous pattern (the one matching any character)
+	// )						= End (second) capture group (contains quiz name)
+	// \(						= A normal '(' (needs to be escaped, since it has special meaning in regex)
+	// (?:						= Start non-capture group
+	// Inactive|Active|Finished	= Match one of these '|'-seperated strings
+	// )						= End non-capture group (contains 3 options)
+	// \)						= A normal ')' (needs to be escaped, since it has special meaning in regex)
+	// $						= End of line
+	// The '/' are there just to encase the regex, the spaces are just regular spaces
+	var quizinfo=grabinforegex.exec(selectedquiz);
+	var quizname=quizinfo[2];
+	var keyword=quizinfo[1];
+	// Update (at the moment this occurs, hidden,) create pdf form
+	$('input[name="header"]').val(quizname);
+	$('input[name="footer"]').val('Send SMS med "STF '+keyword+' $qnum <riktig svarnummer>" til 2000');
+	
+	// Reset create PDF errorlist 
+	$("span#createpdferror").html("");
+	
     // Update links
 	$('a#highscorelink').attr('href', 'highscore_template.php?quizid=' + quizid);
 	
@@ -551,6 +587,37 @@ $(document).ready(function() {
 	$("div#quizadmin a#createpdf").click(function() {
 		$("div#createpdfoverlay").dialog("open");
 		return false;
+	});
+	
+	$("#createpdfsubmit").click(function() {
+		var header=$('input[name="header"]').val();
+		var footer=$('input[name="footer"]').val();
+		var questions=$('div#questions > div.question"');
+		
+		// ?: All requirements met to proceed with PDF creation?
+		if (header.length > 0 && footer.length > 0 && questions.size() > 0) {
+			// -> Open in new window
+			this.form.target='_blank';
+			return true;			
+		}
+		else {
+			// -> Requirements not met, let's see what's wrong
+			var createpdferror="<ul>";
+			if (header.length <= 0) {
+				createpdferror=createpdferror+"<li>Header can not be empty.</li>";
+			}
+            if (footer.length <= 0) {
+            	createpdferror=createpdferror+"<li>Footer can not be empty.</li>";
+			}
+            if (questions.size() <= 0) {
+            	createpdferror=createpdferror+"<li>Can not generate PDF when no questions in quiz.</li>";
+			}
+            createpdferror=createpdferror+"</ul>";
+			if (createpdferror != "<ul></ul>") {
+				$("span#createpdferror").html(createpdferror);
+			}
+			return false;
+		}
 	});
 
 	//highscore bindings
