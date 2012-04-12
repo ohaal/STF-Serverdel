@@ -3,7 +3,7 @@
 // Parameters from _POST:
 // quizid			: int 	 : id of quiz to add question to
 // questiontext 	: string : the question itself
-// questionnumber 	: int	 : the question number (used for sort) TODO: confirm
+// questionnumber 	: int	 : the question number (used for sort)
 // correctanswer 	: int	 : the correct answer number
 // answerX 			: string : the answers
 include_once 'ajaxheader.php';
@@ -13,14 +13,14 @@ if (!isset ($_POST['quizid'])) {
 	//not a proper post. Ignore and die
 	die();
 }
-// Can only add question if quiz state is inactive
-if ($quizadmin->getQuizState($quizid) != '0') {
-	die();
-}
 $questionnumber = $_POST['questionnumber'];
 //might be NULL if new question
 $questiontext = $_POST['questiontext'];
 $quizid = $_POST['quizid'];
+// Can only add question if quiz state is inactive
+if ($quizadmin->getQuizState($quizid) != '0') {
+	die();
+}
 if (isset ($_POST['correctanswer'])) {
 	$correctanswer = $_POST['correctanswer'];
 } else {
