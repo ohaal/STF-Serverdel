@@ -392,9 +392,9 @@ class dbConnection {
 	
 	function addTeamMemberAnswer($answernumber, $questionnumber, $phonenumber, $quizid) {
 		$stmt = $this->dbconn->prepare(
-			"INSERT INTO teamanswers (answer, phonenumber, questionid)".
-			"SELECT ?, '?', questions.idquestion".
-			"FROM questions".
+			"INSERT INTO teamanswers (answer, phonenumber, questionid) ".
+			"SELECT ?, '?', questions.idquestion ".
+			"FROM questions ".
 			"WHERE questionnumber=? AND quizid=?");
 		if ($stmt) {
 			$stmt->bind_param('isii', $answernumber, $phonenumber, $questionnumber, $quizid);
