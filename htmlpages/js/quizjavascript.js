@@ -5,7 +5,7 @@ function getQuizNames(dontselectlast) {
 		// States used for class names in HTML
 		var states = new Array("Inactive", "Active", "Finished");
 		for ( var i = 0; i < quizlist.length; i++) {
-			// Remember to update the regex used to find quiz name if you edit this layout! (For easy lookup, search code for #quiznameregex)
+			// Remember to update the regex used to find quiz name if you edit this layout! (For easy lookup, search code for @regexquizname)
 			options += '<option class="' + states[quizlist[i].state].toLowerCase() + '" value="' + quizlist[i].quizid + '">'
 					+'['+quizlist[i].keyword.toUpperCase()+'] '+ quizlist[i].quizname + ' (' + states[quizlist[i].state] + ')</option>';
 		}
@@ -68,27 +68,27 @@ function getQuestions(resultdiv, quiz) {
 			if (lockedquiz) {
 				extraclass = ' questionlocked';
 			}
-			questions += "<div class=\"question"+extraclass+"\" id=\"q_"+questionlist[i].idquestions+"\">";
-			questions += "<div class=\"answerheader\">";
+			questions += '<div class="question'+extraclass+'" id="q_'+questionlist[i].idquestions+'">';
+			questions += '<div class="answerheader">';
 			if (!lockedquiz) {
-				questions += "<a href=\"#\" id=\"editquestion"+questionlist[i].idquestions+"\" class=\"nounderline editanswer\">";
+				questions += '<a href="#" id="editquestion'+questionlist[i].idquestions+'" class="nounderline editquestion">';
 			}
-			questions += "<strong>"+questionlist[i].questionnumber+"</strong> ";
-			questions += "<span class=\"questiontext\" id=\"questiontext"+questionlist[i].idquestions+"\">"+questionlist[i].questiontext+"</span>";
+			questions += '<strong>'+questionlist[i].questionnumber+'</strong> ';
+			questions += '<span class="questiontext" id="questiontext'+questionlist[i].idquestions+'">'+questionlist[i].questiontext+'</span>';
 			if (!lockedquiz) {
-				questions += "<span class=\"ui-icon ui-icon-wrench\">edit</span>";
-				questions += "</a>";
+				questions += '<span class="ui-icon ui-icon-wrench">edit</span>';
+				questions += '</a>';
 			}
 			if (!lockedquiz) {
-				questions += "<a href=\"#\" id=\"deletequestion"+questionlist[i].idquestions+"\" class=\"nounderline deletequestion\">";
-				questions += "<span class=\"ui-icon ui-icon-trash deletequestion\">delete</span>";
-				questions += "</a>";
+				questions += '<a href="#" id="deletequestion'+questionlist[i].idquestions+'" class="nounderline deletequestion">';
+				questions += '<span class="ui-icon ui-icon-trash deletequestion\">delete</span>';
+				questions += '</a>';
 			}
 			else {
-				questions += "<span class=\"ui-icon ui-icon-locked lockedquestion\">locked</span>";
+				questions += '<span class="ui-icon ui-icon-locked lockedquestion">locked</span>';
 			}
-			questions += "</div>";
-			questions += "<div class=\"answers\">";
+			questions += '</div>';
+			questions += '<div class="answers">';
 			if (questionlist[i].answers) {
 				for (var k = 0; k<questionlist[i].answers.length; k++) {
 					if (questionlist[i].answers[k].answernumber == questionlist[i].correctanswer) {
@@ -97,20 +97,22 @@ function getQuestions(resultdiv, quiz) {
 						questions += "<div>";
 					}
 					questions += '<strong>'+questionlist[i].answers[k].answernumber+'</strong>:'+questionlist[i].answers[k].answertext;
-					questions += "</div>";
+					questions += '</div>';
 				}
 			}
 			questions += '</div>';
 			questions += '</div>';
 			
-			pdfquestions += "<b>Question "+questionlist[i].questionnumber+": "+questionlist[i].questiontext+"</b><br />";
-			pdfquestions += "Header <input type=\"text\" name=\"quizheader-"+questionlist[i].questionnumber+"\" /><br />";
-			pdfquestions += "<input type=\"file\" name=\"quizimage-"+questionlist[i].questionnumber+"\" />";
-			pdfquestions += "<hr />";
+			pdfquestions += '<b>Question '+questionlist[i].questionnumber+': '+questionlist[i].questiontext+'</b><br />';
+			pdfquestions += 'Header <input type="text" name="quizheader-'+questionlist[i].questionnumber+'" /><br />';
+			pdfquestions += '<input type="file" name="quizimage-'+questionlist[i].questionnumber+'" />';
+			pdfquestions += '<hr />';
 		}
 		$(resultdiv).html(questions);
 		$('div#pdfquestions').html(pdfquestions);
-		$("a.editanswer").click(function(event) {
+		$("a.editquestion").click(function(event) {
+			$("div#newquestionoverlay").dialog("option", "title", "Edit question");
+			$("div#newquestionoverlay button#submitnewquestionbutton").text("Save changes");
 			editquestions(this);
 			return false;
 		});
@@ -129,7 +131,7 @@ function updatelinksandforms() {
 	
 	// Grab the quizname and keyword from currently selected option in select list
 	var selectedquiz=$('select#quizname option:selected').text();
-	// Use a regex to grab the name of the quiz #quiznameregex
+	// Use a regex to grab the name of the quiz @regexquizname
 	// (hacky, but we avoid doing an extra (unnecessary) ajax call to get the quizname and keyword by doing it this way)
 	var grabinforegex=/^\[([A-Z0-9∆ÿ≈]*)\] (.+) \((?:Inactive|Active|Finished)\)$/;
 	// Quick explanation of this regex:
@@ -444,9 +446,10 @@ $(document).ready(function() {
 		},
 	});
 	
+	// Title is set dynamically based on which link you click (edit or new)
 	$("div#quizadmin div#newquestionoverlay").dialog({
 		modal : true,
-		title : 'New question',
+		title: 'Question',
 		resizable : false,
 		autoOpen : false,
 		minWidth : 600,
@@ -454,8 +457,7 @@ $(document).ready(function() {
 			$('.ui-widget-overlay').bind('click', function() {
 				$("div#newquestionoverlay").dialog('close');
 			});
-		},
-		close : function(event, ui) {getQuestions($("div#questions"),$("select#quizname").val()) }
+		}
 	});
 	
 	$( "div#quizadmin #questions" ).sortable({
@@ -498,6 +500,7 @@ $(document).ready(function() {
 				getQuizNames();
 				$("div#newquizoverlay").dialog("close");
 				$("div#newquizoverlay input.inputquiz").val("");
+				// Empty error list since we are successful
 				$("span#newquizerror").html("");
 			});
 		}
@@ -546,7 +549,10 @@ $(document).ready(function() {
 		if (qtext.length <= 200 && qtext.length >= 1 && !answertoolongorshort && !correctanswertooshort) {
 			// -> Add question and close dialog when done
 			$.post("ajaxpages/addquestion.php", $("#newquestionform").serialize(), function(data) {
+				getQuestions($("div#questions"),$("select#quizname").val());
 				$("div#newquestionoverlay").dialog("close");
+				// Empty error list since we are successful
+				$("span#newquestionerror").html("");
 			});
 		}
 		else {
@@ -575,6 +581,8 @@ $(document).ready(function() {
 	});
 	
 	$("div#quizadmin a#newquestion").click(function() {
+		$("div#newquestionoverlay").dialog("option", "title", "New question");
+		$("div#newquestionoverlay button#submitnewquestionbutton").text("Add question");
 		$("div#newquestionoverlay input#inputquestiontext").val("");
 		$("div#newquestionoverlay input.newanswer").val("");
 		$("div#newquestionoverlay input:radio").removeAttr("checked");
