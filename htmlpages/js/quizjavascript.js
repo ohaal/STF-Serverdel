@@ -236,19 +236,19 @@ function confirmendquiz(quizid) {
 }
 
 function activatequiz(quizid) {
-	$.get("ajaxpages/activatequiz.php", {quizid: quizid}, function(j) {
+	$.post("ajaxpages/activatequiz.php", {quizid: quizid}, function(j) {
 		getQuizNames(1);
 	});
 }
 
 function deactivatequiz(quizid) {
-	$.get("ajaxpages/deactivatequiz.php", {quizid: quizid}, function(j) {
+	$.post("ajaxpages/deactivatequiz.php", {quizid: quizid}, function(j) {
 		getQuizNames(1);
 	});
 }
 
 function endquiz(quizid) {
-	$.get("ajaxpages/endquiz.php", {quizid: quizid}, function(j) {
+	$.post("ajaxpages/endquiz.php", {quizid: quizid}, function(j) {
 		getQuizNames(1);
 	});
 }
