@@ -48,7 +48,7 @@ function getQuestions(resultdiv, quiz) {
 		var questions = '';
 		var pdfquestions = '';
 
-	    updatelinksandforms();
+	    updatelinksandforms(questionlist);
 	    
 		// Check if we actually get any questions from the JSON
 		if (questionlist == null) { return false; }
@@ -124,7 +124,7 @@ function getQuestions(resultdiv, quiz) {
 }
 
 // This will always be triggered after quizid is changed (from getQuestions)
-function updatelinksandforms() {
+function updatelinksandforms(questionlist) {
 	var quizid = $('select#quizname').val();
 	// Update forms
 	$('input.quizidvalue').attr('value', quizid);
@@ -183,6 +183,7 @@ function updatelinksandforms() {
     	// Hide/show links
 		$('a#changequizstate').show();
 		$('a#newquestion').hide();
+		$('a#highscorelink').show();
 	}
     else if (inactive) {
     	// TODO: Check if other quiz already active with same keyword and give feedback to user (this is already covered server side)
@@ -193,13 +194,22 @@ function updatelinksandforms() {
     		return false;
     	});
     	// Hide/show links
-		$('a#changequizstate').show();
+    	if (questionlist.length > 0) {
+    		$('a#changequizstate').show();
+    		$('a#createpdf').show();
+    	}
+    	else {
+    		$('a#createpdf').hide();
+    		$('a#changequizstate').hide();
+    	}
 		$('a#newquestion').show();
+		$('a#highscorelink').hide();
     }
     else if (finished) {
     	// Hide/show links
     	$('a#changequizstate').hide();
     	$('a#newquestion').hide();
+    	$('a#highscorelink').show();
     }
 }
 
@@ -600,7 +610,7 @@ $(document).ready(function() {
 	$("#createpdfsubmit").click(function() {
 		var header=$('input[name="header"]').val();
 		var footer=$('input[name="footer"]').val();
-		var questions=$('div#questions > div.question"');
+		var questions=$('div#questions > div.question');
 		
 		// ?: All requirements met to proceed with PDF creation?
 		if (header.length > 0 && footer.length > 0 && questions.size() > 0) {
