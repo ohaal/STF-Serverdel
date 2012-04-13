@@ -133,7 +133,7 @@ function updatelinksandforms(questionlist) {
 	var selectedquiz=$('select#quizname option:selected').text();
 	// Use a regex to grab the name of the quiz @regexquizname
 	// (hacky, but we avoid doing an extra (unnecessary) ajax call to get the quizname and keyword by doing it this way)
-	var grabinforegex=/^\[([A-Z0-9ÆØÅ]*)\] (.+) \((?:Inactive|Active|Finished)\)$/;
+	var grabinforegex=/^\[([A-Z0-9ÆØÅ]*)\] (.+) \((Inactive|Active|Finished)\)$/;
 	// Quick explanation of this regex:
 	// ^						= Start of line
 	// \[						= A normal '[' (needs to be escaped, since it has special meaning in regex)
@@ -147,9 +147,9 @@ function updatelinksandforms(questionlist) {
 	// +						= One or more of previous pattern (the one matching any character)
 	// )						= End (second) capture group (contains quiz name)
 	// \(						= A normal '(' (needs to be escaped, since it has special meaning in regex)
-	// (?:						= Start non-capture group
+	// (						= Start (third) capture group
 	// Inactive|Active|Finished	= Match one of these '|'-seperated strings
-	// )						= End non-capture group (contains 3 options)
+	// )						= End (third) capture group (contains 3 options)
 	// \)						= A normal ')' (needs to be escaped, since it has special meaning in regex)
 	// $						= End of line
 	// The '/' are there just to encase the regex, the spaces are just regular spaces
@@ -166,11 +166,12 @@ function updatelinksandforms(questionlist) {
     // Update links
 	$('a#highscorelink').attr('href', 'highscore_template.php?quizid=' + quizid);
 	
-	// Update link and rebind related events
+	// Get current quiz state
 	var finished = $("select#quizname option:selected").hasClass('finished');
 	var inactive = $("select#quizname option:selected").hasClass('inactive');
 	var active = $("select#quizname option:selected").hasClass('active');
 	
+	// Update link and rebind related events
 	$("a#changequizstate").unbind('click');
 	if (active) {
 		// TODO: if no answers, allow deactivate without ending
@@ -186,11 +187,28 @@ function updatelinksandforms(questionlist) {
 		$('a#highscorelink').show();
 	}
     else if (inactive) {
-    	// TODO: Check if other quiz already active with same keyword and give feedback to user (this is already covered server side)
     	$('a#changequizstate').text('Activate and lock');
     	// Update events
     	$("a#changequizstate").click(function(event) {
-    		confirmactivatequiz(quizid);
+    		// Loop through all options in quiz list, looking for active quizzes with same keyword
+    		var quizdata=[];
+    		var isactive=false;
+    		var samekeyword=false;
+    		$('select#quizname > option').each(function() {
+        		// Use regex previously defined to grab the keyword and states of quizzes in list
+    			quizdata=grabinforegex.exec(this.text);
+    			isactive=(quizdata[3] === "Active");
+    			samekeyword=(quizdata[1] === keyword);
+    			if (samekeyword && isactive) {
+    	    		erroralreadyactive();
+    				// Break out of loop
+    				return false;
+    			}
+    		});
+    		
+    		if (!samekeyword || !isactive) {
+    			confirmactivatequiz(quizid);
+    		}
     		return false;
     	});
     	// Hide/show links
@@ -211,6 +229,18 @@ function updatelinksandforms(questionlist) {
     	$('a#newquestion').hide();
     	$('a#highscorelink').show();
     }
+}
+
+function erroralreadyactive() {
+	$( "#error-alreadyactivekeyword" ).dialog({
+		resizable: false,
+		modal: true,
+		buttons: {
+			"OK": function() {
+				$( this ).dialog( "close" );
+			}
+		}
+	});
 }
 
 function confirmactivatequiz(quizid) {

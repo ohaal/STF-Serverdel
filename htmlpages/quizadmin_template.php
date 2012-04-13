@@ -25,7 +25,11 @@
       </div>
       
       <div id="confirm-activate" class="dialog" title="Activate and lock quiz?">
-	    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>You cannot make changes to the quiz once it is activated. Are you sure?</p>
+	    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>You can not make changes to the quiz once it is activated. Are you sure?</p>
+      </div>
+      
+      <div id="error-alreadyactivekeyword" class="dialog" title="Error: Keyword already active">
+	    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>You can not activate this quiz because there is another quiz active with the same keyword. End the active quiz or change the keyword.</p>
       </div>
       
       <div id="confirm-end" class="dialog" title="Deactivate and end quiz?">
