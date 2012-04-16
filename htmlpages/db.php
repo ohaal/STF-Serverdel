@@ -185,9 +185,8 @@ class dbConnection {
 	
 	function getQuizIdByKeyword($keyword) {
 		$quizid = -1;
-		if ($stmt = $this->dbconn->prepare( "SELECT idquiz FROM quiz WHERE keyword='?' AND state=?;" )) {
-			$state = 1; // 1 = active
-			$stmt->bind_param( 'si', $keyword, $state );
+		if ($stmt = $this->dbconn->prepare( "SELECT idquiz FROM quiz WHERE keyword=? AND state=1;" )) {
+			$stmt->bind_param( 's', $keyword );
 			$stmt->execute();
 			$stmt->bind_result( $quizid );
 			$stmt->fetch();
@@ -407,7 +406,7 @@ class dbConnection {
 
 	function getTeamIdByPhoneNumberAndQuizId($phonenumber, $quizid) {
 		$teamid = -1;
-		if ($stmt = $this->dbconn->prepare( "SELECT teamid FROM teammember WHERE phonenumber='?' AND quizid=?;" )) {
+		if ($stmt = $this->dbconn->prepare( "SELECT teamid FROM teammember WHERE phonenumber=? AND quizid=?;" )) {
 			$stmt->bind_param( 'si', $phonenumber, $quizid );
 			$stmt->execute();
 			$stmt->bind_result( $teamid );
@@ -422,7 +421,7 @@ class dbConnection {
 	
 	function getTeamIdByTeamName($teamname) {
 		$teamid = -1;
-		if ($stmt = $this->dbconn->prepare( "SELECT idteam FROM teams WHERE teamname='?';" )) {
+		if ($stmt = $this->dbconn->prepare( "SELECT idteam FROM teams WHERE teamname=?;" )) {
 			$stmt->bind_param( 's', $teamname );
 			$stmt->execute();
 			$stmt->bind_result( $teamid );
@@ -446,7 +445,7 @@ class dbConnection {
 	}
 	
 	function setTeamMembership($phonenumber, $quizid, $teamid) {
-		if ($stmt = $this->dbconn->prepare("UPDATE teammember SET teamid=? WHERE phonenumber='?' AND quizid=?")) {
+		if ($stmt = $this->dbconn->prepare("UPDATE teammember SET teamid=? WHERE phonenumber=? AND quizid=?")) {
 			$stmt->bind_param('isi', $teamid, $phonenumber, $quizid);
 			$stmt->execute();
 			$stmt->close();
