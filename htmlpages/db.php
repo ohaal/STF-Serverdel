@@ -325,7 +325,11 @@ class dbConnection {
 			die ();
 		}
 		$ret = array();
-		$sql = "SELECT DISTINCT teams.idteam, teams.teamname, teams.phonenumber, COUNT(DISTINCT teams.idteam, teams.teamname, teams.phonenumber, questions.idquestion) as correct FROM teamanswers, teams, questions WHERE questions.quizid= $quizid AND teamanswers.teamid = teams.idteam AND (teamanswers.answer = questions.correctanswer AND teamanswers.questionid = questions.idquestion) GROUP BY teams.idteam ORDER BY correct DESC, teams.idteam, questions.questionnumber;";
+		$sql = "SELECT DISTINCT teams.idteam, teams.teamname, COUNT(DISTINCT teams.idteam, teams.teamname, questions.idquestion) AS correct ".
+				"FROM teams, teammember, teamanswers, questions ".
+				"WHERE (teammember.quizid=$quizid AND teams.idteam=teammember.teamid) AND (teamanswers.phonenumber=teammember.phonenumber AND teamanswers.questionid=questions.idquestion AND teamanswers.answer=questions.correctanswer) AND (questions.quizid=teammember.quizid) ".
+				"GROUP BY teams.idteam ".
+				"ORDER BY correct DESC, teams.idteam, questions.questionnumber;";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
 				while ( $row = $result->fetch_object () ) {
@@ -336,17 +340,20 @@ class dbConnection {
 		return $ret;
 	}
 	
-	function getTeamInfo($teamid) {
-		if (! is_numeric ( $teamid )) {
+	function getTeamInfo($teamid, $quizid) {
+		if (! is_numeric ( $teamid ) || ! is_numeric ( $quizid )) {
 			die ();
 		}
-		$sql = "SELECT teamname, phonenumber FROM teams WHERE idteam=$teamid;";
+		$ret = array();
+		$sql = "SELECT DISTINCT teams.teamname, teammember.phonenumber FROM teams, teammember WHERE teams.idteam=$teamid AND teammember.teamid=teams.idteam AND teammember.quizid=$quizid;";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
-				$row = $result->fetch_object ();
-				return $row;
+				while ( $row = $result->fetch_object () ) {
+					$ret[] = $row;				
+				}
 			}
 		}
+		return $ret;
 	}
 	
 	function getAllTeamNames() {
@@ -356,8 +363,11 @@ class dbConnection {
 		//return all teamnames which has sent at least one answer to a given quiz.		
 	}
 	function getTeamAnswers($teamid, $quizid) {
+		if (! is_numeric ( $teamid ) || ! is_numeric ( $quizid )) {
+			die ();
+		}
 		$ret = array();
-		$sql = "SELECT questions.idquestion, questions.questionnumber, questions.correctanswer, teamanswers.answer FROM questions, teamanswers WHERE teamanswers.questionid = questions.idquestion AND questions.quizid=$quizid AND teamanswers.teamid=$teamid ORDER BY questionnumber;";
+		$sql = "SELECT questions.idquestion, questions.questionnumber, questions.correctanswer, teamanswers.answer FROM questions, teamanswers, teammember WHERE teamanswers.questionid = questions.idquestion AND questions.quizid=$quizid AND teammember.teamid=$teamid AND teamanswers.phonenumber=teammember.phonenumber ORDER BY questionnumber;";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
 				while ( $row = $result->fetch_object () ) {
@@ -383,16 +393,17 @@ class dbConnection {
 			$stmt->bind_param('s', $name);
 			$stmt->execute();
 			$stmt->close();
+			return mysqli_insert_id($this->dbconn);
 		} else {
 			printf("Prepared Statement Error: %s\n", $stmt->error);
+			return -1;
 		}
-		return mysql_insert_id();
 	}
 	
 	function addTeamMemberAnswer($answernumber, $questionnumber, $phonenumber, $quizid) {
 		$stmt = $this->dbconn->prepare(
 			"INSERT INTO teamanswers (answer, phonenumber, questionid) ".
-			"SELECT ?, '?', questions.idquestion ".
+			"SELECT ?, ?, questions.idquestion ".
 			"FROM questions ".
 			"WHERE questionnumber=? AND quizid=?");
 		if ($stmt) {

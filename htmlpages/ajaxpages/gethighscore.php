@@ -11,14 +11,12 @@ if (isset ( $_GET ['quizid'] )) {
 	die ();
 }
 $scores = $quizadmin->getCorrectAnswers($quizid);
-
 $ret = array();
 $i=0;
 foreach ($scores as $score) {
 	$i++;
 	$ret[$i]['teamid'] = $score->idteam;
 	$ret[$i]['teamname'] = $score->teamname;
-	$ret[$i]['phonenumber'] = $score->phonenumber;
 	$ret[$i]['score'] = intval($score->correct);
 }
 echo (json_encode($ret));

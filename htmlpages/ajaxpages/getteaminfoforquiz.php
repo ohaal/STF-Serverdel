@@ -33,9 +33,11 @@ if (isset ( $_GET ['teamid'] )) {
 
 $ret = array();
 
-$info = $quizadmin->getTeamInfo($teamid);
-$ret['info']['teamname'] = $info->teamname;
-$ret['info']['phonenumber'] = $info->phonenumber;
+// Get array of team name and phone numbers of members
+$info = $quizadmin->getTeamInfo($teamid, $quizid);
+$ret['info']['teamname'] = $info['teamname'];
+$ret['info']['phonenumbers'] = $info['phonenumbers'];	
+
 
 $questions = $quizadmin->getAllQuestionsForQuiz($quizid);
 $answerarray = array();

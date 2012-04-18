@@ -86,9 +86,14 @@ class quizAdmin {
 		return $ret;
 	}
 	
-	function getTeamInfo($teamid) {
-		$ret = $this->db->getTeamInfo($teamid);
-		return $ret;
+	function getTeamInfo($teamid, $quizid) {
+		$ret = $this->db->getTeamInfo($teamid, $quizid);
+		$phoneNumberList = array();
+		foreach ($ret as $t) {
+			$teamName = $t->teamname;
+			$phoneNumberList[] = $t->phonenumber;
+		}
+		return array('teamname' => $teamName, 'phonenumbers' => $phoneNumberList);
 	}
 	
 	function getTeamAnswers($teamid, $quizid) {
