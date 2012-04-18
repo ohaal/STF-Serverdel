@@ -1,3 +1,4 @@
+<pre>
 <?
 // TODO: Move messages to seperate config file, or get a spec
 
@@ -5,8 +6,8 @@ require_once ('sms.php');
 $smsReact = new smsReaction();
 
 // TODO: Temporary input data until we know exactly what input we will receive
-$smstext = 'stf 1 1';
-$phonenumber = '12345678';
+$smstext = $_GET['text'];
+$phonenumber = '87654321';
 
 if (is_null( $phonenumber )) {
 	echo 'Phone number missing';
@@ -22,6 +23,7 @@ $smstext = preg_replace( '/\s{2,}/', ' ', $smstext );
 
 // Split SMS message into array for easier handling
 $smsparam = explode( ' ', $smstext, 3 );
+var_dump($smsparam);
 if (count( $smsparam ) <= 1) {
 	// TODO: Should we send message to sender about this?
 	echo 'Too few parameters';
@@ -29,7 +31,7 @@ if (count( $smsparam ) <= 1) {
 }
 $keyword = $smsparam[0];
 
-// Get the quiz id based on keyword
+// Get the quiz id based on keyword (looks for active quiz with keyword)
 $quizid = $smsReact->getQuizIdByKeyword( $keyword );
 if ($quizid < 0) {
 	// TODO: Should we send message to sender about this?
@@ -57,16 +59,23 @@ if ($smsparam[1] == 'lag' || $smsparam[1] == 'lagnavn') {
 	}
 	$teamname = $smsparam[2];
 	
+	$newTeamCreated = false;
+	
 	$teamid = $smsReact->getTeamIdByTeamName( $teamname );
 	// TeamId < 0	no team found with this name
 	// TeamId > 0	team found
 	if ($teamid < 0) {
+		$newTeamCreated = true;
 		$teamid = $smsReact->createTeam( $teamname );
-		$smsReact->sendMessage( 'Laget "' . $teamname . '" er nå opprettet!', $phonenumber );
 	}
 	// Associate phone number with team (connects all current answers by this phone number with team)
 	$smsReact->addParticipantToTeam( $phonenumber, $quizid, $teamid );
-	$smsReact->sendMessage( 'Du er nå påmeldt laget "' . $teamname . '"!', $phonenumber );
+	if ($newTeamCreated) {
+		$smsReact->sendMessage( 'Laget "' . $teamname . '" er nå opprettet og du er påmeldt dette laget!', $phonenumber );
+	}
+	else {
+		$smsReact->sendMessage( 'Du er nå påmeldt laget "' . $teamname . '"!', $phonenumber );
+	}
 }
 // -> Format: <keyword> <question number> <answer number>
 else if (is_numeric( $smsparam[1] )) {
@@ -97,3 +106,4 @@ else {
 }
 
 ?>
+</pre>

@@ -3,7 +3,6 @@ require_once ('db.php');
 class smsReaction {
 	private $db;
 	
-	// TODO: sanitize!
 	function __construct() {
 		$this->db = new dbConnection();
 	}
@@ -30,6 +29,7 @@ class smsReaction {
 	
 	function sendMessage($message, $phonenumber) {
 		// TODO: Send message somehow!
+		echo 'sendMessage@'.$phonenumber.': '.$message.PHP_EOL;
 	}
 	
 	function addParticipantToTeam($phonenumber, $quizid, $teamid) {
