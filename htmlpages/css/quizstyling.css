@@ -85,6 +85,9 @@ div#quizselect, div#newquizdiv {
 	margin-top: 6px;
 	display: inline-block;
 }
+div#highscoretable_div {
+	top: 30px;
+}
 div#quizselect {
 	text-align: right;
 	float: right;
