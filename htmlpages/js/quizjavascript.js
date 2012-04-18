@@ -1,4 +1,4 @@
-function getQuizNames(dontselectlast) {
+function getQuizNames(selectVal) {
 	$.getJSON("ajaxpages/getquiznames.php", function(quizlist) {
 		var options = '';
 		
@@ -12,13 +12,11 @@ function getQuizNames(dontselectlast) {
 
 		// Only add options to select dropdown and show it if we have >0 quizzes
 		if (quizlist.length > 0) {
-			// Save previously selected option
-			var prevValue = $('select#quizname').val();
 			// Add options to select tag
 			$('select#quizname').html(options);
-			if (dontselectlast) {
-				// Set to previous selection
-				$('select#quizname').val(prevValue);
+			if (selectVal) {
+				// Set to specific quiz
+				$('select#quizname').val(selectVal);
 			}
 			else {
 				// Set to last option in dropdown
@@ -34,11 +32,12 @@ function getQuizNames(dontselectlast) {
 			$('.hideifnoquiz').hide();
 		}
 		
+		// Get questions or high scores based on DOM content (quizadmin_template or highscore_template)
 		if ($("div#quizadmin div#questions").length) {
 			getQuestions($("div#questions"),$('select#quizname').val());
 		}
 		if ($("div#quizscore div#highscoretable_div").length) {
-			getHighScores($("div#highscoretable_div"),$('select#quizname').val());
+			getHighScores($('select#quizname').val());
 		}
 		return false;
 	});
@@ -131,7 +130,7 @@ function updatelinksandforms(questionlist) {
 	
 	// Grab the quizname and keyword from currently selected option in select list
 	var selectedquiz=$('select#quizname option:selected').text();
-	// Use a regex to grab the name of the quiz @regexquizname
+	// Use a regex to grab the name/keyword/state of the quiz @regexquizname
 	// (hacky, but we avoid doing an extra (unnecessary) ajax call to get the quizname and keyword by doing it this way)
 	var grabinforegex=/^\[([A-Z0-9∆ÿ≈]*)\] (.+) \((Inactive|Active|Finished)\)$/;
 	// Quick explanation of this regex:
@@ -188,7 +187,7 @@ function updatelinksandforms(questionlist) {
 	}
     else if (inactive) {
     	$('a#changequizstate').text('Activate and lock');
-    	// Update events
+    	// Update events (we do some client side validation here to see if there is already an active quiz with same keyword)
     	$("a#changequizstate").click(function(event) {
     		// Loop through all options in quiz list, looking for active quizzes with same keyword
     		var quizdata=[];
@@ -277,19 +276,19 @@ function confirmendquiz(quizid) {
 
 function activatequiz(quizid) {
 	$.post("ajaxpages/activatequiz.php", {quizid: quizid}, function(j) {
-		getQuizNames(1);
+		getQuizNames($('select#quizname').val());
 	});
 }
 
 function deactivatequiz(quizid) {
 	$.post("ajaxpages/deactivatequiz.php", {quizid: quizid}, function(j) {
-		getQuizNames(1);
+		getQuizNames($('select#quizname').val());
 	});
 }
 
 function endquiz(quizid) {
 	$.post("ajaxpages/endquiz.php", {quizid: quizid}, function(j) {
-		getQuizNames(1);
+		getQuizNames($('select#quizname').val());
 	});
 }
 
@@ -345,9 +344,9 @@ function deletequestion(el) {
 	});
 }
 
-function getHighScores(resultdiv, quiz) {
+function getHighScores(quiz) {
 	$("#teamanswers_div").html('');
-	$.getJSON("ajaxpages/gethighscore.php", {quizid: quiz, ajax : 'true'}, function(j) {
+	$.getJSON("ajaxpages/gethighscore.php", {quizid: quiz}, function(j) {
 		var data = new google.visualization.DataTable(j);
 		data.addColumn('string', 'Team');
 		data.addColumn('number', 'Score');
@@ -396,14 +395,14 @@ function getTeaminfoForQuiz(teamid, quiz) {
 	$.getJSON("ajaxpages/getteaminfoforquiz.php", {teamid: teamid, quizid: quiz, ajax : 'true'}, function(j) {
 			
 		var html ='';
-		var phone = j['info']['phonenumber'];
+		var phonenumbers = j['info']['phonenumbers'];
 		var teamname = j['info']['teamname'];
 		html += '<div class="header">';
 		html += '<form id="editteamname">';
 		html += '<a href="#" id="editteamnamelink"><h2 id="teamnameheader">' + teamname + '<span class="ui-icon ui-icon-wrench">edit</span></h2></a>';
 		html += '<input id="teamidinput" type="hidden" value="'+ teamid + '"/>';
 		html += '<input id="teamnameinput" value="'+ teamname + '"/>';
-		html += '<div class="phone">'+phone+'</div>';
+		html += '<div class="phone">Tel: '+phonenumbers.join(", ")+'</div>';
 		html += '</form>';
 		html += '</div>';
 		var qa=j['answersarray'];
@@ -460,7 +459,7 @@ function getTeaminfoForQuiz(teamid, quiz) {
 				return false;
 			}
 			$.getJSON("ajaxpages/editteamname.php", {teamid: teamid, teamname: teamname, ajax : 'true'}, function(j) {
-				$("div#quizscore div#teamanswers_div h2#teamnameheader").html($("div#quizscore div#teamanswers_div input#teamnameinput").val());
+				$("div#quizscore div#teamanswers_div h2#teamnameheader").html($("div#quizscore div#teamanswers_div input#teamnameinput").val()+'<span class="ui-icon ui-icon-wrench">edit</span>');
 				$("div#quizscore div#teamanswers_div input#teamnameinput").hide();
 				$("div#quizscore div#teamanswers_div h2#teamnameheader").show();
 			});
@@ -470,8 +469,24 @@ function getTeaminfoForQuiz(teamid, quiz) {
 	});
 }
 
+// GET parameters from URL
+function populateGet() {
+	var obj = {}, params = location.search.slice(1).split('&');
+	for(var i=0,len=params.length;i<len;i++) {
+		var keyVal = params[i].split('=');
+		obj[decodeURIComponent(keyVal[0])] = decodeURIComponent(keyVal[1]);
+	}
+	return obj;
+}
+
 $(document).ready(function() {
-	getQuizNames();
+	var get=populateGet();
+	if (get.quizid != undefined) {
+		getQuizNames(get.quizid);
+	}
+	else {
+		getQuizNames();
+	}
 	
 	//quizadmin bindings
 	$("div#quizadmin div#newquizoverlay").dialog({
@@ -660,6 +675,7 @@ $(document).ready(function() {
             if (questions.size() <= 0) {
             	createpdferror=createpdferror+"<li>Can not generate PDF when no questions in quiz.</li>";
 			}
+            // Finish error list and display
             createpdferror=createpdferror+"</ul>";
 			if (createpdferror != "<ul></ul>") {
 				$("span#createpdferror").html(createpdferror);
@@ -671,6 +687,6 @@ $(document).ready(function() {
 	//highscore bindings
 	
 	 $("div#quizscore select#quizname").change(function() {
-		 getHighScores($("div#highscoretable_div"),$("select#quizname").val());
+		 getHighScores($("select#quizname").val());
 	 });
 });
