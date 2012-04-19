@@ -86,10 +86,10 @@ class dbConnection {
 	}
 
 	function getAllQuestionsForQuiz($quiz) {
-		if (!is_numeric($quiz)) {
-			die();
-		}
 		$ret = array ();
+		if (!is_numeric($quiz)) {
+			return $ret;
+		}
 		$sql = "SELECT questions.idquestion, questions.quizid as quizid, questions.questionnumber as questionnumber, questions.questiontext, questions.correctanswer, answers.quizid as aquizid, answers.answernumber, answers.answertext FROM questions LEFT JOIN answers ON (questions.quizid = answers.quizid AND questions.idquestion = answers.questionid)  WHERE questions.quizid = $quiz ORDER BY questions.questionnumber, answers.answernumber";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
@@ -363,10 +363,10 @@ class dbConnection {
 		//return all teamnames which has sent at least one answer to a given quiz.		
 	}
 	function getTeamAnswers($teamid, $quizid) {
-		if (! is_numeric ( $teamid ) || ! is_numeric ( $quizid )) {
-			die ();
-		}
 		$ret = array();
+		if (! is_numeric ( $teamid ) || ! is_numeric ( $quizid )) {
+			return $ret;
+		}
 		$sql = "SELECT questions.idquestion, questions.questionnumber, questions.correctanswer, teamanswers.answer FROM questions, teamanswers, teammember WHERE teamanswers.questionid = questions.idquestion AND questions.quizid=$quizid AND teammember.teamid=$teamid AND teamanswers.phonenumber=teammember.phonenumber ORDER BY questionnumber;";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
@@ -376,6 +376,23 @@ class dbConnection {
 			}
 		}
 		return $ret;
+	}
+	
+	function isValidQuestionNumberAndAnswerNumber($questionnumber, $answernumber, $quizid) {
+		if (! is_numeric ( $questionnumber ) || ! is_numeric ( $answernumber ) || ! is_numeric ( $quizid )) {
+			return false;
+		}
+		$sql = "SELECT COUNT(*) ".
+				"FROM questions, answers, quiz ".
+				"WHERE quiz.idquiz=$quizid AND questions.quizid=quiz.idquiz AND answers.quizid=quiz.idquiz AND questions.idquestion=answers.questionid AND questions.questionnumber=$questionnumber AND answers.answernumber=$answernumber;";
+		if ($result = $this->dbconn->query ( $sql )) {
+			if ( $row = $result->fetch_object ()) {
+				if (is_numeric($row) && $row == 1) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	function setTeamName($teamid, $newname) {

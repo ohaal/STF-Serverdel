@@ -22,6 +22,10 @@ class smsReaction {
 	function getTeamIdByTeamName($teamname) {
 		return $this->db->getTeamIdByTeamName( $teamname );
 	}
+
+	function isValidQuestionNumberAndAnswerNumber($questionnumber, $answernumber, $quizid) {
+		return $this->db->isValidQuestionNumberAndAnswerNumber( $questionnumber, $answernumber, $quizid );
+	}
 	
 	function createTeam($teamname) {
 		return $this->db->createTeam( $teamname );

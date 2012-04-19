@@ -87,6 +87,13 @@ else if (is_numeric( $smsparam[1] )) {
 	$questionnumber = $smsparam[1];
 	$answernumber = $smsparam[2];
 	
+	// Check if both question number and answer number are valid
+	if (!$smsReact->isValidQuestionNumberAndAnswerNumber( $questionnumber, $answernumber, $quizid )) {
+		$smsReact->sendMessage( 'Du har oppgitt et ugyldig spørsmål- eller svarnummer!', $phonenumber );
+		echo 'Invalid question or answer number';
+		die();
+	}
+	
 	// Add answer to participant
 	$smsReact->addAnswerToParticipant( $answernumber, $questionnumber, $phonenumber, $quizid );
 	
