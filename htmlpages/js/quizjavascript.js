@@ -378,6 +378,8 @@ function getHighScores(quiz) {
 			legend: 'none',
 			vAxis: {viewWindow: {min: 0, max: maxscore}, minValue: 0, viewWindowMode: 'explicit', interval: 1},
 		};
+		// Empty the highscore table (fixes small bug where height of chart would increase on every quiz change)
+		$('#highscoretable_div').empty();
 		var chart = new google.visualization.ColumnChart(document.getElementById('highscoretable_div'));
 		
 		function scoreClicked() {
