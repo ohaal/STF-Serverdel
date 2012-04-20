@@ -382,12 +382,12 @@ class dbConnection {
 		if (! is_numeric ( $questionnumber ) || ! is_numeric ( $answernumber ) || ! is_numeric ( $quizid )) {
 			return false;
 		}
-		$sql = "SELECT COUNT(*) ".
+		$sql = "SELECT COUNT(*) AS matches ".
 				"FROM questions, answers, quiz ".
 				"WHERE quiz.idquiz=$quizid AND questions.quizid=quiz.idquiz AND answers.quizid=quiz.idquiz AND questions.idquestion=answers.questionid AND questions.questionnumber=$questionnumber AND answers.answernumber=$answernumber;";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ( $row = $result->fetch_object ()) {
-				if (is_numeric($row) && $row == 1) {
+				if (is_numeric($row->matches) && $row->matches == 1) {
 					return true;
 				}
 			}
