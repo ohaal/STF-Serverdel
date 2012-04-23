@@ -9,7 +9,7 @@
 include_once 'ajaxheader.php';
 require_once ('../quizadmin.php');
 $quizadmin = new quizAdmin();
-if (!isset( $_POST['quizid'] )) {
+if (!isset( $_POST['quizid'] ) || !is_numeric( $_POST['quizid'] )) {
 	//not a proper post. Ignore and die
 	die();
 }
