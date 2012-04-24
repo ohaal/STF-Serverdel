@@ -62,7 +62,7 @@ else {
 	// Keeping it simple: Just pick random teams from list of winners and keep them unique
 	$potentialwinnercount = count($potentialwinners);
 	if ($potentialwinnercount < $amountofwinners) {
-		echo 'Less potential winners than required amount of winners';
+		// Less potential winners than required amount of winners
 		die();
 	}
 	$used = array();

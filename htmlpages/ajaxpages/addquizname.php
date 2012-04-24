@@ -13,7 +13,6 @@ if (isset ( $_GET ['quizname'] ) && isset( $_GET ['quizkeyword'] ) ) {
 	// Keyword must be alphanumeric (a-z, 0-9 or æ, Æ, ø, Ø, å, Å, case insensitive) and between 1 and 20 characters
 	$isNordicAlnum = preg_match('/^[a-z0-9\x{00C6}\x{00E6}\x{00C5}\x{00E5}\x{00D8}\x{00F8}]{1,20}$/iu', $quizKeyword);
 	if (!$isNordicAlnum) {
-		echo 'Keyword must be alphanumeric and no longer than 20 characters.';
 		die();
 	}
 
