@@ -346,7 +346,14 @@ function deletequestion(el) {
 
 function getHighScores(quiz) {
 	$("#teamanswers_div").html('');
+	$("span#choosewinnerinfo").html('');
 	$.getJSON("ajaxpages/gethighscore.php", {quizid: quiz}, function(j) {
+		if ($.isPlainObject(j)) {
+			$('a#choosewinner').show();
+		}
+		else {
+			$('a#choosewinner').hide();
+		}
 		var data = new google.visualization.DataTable(j);
 		data.addColumn('string', 'Team');
 		data.addColumn('number', 'Score');
@@ -390,7 +397,59 @@ function getHighScores(quiz) {
 		
 		google.visualization.events.addListener(chart, 'select', scoreClicked);
 		chart.draw(view, options);
+		
+		// Update (hidden) winner selection overlay
+		fillMinimumCorrectOptions(j);
 	});
+}
+
+function fillMinimumCorrectOptions(correctAnswers) {
+	// Initialize an array containing the amount of correct answers as the key and amount of teams with this many correct answers as value
+	var amountOfTeamsWithXCorrectAnswers = new Array();
+	var maxCorrectAnswers = 0;
+	for (num in correctAnswers) {
+		var correct = correctAnswers[num];
+		if (correct['score'] > maxCorrectAnswers) {
+			// Used to figure out the maximum amount of teams who can win  
+			maxCorrectAnswers = correct['score'];
+		}
+		if (amountOfTeamsWithXCorrectAnswers[correct['score']]) {
+			// Increase amount of teams with certain amount of answers
+			amountOfTeamsWithXCorrectAnswers[correct['score']]++;
+		}
+		else {
+			// Initialize team amount with this many correct answers
+			amountOfTeamsWithXCorrectAnswers[correct['score']] = 1;
+		}
+	}
+	
+	var addCorrect = 0;
+	var options = '';
+	var i;
+	var teamsWithThisManyCorrectAnswersOrMore = 0;
+	for (i = maxCorrectAnswers; i > 0; i--) {
+		if (amountOfTeamsWithXCorrectAnswers[i]) {
+			// Include all teams with more correct answers aswell
+			teamsWithThisManyCorrectAnswersOrMore = amountOfTeamsWithXCorrectAnswers[i] + addCorrect;
+			// Update regex tagged as @regexteamamount in code if you change the layout of this
+			options += '<option value="' + i + '">'+i+' ('+teamsWithThisManyCorrectAnswersOrMore+' teams)</option>';
+			addCorrect += amountOfTeamsWithXCorrectAnswers[i];
+		}
+	}
+	
+	$('div#choosewinneroverlay select#correctanswersneeded').html(options);
+	
+	fillAmountOfWinnersOptions(amountOfTeamsWithXCorrectAnswers[maxCorrectAnswers]);
+}
+function fillAmountOfWinnersOptions(maxAmount) {
+	options = '';
+	// Fill amount of winners - we hard cap the value to 10 if more than that amount of teams meet the requirements
+	var maxcap = maxAmount > 10 ? 10 : maxAmount;
+	for (i = 1; i <= maxcap; i++) {
+		options += '<option value="' + i + '">'+i+'</option>';
+	}
+	$('div#choosewinneroverlay select#amountofwinners').html(options);
+	$('div#choosewinneroverlay select#amountofwinners').val(maxcap);
 }
 
 function getTeaminfoForQuiz(teamid, quiz) {
@@ -542,6 +601,19 @@ $(document).ready(function() {
 		},
 	});
 	
+	$("div#quizscore div#choosewinneroverlay").dialog({
+		modal : true,
+		title : 'Choose winner requirements',
+		resizable : false,
+		autoOpen : false,
+		minWidth : 600,
+		open : function(event, ui) {
+			$('.ui-widget-overlay').bind('click', function() {
+				$("div#choosewinneroverlay").dialog('close');
+			});
+		},
+	});
+	
 	$("div#quizadmin a#newquiz").click(function() {
 		$("div#newquizoverlay").dialog("open");
 		return false;
@@ -637,6 +709,55 @@ $(document).ready(function() {
 		getQuestions($("div#questions"),$("select#quizname").val());
 	});
 	
+	$("div#choosewinneroverlay select#correctanswersneeded").change(function() {
+		// Update max amount of winners possible based on selected option
+		var selected=$('select#correctanswersneeded option:selected').text();
+		// In short, this regex @regexteamamount matches this format (example): 4 (2 teams)
+		// The numbers can be any amount higher than 0
+		var grabteamamountregex=/^[1-9][0-9]* \(([1-9][0-9]*) teams\)$/;
+		var teamamount=grabteamamountregex.exec(selected);
+		fillAmountOfWinnersOptions(teamamount[1]);
+	});
+	
+	$("div#choosewinneroverlay button#choosewinnerbutton").click(function() {
+		// Fetch selected options from input
+		var prioritizemostcorrect = $('input#prioritizemostcorrect').is(':checked');
+		var correctanswersneeded = $('select#correctanswersneeded').val();
+		var amountofwinners = $('select#amountofwinners').val();
+		var quizid = $('select#quizname').val();
+
+		$.getJSON("ajaxpages/getwinners.php", {quizid: quizid, correctanswersneeded: correctanswersneeded, amountofwinners: amountofwinners, priomostcorrect: prioritizemostcorrect }, function(winnerlist) {
+			var scoretable = '';
+			if (winnerlist) {
+				scoretable += '<table border="0" width="100%">';
+				scoretable += ' <thead class="ui-widget-header">';
+				scoretable += '  <tr>';
+				scoretable += '   <th>Pos.</th>';
+				scoretable += '   <th>Team name</th>';
+				scoretable += '   <th>Correct answers</th>';
+				scoretable += '   <th>Phone numbers</th>';
+				scoretable += '  </tr>';
+				scoretable += ' </thead>';
+				scoretable += ' <tbody class="ui-widget-content">';
+				for ( var i = 0; i < winnerlist.length; i++) {
+					scoretable += '  <tr>';
+					scoretable += '   <td>#'+(i+1)+'</td>';
+					scoretable += '   <td>'+winnerlist[i].teamname+'</td>';
+					scoretable += '   <td>'+winnerlist[i].correct+'</td>';
+					scoretable += '   <td>'+winnerlist[i].phonenumbers.join(", ")+'</td>';
+					scoretable += '  </tr>';
+				}
+				scoretable += ' </tbody>';
+				scoretable += '</table>'
+			}
+			else {
+				scoretable += '<ul><li>Unable to get winner data.</li></ul>';
+			}
+			$("span#choosewinnerinfo").html(scoretable);
+		});
+		return false;
+	});
+	
 	$("div#quizadmin a#newquestion").click(function() {
 		$("div#newquestionoverlay").dialog("option", "title", "New question");
 		$("div#newquestionoverlay button#submitnewquestionbutton").text("Add question");
@@ -651,6 +772,11 @@ $(document).ready(function() {
 	
 	$("div#quizadmin a#createpdf").click(function() {
 		$("div#createpdfoverlay").dialog("open");
+		return false;
+	});
+	
+	$("div#quizscore a#choosewinner").click(function() {
+		$("div#choosewinneroverlay").dialog("open");
 		return false;
 	});
 	

@@ -19,7 +19,16 @@
       <div class="header center ui-corner-all">
         <h1 class="center">Quiz scores</h1>
       </div>
+      <div id="choosewinneroverlay" class="dialog">
+        Minimum amount of correct answers required to win: <select id="correctanswersneeded"></select><br/>
+        Amount of winners: <select id="amountofwinners"></select><br/>
+        <input type="checkbox" checked id="prioritizemostcorrect"/> Rank teams with most correct answers higher<br/>
+        <input class="quizidvalue" type="hidden" name="quizid" value="" />
+        <button id="choosewinnerbutton">Generate table of winners</button><br/>
+        <span class="errorlist" id="choosewinnerinfo"></span>
+      </div>
       <div id="quizselect">
+	    <a id="choosewinner" href="#">Find winners</a>
 	    <select id="quizname"></select>
       </div>
       <div id="highscoretable_div"></div>

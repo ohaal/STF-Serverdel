@@ -320,15 +320,20 @@ class dbConnection {
 		}
 	}
 	
-	function getCorrectAnswersForQuiz($quizid) {
+	function getCorrectAnswersForQuiz($quizid, $correctanswersneeded) {
 		if (! (is_numeric ( $quizid ))) {
 			die ();
+		}
+		$minimumcorrect = '';
+		if (is_numeric($correctanswersneeded)) {
+			$minimumcorrect = "HAVING correct >= $correctanswersneeded ";
 		}
 		$ret = array();
 		$sql = "SELECT DISTINCT teams.idteam, teams.teamname, COUNT(DISTINCT teams.idteam, teams.teamname, questions.idquestion) AS correct ".
 				"FROM teams, teammember, teamanswers, questions ".
 				"WHERE (teammember.quizid=$quizid AND teams.idteam=teammember.teamid) AND (teamanswers.phonenumber=teammember.phonenumber AND teamanswers.questionid=questions.idquestion AND teamanswers.answer=questions.correctanswer) AND (questions.quizid=teammember.quizid) ".
 				"GROUP BY teams.idteam ".
+				$minimumcorrect;
 				"ORDER BY correct DESC, teams.idteam, questions.questionnumber;";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {

@@ -46,7 +46,7 @@ class quizAdmin {
 	function getQuizKeywordExistsAndActive($keyword) {
 		$quizStates = $this->db->getQuizStatesByKeyword($keyword);
 		foreach ($quizStates as $value) {
-			if ($value == 1) {
+			if ($value == 1) { // 1 = active quiz
 				return true;
 			}
 		}
@@ -81,8 +81,8 @@ class quizAdmin {
 		$this->db->deleteQuestion($quizid, $questionid);
 	}
 	
-	function getCorrectAnswers($quizid) {
-		$ret = $this->db->getCorrectAnswersForQuiz($quizid);
+	function getCorrectAnswers($quizid, $correctanswersneeded=null) {
+		$ret = $this->db->getCorrectAnswersForQuiz($quizid, $correctanswersneeded);
 		return $ret;
 	}
 	
