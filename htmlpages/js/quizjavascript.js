@@ -347,20 +347,21 @@ function deletequestion(el) {
 function getHighScores(quiz) {
 	$("#teamanswers_div").html('');
 	$("span#choosewinnerinfo").html('');
-	$.getJSON("ajaxpages/gethighscore.php", {quizid: quiz}, function(j) {
-		if ($.isPlainObject(j)) {
+	$.getJSON("ajaxpages/gethighscore.php", {quizid: quiz}, function(winnerlist) {
+		// Check if we get something in return and if we do, show the link
+		if ($.isPlainObject(winnerlist)) {
 			$('a#choosewinner').show();
 		}
 		else {
 			$('a#choosewinner').hide();
 		}
-		var data = new google.visualization.DataTable(j);
+		var data = new google.visualization.DataTable(winnerlist);
 		data.addColumn('string', 'Team');
 		data.addColumn('number', 'Score');
 		data.addColumn('string', 'teamid');
 		var maxscore= 0;
-		for (num in j) {
-			var srow=j[num];
+		for (num in winnerlist) {
+			var srow=winnerlist[num];
 			if (srow['score'] > maxscore) {
 				maxscore = srow['score'];
 			}
@@ -399,7 +400,7 @@ function getHighScores(quiz) {
 		chart.draw(view, options);
 		
 		// Update (hidden) winner selection overlay
-		fillMinimumCorrectOptions(j);
+		fillMinimumCorrectOptions(winnerlist);
 	});
 }
 
