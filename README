@@ -5,3 +5,5 @@ Den skal ha en MySQL-server og noen PHP-sider som:
 * Visning av SMS-resultater
 * Godkjenning av MMS
 * Visning av MMS-karusell.
+
+MMS-karusell og administrasjon baserer vi på http://www.jacksasylum.eu/ContentFlow
