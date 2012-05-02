@@ -1,5 +1,5 @@
 <pre>
-<?
+<?php
 // TODO: Move messages to seperate config file, or get a spec
 
 require_once ('sms.php');

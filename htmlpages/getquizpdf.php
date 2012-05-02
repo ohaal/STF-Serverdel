@@ -1,4 +1,4 @@
-<?
+<?php
 if (!empty( $_POST['quizid'] )) {
 	$quizid = $_POST['quizid'];
 	if (!is_numeric( $quizid )) {

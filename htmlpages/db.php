@@ -1,4 +1,4 @@
-<?
+<?php
 // TODO: mysql_real_escape_string()
 // TODO: http://stackoverflow.com/questions/4752026/do-i-need-to-sanitize-input-if-using-prepared-php-mysql-queries
 class dbConnection {

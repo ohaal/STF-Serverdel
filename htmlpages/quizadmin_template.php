@@ -68,7 +68,7 @@
             <input type="hidden" name="quizid" id="hiddenquizid" />
             <input type="hidden" name="questionnumber" id="hiddenquestionnumber" />
           </div>
-<?
+<?php
 for ($i=1;$i<=5;$i++) {
 	print('<div class="answer" id="answer'.$i.'">');
 	print('<input type="text" class="newanswer" name="answer'.$i.'" />');

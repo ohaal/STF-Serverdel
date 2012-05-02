@@ -1,4 +1,4 @@
-<?
+<?php
 class dbDetails {
       public static $user = 'stf';      
       public static $passwd = 'stf';
