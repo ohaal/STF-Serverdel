@@ -132,7 +132,7 @@ foreach ($questionsArray as $key => $question) {
 	//////////////////////////////////////////////////////////////
 	// Actual question
 	//////////////////////////////////////////////////////////////
-	$text = $question['questiontext'];
+	$text = iconv('UTF-8', 'ISO-8859-1', $question['questiontext']); // FPDF does not support UTF-8
 	$pdf->SetFont( 'Arial', 'B', 20 );
 	$pdf->Cell( 10 );
 	$pdf->Cell( 0, 22, $text, 0, 1, 'L' );
@@ -144,7 +144,7 @@ foreach ($questionsArray as $key => $question) {
 	if (isset( $question['answers'] ) && sizeof( $question['answers'] ) > 0) {
 		foreach ($question['answers'] as $answer) {
 			$pdf->Cell( 20 );
-			$pdf->Cell( 0, 8, $answer['answernumber'] . ".  " . $answer['answertext'], 0, 1, 'L' );
+			$pdf->Cell( 0, 8, $answer['answernumber'] . ".  " . iconv('UTF-8', 'ISO-8859-1', $answer['answertext']), 0, 1, 'L' );// FPDF does not support UTF-8
 		}
 	}
 	
