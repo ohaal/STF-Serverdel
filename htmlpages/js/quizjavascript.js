@@ -91,11 +91,13 @@ function getQuestions(resultdiv, quiz) {
 			if (questionlist[i].answers) {
 				for (var k = 0; k<questionlist[i].answers.length; k++) {
 					if (questionlist[i].answers[k].answernumber == questionlist[i].correctanswer) {
-						questions += "<div class=\"correct\">";
+						questions += '<div class="correct">';
 					} else {
-						questions += "<div>";
+						questions += '<div>';
 					}
-					questions += '<strong>'+questionlist[i].answers[k].answernumber+'</strong>:'+questionlist[i].answers[k].answertext;
+					// Simple fix for request about using letters instead of numbers as answer alternatives @replacealphawithnumber
+					// First answer number is 1. 1+64 = 65. 65 is the ascii code for 'A'
+					questions += '<strong>'+String.fromCharCode(questionlist[i].answers[k].answernumber+64)+'</strong>:'+questionlist[i].answers[k].answertext;
 					questions += '</div>';
 				}
 			}
@@ -157,7 +159,7 @@ function updatelinksandforms(questionlist) {
 	var keyword=quizinfo[1];
 	// Update (at the moment this occurs, hidden,) create pdf form
 	$('input[name="header"]').val(quizname);
-	$('input[name="footer"]').val('Send SMS med "STF '+keyword+' $qnum <riktig svarnummer>" til 2000');
+	$('input[name="footer"]').val('Send SMS med "STF '+keyword+' $qnum <riktig svarnummer>" til 2077');
 	
 	// Reset create PDF errorlist 
 	$("span#createpdferror").html("");

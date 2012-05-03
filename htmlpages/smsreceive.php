@@ -49,6 +49,8 @@ if ($teamid < 0) {
 	$teamid = 0;
 }
 
+$combined = false;
+
 // Expected SMS text formats (we will act differently based on the format):
 // -> Format: <keyword> lag <teamname> || <keyword> lagnavn <teamname>
 if ($smsparam[1] == 'lag' || $smsparam[1] == 'lagnavn') {
@@ -77,20 +79,36 @@ if ($smsparam[1] == 'lag' || $smsparam[1] == 'lagnavn') {
 		$smsReact->sendMessage( 'Du er nå påmeldt laget "' . $teamname . '"!', $phonenumber );
 	}
 }
-// -> Format: <keyword> <question number> <answer number>
-else if (is_numeric( $smsparam[1] )) {
-	if (is_null( $smsparam[2] ) || empty( $smsparam[2] ) || !is_numeric( $smsparam[2] )) {
-		$smsReact->sendMessage( 'Du må angi et svarnummer!', $phonenumber );
-		echo 'No answer number provided';
+// -> Format: <keyword> <question number> <answer alternative> || <keyword> <question number><answer alternative>
+// Examples: STF 1 a
+//           STF 3c
+else if (is_numeric( $smsparam[1] ) || $combined = preg_match('/^([0-9])+([a-eA-E])$/', $smsparam[1], $questionanswer)) {
+	if (!$combined && !array_key_exists(2, $smsparam) ||
+	(array_key_exists(2, $smsparam) && (is_null( $smsparam[2] ) || empty( $smsparam[2] ) || !ctype_alpha( $smsparam[2] ) || strlen( $smsparam[2] ) != 1))
+	) {
+		$smsReact->sendMessage( 'Du må angi et gyldig svaralternativ!', $phonenumber );
+		echo 'Invalid answer provided';
 		die();
 	}
-	$questionnumber = $smsparam[1];
-	$answernumber = $smsparam[2];
+	
+	if ($combined && !empty($questionanswer)) {
+		$questionnumber = $questionanswer[1];
+		$answer = $questionanswer[2];
+	}
+	else {
+		$questionnumber = $smsparam[1];
+		$answer = $smsparam[2];
+	}
+	
+	// Simple fix for request about using letters instead of numbers as answer alternatives @replacealphawithnumber
+	$search  = array('a','b','c','d','e');
+	$replace = array('1','2','3','4','5');
+	$answernumber =  str_replace($search, $replace, strtolower($answer));
 	
 	// Check if both question number and answer number are valid
 	if (!$smsReact->isValidQuestionNumberAndAnswerNumber( $questionnumber, $answernumber, $quizid )) {
-		$smsReact->sendMessage( 'Du har oppgitt et ugyldig spørsmål- eller svarnummer!', $phonenumber );
-		echo 'Invalid question or answer number';
+		$smsReact->sendMessage( 'Du har oppgitt et ugyldig spørsmål- eller svaralternativ!', $phonenumber );
+		echo 'Invalid question number or answer';
 		die();
 	}
 	
