@@ -105,7 +105,8 @@ function getQuestions(resultdiv, quiz) {
 			questions += '</div>';
 			
 			pdfquestions += '<b>Question '+questionlist[i].questionnumber+': '+questionlist[i].questiontext+'</b><br />';
-			pdfquestions += 'Question Header <input type="text" name="quizheader-'+questionlist[i].questionnumber+'" /><br />';
+			pdfquestions += 'Question Heading <input type="text" name="quizheading-'+questionlist[i].questionnumber+'" /><br />';
+			pdfquestions += 'Question Ingress <input type="text" name="quizheader-'+questionlist[i].questionnumber+'" /><br />';
 			pdfquestions += 'Question Image <input type="file" name="quizimage-'+questionlist[i].questionnumber+'" />';
 			pdfquestions += '<hr />';
 		}
@@ -134,12 +135,12 @@ function updatelinksandforms(questionlist) {
 	var selectedquiz=$('select#quizname option:selected').text();
 	// Use a regex to grab the name/keyword/state of the quiz @regexquizname
 	// (hacky, but we avoid doing an extra (unnecessary) ajax call to get the quizname and keyword by doing it this way)
-	var grabinforegex=/^\[([A-Z0-9ÆØÅ]*)\] (.+) \((Inactive|Active|Finished)\)$/;
+	var grabinforegex=/^\[([A-Z0-9Ã†Ã˜Ã…]*)\] (.+) \((Inactive|Active|Finished)\)$/;
 	// Quick explanation of this regex:
 	// ^						= Start of line
 	// \[						= A normal '[' (needs to be escaped, since it has special meaning in regex)
 	// (						= Start (first) capture group
-	// [A-Z0-9ÆØÅ]				= Match any of the characters inside []-brackets (A-Z means all letters in between and 0-9 means all numbers in between)
+	// [A-Z0-9Ã†Ã˜Ã…]				= Match any of the characters inside []-brackets (A-Z means all letters in between and 0-9 means all numbers in between)
 	// *						= Any amount of previous pattern (the one matching specific characters)
 	// )						= End (first) capture group (contains keyword)
 	// \]						= A normal ']' (needs to be escaped, since it has special meaning in regex)
@@ -633,7 +634,7 @@ $(document).ready(function() {
 	$("button#addquiznamebutton").click(function() {
 		var qkey=$("#inputquizkeyword").val();
 		var qname=$("#inputquizname").val();
-		var qkeymatch=qkey.match(/^[a-z0-9æÆøØåÅ]{1,20}$/i);
+		var qkeymatch=qkey.match(/^[a-z0-9Ã¦Ã†Ã¸Ã˜Ã¥Ã…]{1,20}$/i);
 		
 		if (qkeymatch && qname.length >= 1 && qname.length <= 45) {
 			$.get("ajaxpages/addquizname.php", {quizname: qname, quizkeyword: qkey}, function() {

@@ -123,19 +123,28 @@ foreach ($questionsArray as $key => $question) {
 	}
 
 	//////////////////////////////////////////////////////////////
-	// Question header
+	// Question heading
 	//////////////////////////////////////////////////////////////
-	$pdf->SetFont( 'Arial', 'B', 16 );
+	$pdf->Ln(4);
+	$pdf->SetFont( 'Arial', 'B', 18 );
+	$questionHeading = $_POST['quizheading-' . $question['questionnumber']];
+	$pdf->MultiCell( 0, 8, $questionHeading, 0, 'C' );
+	
+	//////////////////////////////////////////////////////////////
+	// Question ingress
+	//////////////////////////////////////////////////////////////
+	$pdf->SetFont( 'Arial', '', 16 );
 	$questionHeader = $_POST['quizheader-' . $question['questionnumber']];
 	$pdf->MultiCell( 0, 8, $questionHeader, 0, 'C' );
 	
 	//////////////////////////////////////////////////////////////
 	// Actual question
 	//////////////////////////////////////////////////////////////
-	$text = iconv('UTF-8', 'ISO-8859-1', $question['questiontext']); // FPDF does not support UTF-8
+	$pdf->Ln(4);
+	$pdf->Cell(8);
+	$text = $question['questionnumber'].'. '.iconv('UTF-8', 'ISO-8859-1', $question['questiontext']); // FPDF does not support UTF-8
 	$pdf->SetFont( 'Arial', 'B', 20 );
-	$pdf->Cell( 10 );
-	$pdf->Cell( 0, 22, $text, 0, 1, 'L' );
+	$pdf->MultiCell( 0, 8, $text, 0, 1, 'L' );
 	
 	//////////////////////////////////////////////////////////////
 	// Answers
