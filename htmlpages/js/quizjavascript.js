@@ -483,7 +483,7 @@ function getTeaminfoForQuiz(teamid, quiz) {
 			q=qa[k];
 			var corr = qa['correctanswer'];
 			html += '<div class="question">';
-			html += '<div class="answerheader"><strong>'+q['questionnumber']+'</strong><span class="questiontext">'+q['questiontext']+'</span></div>';
+			html += '<div class="answerheader"><strong>'+q['questionnumber']+'</strong> <span class="questiontext">'+q['questiontext']+'</span></div>';
 			
 			var teamanswers = new Array();
 			// looping through answers given.
