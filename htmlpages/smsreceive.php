@@ -41,9 +41,12 @@ class SMSReceiveHandler {
 		
 
 		// Split SMS message into array for easier handling
-		$smsparam = explode( ' ', $smstext, 3 );
 		if (!$this->config["keywords_enabled"]) {
+			$smsparam = explode( ' ', $smstext, 2 );
 			array_unshift($smsparam, $this->config["keywords_default"]);
+		}
+		else {
+			$smsparam = explode( ' ', $smstext, 3 );
 		}
 		var_dump($smsparam);
 		if (count( $smsparam ) <= 1) {
