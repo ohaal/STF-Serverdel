@@ -7,7 +7,7 @@ class smsReaction {
 	
 	function __construct() {
 		$this->db = new dbConnection();
-		$this->$smsService = new SendSMS();
+		$this->smsService = new SendSMS();
 	}
 	
 	function getQuizIdByKeyword($keyword) {
@@ -35,7 +35,7 @@ class smsReaction {
 	}
 	
 	function sendMessage($message, $phonenumber) {
-		$this->$smsService->sendSMSMessage($phonenumber, $message);
+//		$this->smsService->sendSMSMessage($phonenumber, $message);
 		echo 'sendMessage@'.$phonenumber.': '.$message.PHP_EOL;
 	}
 	
