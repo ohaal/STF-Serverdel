@@ -26,7 +26,7 @@ CREATE TABLE `answers` (
   `quizid` int(11) NOT NULL,
   `questionid` int(11) NOT NULL,
   `answernumber` int(11) NOT NULL,
-  `answertext` varchar(200) DEFAULT NULL,
+  `answertext` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`quizid`,`questionid`,`answernumber`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -41,7 +41,7 @@ DROP TABLE IF EXISTS `questions`;
 CREATE TABLE `questions` (
   `quizid` int(11) NOT NULL,
   `questionnumber` int(11) NOT NULL,
-  `questiontext` varchar(200) NOT NULL DEFAULT '',
+  `questiontext` varchar(1000) NOT NULL DEFAULT '',
   `correctanswer` int(11) NOT NULL DEFAULT '0',
   `idquestion` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`idquestion`)

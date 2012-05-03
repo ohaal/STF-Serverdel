@@ -676,7 +676,7 @@ $(document).ready(function() {
 			for (i = 1; i <= $("div.answer").length; i++) {
 				atext=$('input[name="answer'+i+'"]').val();
 				// ?: Answer is too long
-				if (atext.length > 200) {
+				if (atext.length > 500) {
 					answertoolongorshort=true;
 				}
 				// ?: Length less than one and is correct answer?
@@ -686,7 +686,7 @@ $(document).ready(function() {
 			}
 		}
 		// ?: All requirements met to proceed with adding the question?
-		if (qtext.length <= 200 && qtext.length >= 1 && !answertoolongorshort && !correctanswertooshort) {
+		if (qtext.length <= 1000 && qtext.length >= 1 && !answertoolongorshort && !correctanswertooshort) {
 			// -> Add question and close dialog when done
 			$.post("ajaxpages/addquestion.php", $("#newquestionform").serialize(), function(data) {
 				getQuestions($("div#questions"),$("select#quizname").val());
@@ -698,11 +698,11 @@ $(document).ready(function() {
 		else {
 			// -> Requirements not met, let's see what's wrong
 			var newquestionerror="<ul>";
-			if (qtext.length > 200 || qtext.length < 1) {
-				newquestionerror=newquestionerror+"<li>Question text must be between 1 and 200 characters.</li>";
+			if (qtext.length > 1000 || qtext.length < 1) {
+				newquestionerror=newquestionerror+"<li>Question text must be between 1 and 1000 characters.</li>";
 			}
             if (answertoolongorshort) {
-				newquestionerror=newquestionerror+"<li>Answers must be between 1 and 200 characters.</li>";
+				newquestionerror=newquestionerror+"<li>Answers must be between 1 and 1000 characters.</li>";
 			}
             if (correctanswertooshort) {
 				newquestionerror=newquestionerror+"<li>Answer marked as correct must contain an actual answer.</li>";

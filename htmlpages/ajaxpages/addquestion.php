@@ -17,8 +17,8 @@ $quizid = $_POST['quizid'];
 $questionnumber = $_POST['questionnumber']; //might be NULL if new question
 $questiontext = $_POST['questiontext'];
 
-// Question text must be between 1 and 200 chars
-if (strlen( $questiontext ) > 200 || strlen( $questiontext ) < 1) {
+// Question text must be between 1 and 1000 chars
+if (strlen( $questiontext ) > 1000 || strlen( $questiontext ) < 1) {
 	die();
 }
 
@@ -43,8 +43,8 @@ $answers = array();
 $i = 1;
 while (isset( $_POST['answer' . $i] )) {
 	$answers[$i] = $_POST['answer' . $i];
-	// No answer can be longer than 200 characters
-	if (strlen( $answers[$i] ) > 200) {
+	// No answer can be longer than 500 characters
+	if (strlen( $answers[$i] ) > 500) {
 		die();
 	}
 	// If answer is marked as correct, it needs to have some content
