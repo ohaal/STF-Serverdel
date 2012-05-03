@@ -60,8 +60,9 @@ require_once ('config.php');
         Name: <input type="text" name="quizname" class="inputquiz" id="inputquizname" />
         <?php
         $extraparam = '';
-        if (!$keywords_enabled) {
-        	$extraparam = ' value="'.$keywords_default.'" style="display:none;"';
+        if (!$config["keywords_enabled"]) {
+        	//$extraparam = ' value="'.$keywords_default.'" style="display:none;"';
+        	$extraparam = ' value="'.$config["keywords_default"].'" style="display:none;"';
         }
         else {
         	print('Keyword*:');
@@ -70,7 +71,7 @@ require_once ('config.php');
 		<input type="text" name="quizkeyword" class="inputquiz" id="inputquizkeyword"<?php print($extraparam); ?>/>
         <button value="addquiz" id="addquiznamebutton">Add Quiz</button>
 		<?php
-		if ($keywords_enabled) {
+		if ($config["keywords_enabled"]) {
 			print('<br/>* Keyword is the word used for identifying the quiz when sending answers in via SMS');
 		}
 		?>

@@ -1,5 +1,6 @@
 <?php
 require_once ('db.php');
+require_once ('pswin/SendSMSService.php');
 class smsReaction {
 	private $db;
 	
@@ -32,7 +33,9 @@ class smsReaction {
 	}
 	
 	function sendMessage($message, $phonenumber) {
-		// TODO: Send message somehow!
+		
+		$smsService = new SendSMS();
+		$smsService->SendSMSMessage($phonenumber, $message);
 		echo 'sendMessage@'.$phonenumber.': '.$message.PHP_EOL;
 	}
 	

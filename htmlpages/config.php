@@ -1,3 +1,3 @@
 <?php
-$keywords_enabled = false;
-$keywords_default = 'STF';
+$config["keywords_enabled"] = false;
+$config["keywords_default"] = "STF";
