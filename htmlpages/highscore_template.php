@@ -33,6 +33,8 @@
       </div>
       <div id="highscoretable_div"></div>
 	  <div id="teamanswers_div"></div>
+	  <br/>
+      *Click on a team to specifically view their answers to each question.
     </div>
   </body>
 </html>

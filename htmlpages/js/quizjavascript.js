@@ -162,6 +162,7 @@ function updatelinksandforms(questionlist) {
 	$('input[name="header"]').val(quizname);
 	
 	var keywords_enabled = true;
+	// This is a hacky way to find out if multiple keywords are allowed in the quiz
 	if ($('#inputquizkeyword').css('display') === 'none') {
 		keywords_enabled = false;
 	}
