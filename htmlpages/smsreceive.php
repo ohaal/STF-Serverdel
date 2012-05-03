@@ -6,7 +6,7 @@ require_once ('sms.php');
 require_once ('config.php');
 
 $test = new SMSReceiveHandler();
-$test->handleSms('93603364', $_GET['text']);
+$test->handleSms($_GET['number'], $_GET['text']);
 
 class SMSReceiveHandler {
 	
