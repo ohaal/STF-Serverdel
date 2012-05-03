@@ -100,6 +100,8 @@ for ($i=1;$i<=5;$i++) {
 	print('</div>');
 }
 ?>
+          Remember to select the correct answer before you add the question. (Click the circle to the right)
+          <br/>
           <button value="submitnewquestion" id="submitnewquestionbutton">Add question</button>
         </form>
         <span class="errorlist" id="newquestionerror"></span>
