@@ -97,7 +97,7 @@ function getQuestions(resultdiv, quiz) {
 					}
 					// Simple fix for request about using letters instead of numbers as answer alternatives @replacealphawithnumber
 					// First answer number is 1. 1+64 = 65. 65 is the ascii code for 'A'
-					questions += '<strong>'+String.fromCharCode(questionlist[i].answers[k].answernumber+64)+'</strong>:'+questionlist[i].answers[k].answertext;
+					questions += '<strong>'+String.fromCharCode(parseInt(questionlist[i].answers[k].answernumber)+64)+'</strong>:'+questionlist[i].answers[k].answertext;
 					questions += '</div>';
 				}
 			}
@@ -504,7 +504,9 @@ function getTeaminfoForQuiz(teamid, quiz) {
 					} else {
 						html += "<div>";
 					}
-					html += '<strong>'+q.answers[l].answernumber+'</strong>:'+q.answers[l].answertext;
+					// Simple fix for request about using letters instead of numbers as answer alternatives @replacealphawithnumber
+					// First answer number is 1. 1+64 = 65. 65 is the ascii code for 'A'
+					html += '<strong>'+String.fromCharCode(parseInt(q.answers[l].answernumber)+64)+'</strong>:'+q.answers[l].answertext;
 					if (teamanswers[q.answers[l].answernumber] != undefined) {
 						for (var m =0; m<teamanswers[q.answers[l].answernumber]; m++) {
 							html += '<span class="answered" />';
