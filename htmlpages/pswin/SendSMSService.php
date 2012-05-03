@@ -4,8 +4,7 @@ include_once('PSWinSendSMS.php');
 
 class SendSMS {
 		
-	public function SendSMSMessage($receiverNumberWCountryCode, $text) {
-			
+	public function sendSMSMessage($receiverNumberWCountryCode, $text) {
 		// Create a new message
 		$objMessage = new SMSMessage();
 		$objMessage->ReceiverNumber =$receiverNumberWCountryCode;
@@ -30,9 +29,7 @@ class SendSMS {
 		echo '<pre>';
 		var_dump($objReturn);
 		echo '</pre>';
-	
 	}
-	
 }
 
 
