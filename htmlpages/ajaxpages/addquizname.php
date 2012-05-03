@@ -5,10 +5,19 @@
 // quizkeyword  : string : keyword for receiving SMS
 include_once 'ajaxheader.php';
 require_once ('../quizadmin.php');
+require_once ('../config.php');
 $quizadmin = new quizAdmin ();
-if (isset ( $_GET ['quizname'] ) && isset( $_GET ['quizkeyword'] ) ) {
+if (isset ( $_GET ['quizname'] ) ) {
+	if (isset( $_GET ['quizkeyword'] )) {
+		$quizKeyword = strtolower($_GET ['quizkeyword']);		
+	}
+	else if (!$keywords_enabled) {
+		$quizKeyword = strtolower($keywords_default);
+	}
+	else {
+		die();
+	}
 	$quizName = $_GET ['quizname'];
-	$quizKeyword = strtolower($_GET ['quizkeyword']);
 	
 	// Keyword must be alphanumeric (a-z, 0-9 or æ, Æ, ø, Ø, å, Å, case insensitive) and between 1 and 20 characters
 	$isNordicAlnum = preg_match('/^[a-z0-9\x{00C6}\x{00E6}\x{00C5}\x{00E5}\x{00D8}\x{00F8}]{1,20}$/iu', $quizKeyword);

@@ -3,6 +3,8 @@
 // TODO: Move messages to seperate config file, or get a spec
 
 require_once ('sms.php');
+require_once ('config.php');
+
 $smsReact = new smsReaction();
 
 // TODO: Temporary input data until we know exactly what input we will receive
@@ -23,6 +25,9 @@ $smstext = preg_replace( '/\s{2,}/', ' ', $smstext );
 
 // Split SMS message into array for easier handling
 $smsparam = explode( ' ', $smstext, 3 );
+if (!$keywords_enabled) {
+	array_unshift($smsparam, $keywords_default);
+}
 var_dump($smsparam);
 if (count( $smsparam ) <= 1) {
 	// TODO: Should we send message to sender about this?
@@ -103,7 +108,7 @@ else if (is_numeric( $smsparam[1] ) || $combined = preg_match('/^([0-9])+([a-eA-
 	// Simple fix for request about using letters instead of numbers as answer alternatives @replacealphawithnumber
 	$search  = array('a','b','c','d','e');
 	$replace = array('1','2','3','4','5');
-	$answernumber =  str_replace($search, $replace, strtolower($answer));
+	$answernumber = str_replace($search, $replace, strtolower($answer));
 	
 	// Check if both question number and answer number are valid
 	if (!$smsReact->isValidQuestionNumberAndAnswerNumber( $questionnumber, $answernumber, $quizid )) {

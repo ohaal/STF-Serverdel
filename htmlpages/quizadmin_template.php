@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<?php
+require_once ('config.php');
+?>
 <html>
   <head>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -39,8 +42,8 @@
       <div id="createpdfoverlay" class="dialog">
         <form name="createpdf" action="getquizpdf.php" method="post" enctype="multipart/form-data">
           <input class="quizidvalue" type="hidden" name="quizid" value="" />
-          Header: <input type="text" name="header" />*<br/>
-          Ingress: <textarea name="ingress"></textarea><br/>
+          Quiz Header: <input type="text" name="header" />*<br/>
+          Quiz Ingress: <textarea name="ingress"></textarea><br/>
           <hr />
           <div id="pdfquestions"></div>
           Footer: <input type="text" name="footer"/>*<br/>
@@ -55,8 +58,22 @@
 
       <div id="newquizoverlay" class="dialog">
         Name: <input type="text" name="quizname" class="inputquiz" id="inputquizname" />
-        Keyword: <input type="text" name="quizkeyword" class="inputquiz" id="inputquizkeyword" />
+        <?php
+        $extraparam = '';
+        if (!$keywords_enabled) {
+        	$extraparam = ' value="'.$keywords_default.'" style="display:none;"';
+        }
+        else {
+        	print('Keyword*:');
+        }
+        ?>
+		<input type="text" name="quizkeyword" class="inputquiz" id="inputquizkeyword"<?php print($extraparam); ?>/>
         <button value="addquiz" id="addquiznamebutton">Add Quiz</button>
+		<?php
+		if ($keywords_enabled) {
+			print('<br/>* Keyword is the word used for identifying the quiz when sending answers in via SMS');
+		}
+		?>
         <span class="errorlist" id="newquizerror"></span>
       </div>
 

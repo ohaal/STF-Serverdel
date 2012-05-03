@@ -144,7 +144,11 @@ foreach ($questionsArray as $key => $question) {
 	if (isset( $question['answers'] ) && sizeof( $question['answers'] ) > 0) {
 		foreach ($question['answers'] as $answer) {
 			$pdf->Cell( 20 );
-			$pdf->Cell( 0, 8, $answer['answernumber'] . ".  " . iconv('UTF-8', 'ISO-8859-1', $answer['answertext']), 0, 1, 'L' );// FPDF does not support UTF-8
+			// Simple fix for request about using letters instead of numbers as answer alternatives @replacealphawithnumber
+			$search  = array('1','2','3','4','5');
+			$replace = array('A','B','C','D','E'); 
+			$answernumber = str_replace($search, $replace, $answer['answernumber']);
+			$pdf->Cell( 0, 8, $answernumber . ".  " . iconv('UTF-8', 'ISO-8859-1', $answer['answertext']), 0, 1, 'L' );// FPDF does not support UTF-8
 		}
 	}
 	

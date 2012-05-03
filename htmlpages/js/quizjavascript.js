@@ -105,8 +105,8 @@ function getQuestions(resultdiv, quiz) {
 			questions += '</div>';
 			
 			pdfquestions += '<b>Question '+questionlist[i].questionnumber+': '+questionlist[i].questiontext+'</b><br />';
-			pdfquestions += 'Header <input type="text" name="quizheader-'+questionlist[i].questionnumber+'" /><br />';
-			pdfquestions += '<input type="file" name="quizimage-'+questionlist[i].questionnumber+'" />';
+			pdfquestions += 'Question Header <input type="text" name="quizheader-'+questionlist[i].questionnumber+'" /><br />';
+			pdfquestions += 'Question Image <input type="file" name="quizimage-'+questionlist[i].questionnumber+'" />';
 			pdfquestions += '<hr />';
 		}
 		$(resultdiv).html(questions);
@@ -156,10 +156,18 @@ function updatelinksandforms(questionlist) {
 	// The '/' are there just to encase the regex, the spaces are just regular spaces
 	var quizinfo=grabinforegex.exec(selectedquiz);
 	var quizname=quizinfo[2];
-	var keyword=quizinfo[1];
+	var keyword=quizinfo[1]+' ';
 	// Update (at the moment this occurs, hidden,) create pdf form
 	$('input[name="header"]').val(quizname);
-	$('input[name="footer"]').val('Send SMS med "STF '+keyword+' $qnum <riktig svarnummer>" til 2077');
+	
+	var keywords_enabled = true;
+	if ($('#inputquizkeyword').css('display') === 'none') {
+		keywords_enabled = false;
+	}
+	if (!keywords_enabled) {
+		keyword = '';
+	}
+	$('input[name="footer"]').val('Send SMS med "STF '+keyword+'$qnum <svaralternativ>" til 2077');
 	
 	// Reset create PDF errorlist 
 	$("span#createpdferror").html("");
