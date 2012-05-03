@@ -40,7 +40,7 @@ require_once ('config.php');
       </div>
 
       <div id="createpdfoverlay" class="dialog">
-        <form name="createpdf" action="getquizpdf.php" method="post" enctype="multipart/form-data">
+        <form name="createpdf" action="getquizpdf.php" method="post" enctype="multipart/form-data" accept-charset="ISO-8859-1">
           <input class="quizidvalue" type="hidden" name="quizid" value="" />
           Quiz Header: <input type="text" name="header" />*<br/>
           Quiz Ingress: <textarea name="ingress"></textarea><br/>
