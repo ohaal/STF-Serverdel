@@ -1,5 +1,5 @@
 <?php //server.php
-require_once('ReturnValue.php');
+require_once('pswin/ReturnValue.php');
 
 ini_set("soap.wsdl_cache_enabled", "0"); // disabling WSDL cache
 
