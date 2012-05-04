@@ -23,11 +23,11 @@ class SMSReceiveHandler {
 		
 		if (is_null( $phonenumber )) {
 			error_log('Phone number missing', 0);
-			die();
+			return;
 		}
 		if (is_null( $smstext )) {
 			error_log('SMS text missing', 0);
-			die();
+			return;
 		}
 		
 		// Account for and remove any accidental double (or more) spaces in message
@@ -45,7 +45,7 @@ class SMSReceiveHandler {
 		if (count( $smsparam ) <= 1) {
 			// TODO: Should we send message to sender about this?
 			error_log('Too few parameters - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
-			die();
+			return;
 		}
 		$keyword = strtolower($smsparam[1]);
 	
@@ -55,7 +55,7 @@ class SMSReceiveHandler {
 			// TODO: Should we send message to sender about this?
 			// $this->config['lang_no_invalidkeyword']
 			error_log('Invalid keyword: '.$keyword.' - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
-			die();
+			return;
 		}
 		
 		$teamid = $smsReact->getTeamIdByPhoneNumberAndQuizId( $phonenumber, $quizid );
@@ -76,7 +76,7 @@ class SMSReceiveHandler {
 			if (!array_key_exists(3, $smsparam) || is_null( $smsparam[3] ) || empty( $smsparam[3] )) {
 				$smsReact->sendMessage( $this->config['lang_no_noteamnamegiven'], $phonenumber );
 				error_log('No team name given - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
-				die();
+				return;
 			}
 			$teamname = $smsparam[3];
 			
@@ -108,7 +108,7 @@ class SMSReceiveHandler {
 			) {
 				$smsReact->sendMessage( $this->config['lang_no_invalidanswerprovided'], $phonenumber );
 				error_log('Invalid answer provided - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
-				die();
+				return;
 			}
 			
 			if ($combined && !empty($questionanswer)) {
@@ -129,7 +129,7 @@ class SMSReceiveHandler {
 			if (!$smsReact->isValidQuestionNumberAndAnswerNumber( $questionnumber, $answernumber, $quizid )) {
 				$smsReact->sendMessage( $this->config['lang_no_invalidquestionnumberoranswer'], $phonenumber );
 				error_log('Invalid question number ('.$questionnumber.') or answer ('.$answer.') - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
-				die();
+				return;
 			}
 			
 			// Add answer to participant
@@ -149,7 +149,7 @@ class SMSReceiveHandler {
 		// Unknown format (unknown command)
 		else {
 			error_log('Unknown format! - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
-			die();
+			return;
 		}
 
 	}
