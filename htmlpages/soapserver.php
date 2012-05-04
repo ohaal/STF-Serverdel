@@ -1,5 +1,5 @@
 <?php //server.php
-
+require_once('ReturnValue.php');
 
 ini_set("soap.wsdl_cache_enabled", "0"); // disabling WSDL cache
 
@@ -122,19 +122,6 @@ class GSMPosition {
 class ReceiveSMSMessageResponse {
 	public $ReceiveSMSMessageResult; // ReturnValue
 }
-
-class ReturnValue {
-	public $Code; // int
-	public $Description; // string
-	public $Reference; // string
-	
-	public function __construct($code, $description, $ref) {
-		$this->Code = $code;
-		$this->Description = $description;
-		$this->Reference = $ref;
-	}
-}
-
 
 class ReceiveMMSMessage {
 	public $m; // IncomingMMSMessage

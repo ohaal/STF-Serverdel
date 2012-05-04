@@ -1,4 +1,6 @@
 <?php
+require_once('ReturnValue.php');
+
 class SendSingleMessage {
   public $username; // string
   public $password; // string
@@ -24,12 +26,6 @@ class SMSMessage {
 class SendSingleMessageResponse {
   public $SendSingleMessageResult; // ReturnValue
 }
-
-// class ReturnValue {
-//   public $Code; // int
-//   public $Description; // string
-//   public $Reference; // string
-// }
 
 class SendMessages {
   public $username; // string
