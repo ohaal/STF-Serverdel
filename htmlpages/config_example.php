@@ -6,7 +6,7 @@ $config['pswin_sendernumber'] = '2077';
 // Service number is the actual number the service receives messages at
 $config['pswin_servicenumber'] = '2077';
 // Tariff is the cost pr. message
-$config['pswin_tariff'] = 0; // kr.
+$config['pswin_tariff'] = 0; // øre
 
 $config['keywords_enabled'] = false;
 $config['keywords_default'] = 'STF';
