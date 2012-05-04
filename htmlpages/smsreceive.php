@@ -36,18 +36,18 @@ class SMSReceiveHandler {
 
 		// Split SMS message into array for easier handling
 		if (!$this->config["keywords_enabled"]) {
-			$smsparam = explode( ' ', $smstext, 2 );
+			$smsparam = explode( ' ', $smstext, 3 );
 			array_unshift($smsparam, $this->config["keywords_default"]);
 		}
 		else {
-			$smsparam = explode( ' ', $smstext, 3 );
+			$smsparam = explode( ' ', $smstext, 4 );
 		}
 		if (count( $smsparam ) <= 1) {
 			// TODO: Should we send message to sender about this?
 			echo 'Too few parameters';
 			die();
 		}
-		$keyword = strtolower($smsparam[0]);
+		$keyword = strtolower($smsparam[1]);
 	
 		// Get the quiz id based on keyword (looks for active quiz with keyword)
 		$quizid = $smsReact->getQuizIdByKeyword( $keyword );
@@ -71,13 +71,13 @@ class SMSReceiveHandler {
 		
 		// Expected SMS text formats (we will act differently based on the format):
 		// -> Format: <keyword> lag <teamname> || <keyword> lagnavn <teamname>
-		if ($smsparam[1] == 'lag' || $smsparam[1] == 'lagnavn') {
-			if (!array_key_exists(2, $smsparam) || is_null( $smsparam[2] ) || empty( $smsparam[2] )) {
+		if ($smsparam[2] == 'lag' || $smsparam[2] == 'lagnavn') {
+			if (!array_key_exists(3, $smsparam) || is_null( $smsparam[3] ) || empty( $smsparam[3] )) {
 				$smsReact->sendMessage( 'Du må angi et lagnavn!', $phonenumber );
 				echo 'No team name given';
 				die();
 			}
-			$teamname = $smsparam[2];
+			$teamname = $smsparam[3];
 			
 			$newTeamCreated = false;
 			
@@ -100,9 +100,9 @@ class SMSReceiveHandler {
 		// -> Format: <keyword> <question number> <answer alternative> || <keyword> <question number><answer alternative>
 		// Examples: STF 1 a
 		//           STF 3c
-		else if (is_numeric( $smsparam[1] ) || $combined = preg_match('/^([0-9])+([a-eA-E])$/', $smsparam[1], $questionanswer)) {
-			if (!$combined && !array_key_exists(2, $smsparam) ||
-			(array_key_exists(2, $smsparam) && (is_null( $smsparam[2] ) || empty( $smsparam[2] ) || !ctype_alpha( $smsparam[2] ) || strlen( $smsparam[2] ) != 1))
+		else if (is_numeric( $smsparam[2] ) || $combined = preg_match('/^([0-9])+([a-eA-E])$/', $smsparam[2], $questionanswer)) {
+			if (!$combined && !array_key_exists(3, $smsparam) ||
+			(array_key_exists(3, $smsparam) && (is_null( $smsparam[3] ) || empty( $smsparam[3] ) || !ctype_alpha( $smsparam[3] ) || strlen( $smsparam[3] ) != 1))
 			) {
 				$smsReact->sendMessage( 'Du må angi et gyldig svaralternativ!', $phonenumber );
 				echo 'Invalid answer provided';
@@ -114,8 +114,8 @@ class SMSReceiveHandler {
 				$answer = $questionanswer[2];
 			}
 			else {
-				$questionnumber = $smsparam[1];
-				$answer = $smsparam[2];
+				$questionnumber = $smsparam[2];
+				$answer = $smsparam[3];
 			}
 			
 			// Simple fix for request about using letters instead of numbers as answer alternatives @replacealphawithnumber
