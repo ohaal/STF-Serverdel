@@ -15,9 +15,9 @@ class SendSMS {
 		// Create a new message
 		$objMessage = new SMSMessage();
 		$objMessage->ReceiverNumber =$receiverNumberWCountryCode;
-		$objMessage->SenderNumber = '2077';
+		$objMessage->SenderNumber = $this->config['pswin_sendernumber'];
 		$objMessage->Text = $text;
-		$objMessage->Tariff = 0;
+		$objMessage->Tariff = $this->config['pswin_tariff'];
 		$objMessage->TimeToLive = 0;
 		$objMessage->RequestReceipt = false;
 		

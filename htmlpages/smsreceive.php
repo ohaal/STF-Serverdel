@@ -53,6 +53,7 @@ class SMSReceiveHandler {
 		$quizid = $smsReact->getQuizIdByKeyword( $keyword );
 		if ($quizid < 0) {
 			// TODO: Should we send message to sender about this?
+			// $this->config['lang_no_invalidkeyword']
 			echo 'Invalid keyword.';
 			die();
 		}
@@ -73,7 +74,7 @@ class SMSReceiveHandler {
 		// -> Format: <keyword> lag <teamname> || <keyword> lagnavn <teamname>
 		if ($smsparam[2] == 'lag' || $smsparam[2] == 'lagnavn') {
 			if (!array_key_exists(3, $smsparam) || is_null( $smsparam[3] ) || empty( $smsparam[3] )) {
-				$smsReact->sendMessage( 'Du må angi et lagnavn!', $phonenumber );
+				$smsReact->sendMessage( $this->config['lang_no_noteamnamegiven'], $phonenumber );
 				echo 'No team name given';
 				die();
 			}
@@ -91,10 +92,10 @@ class SMSReceiveHandler {
 			// Associate phone number with team (connects all current answers by this phone number with team)
 			$smsReact->addParticipantToTeam( $phonenumber, $quizid, $teamid );
 			if ($newTeamCreated) {
-				$smsReact->sendMessage( 'Laget "' . $teamname . '" er nå opprettet og du er påmeldt dette laget!', $phonenumber );
+				$smsReact->sendMessage( str_replace('$teamname$', $teamname, $this->config['lang_no_createdandsignedupforteam']), $phonenumber );
 			}
 			else {
-				$smsReact->sendMessage( 'Du er nå påmeldt laget "' . $teamname . '"!', $phonenumber );
+				$smsReact->sendMessage( str_replace('$teamname$', $teamname, $this->config['lang_no_signedupforteam']), $phonenumber );
 			}
 		}
 		// -> Format: <keyword> <question number> <answer alternative> || <keyword> <question number><answer alternative>
@@ -104,7 +105,7 @@ class SMSReceiveHandler {
 			if (!$combined && !array_key_exists(3, $smsparam) ||
 			(array_key_exists(3, $smsparam) && (is_null( $smsparam[3] ) || empty( $smsparam[3] ) || !ctype_alpha( $smsparam[3] ) || strlen( $smsparam[3] ) != 1))
 			) {
-				$smsReact->sendMessage( 'Du må angi et gyldig svaralternativ!', $phonenumber );
+				$smsReact->sendMessage( $this->config['lang_no_invalidanswerprovided'], $phonenumber );
 				echo 'Invalid answer provided';
 				die();
 			}
@@ -125,7 +126,7 @@ class SMSReceiveHandler {
 			
 			// Check if both question number and answer number are valid
 			if (!$smsReact->isValidQuestionNumberAndAnswerNumber( $questionnumber, $answernumber, $quizid )) {
-				$smsReact->sendMessage( 'Du har oppgitt et ugyldig spørsmål- eller svaralternativ!', $phonenumber );
+				$smsReact->sendMessage( $this->config['lang_no_invalidquestionnumberoranswer'], $phonenumber );
 				echo 'Invalid question number or answer';
 				die();
 			}
@@ -135,11 +136,11 @@ class SMSReceiveHandler {
 			
 			if ($teamid == 0) {
 				// Team member not member of any team
-				$smsReact->sendMessage( 'Ditt svar er registrert, men du er ikke påmeldt noe lag. For å melde deg på et lag eller etablere nytt send SMS til...', $phonenumber );
+				$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array($answernumber, $questionnumber), $this->config['lang_no_registeredanswerbutnoteam']), $phonenumber );
 			}
 			else {
 				// Team member of team
-				$smsReact->sendMessage( 'Ditt svar er registrert!', $phonenumber );
+				$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array($answernumber, $questionnumber), $this->config['lang_no_registeredanswer']), $phonenumber );
 			}
 		}
 		// Unknown format (unknown command)
