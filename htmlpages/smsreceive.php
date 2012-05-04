@@ -136,11 +136,11 @@ class SMSReceiveHandler {
 			
 			if ($teamid == 0) {
 				// Team member not member of any team
-				$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array($answernumber, $questionnumber), $this->config['lang_no_registeredanswerbutnoteam']), $phonenumber );
+				$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array(strtoupper($answer), $questionnumber), $this->config['lang_no_registeredanswerbutnoteam']), $phonenumber );
 			}
 			else {
 				// Team member of team
-				$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array($answernumber, $questionnumber), $this->config['lang_no_registeredanswer']), $phonenumber );
+				$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array(strtoupper($answer), $questionnumber), $this->config['lang_no_registeredanswer']), $phonenumber );
 			}
 		}
 		// Unknown format (unknown command)
