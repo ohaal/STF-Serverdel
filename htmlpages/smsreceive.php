@@ -1,12 +1,8 @@
-<pre>
 <?php
 // TODO: Move messages to seperate config file, or get a spec
 
 require_once ('sms.php');
 require_once ('config.php');
-
-$test = new SMSReceiveHandler();
-$test->handleSms($_GET['number'], $_GET['text']);
 
 class SMSReceiveHandler {
 	
@@ -19,8 +15,6 @@ class SMSReceiveHandler {
 	
 
 	public function handleSms($phonenumber, $smstext) {
-		
-		error_log("in handleSMS", 0);
 		
 		$smsReact = new smsReaction();
 		
@@ -48,21 +42,15 @@ class SMSReceiveHandler {
 		else {
 			$smsparam = explode( ' ', $smstext, 3 );
 		}
-		var_dump($smsparam);
 		if (count( $smsparam ) <= 1) {
 			// TODO: Should we send message to sender about this?
 			echo 'Too few parameters';
 			die();
 		}
 		$keyword = strtolower($smsparam[0]);
-		error_log("keyword from SMS: ".$keyword, 0);
-		error_log("keyword from SMS: ".$keyword, 0);
-		
-		var_dump($keyword);
-		
+	
 		// Get the quiz id based on keyword (looks for active quiz with keyword)
 		$quizid = $smsReact->getQuizIdByKeyword( $keyword );
-		var_dump("quizid: " . $quizid);
 		if ($quizid < 0) {
 			// TODO: Should we send message to sender about this?
 			echo 'Invalid keyword.';
@@ -164,4 +152,3 @@ class SMSReceiveHandler {
 }
 
 ?>
-</pre>

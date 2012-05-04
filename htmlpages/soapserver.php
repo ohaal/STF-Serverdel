@@ -27,7 +27,7 @@ class SMSReceiveService {
 	 */
 	public static function ReceiveSMSMessage(ReceiveSMSMessage $parameters) {
 		$res = new ReceiveSMSMessageResponse();
-	
+		
 		$m = $parameters->getM();
 		$sender = $m->getSenderNumber();
 		$message = $m->getText();
@@ -39,6 +39,7 @@ class SMSReceiveService {
 		}
 		
 		
+	
 		// Call function to handle the incoming SMS
 		$smsHandler = new SMSReceiveHandler();
 		$smsHandler->handleSms($sender, $message);
