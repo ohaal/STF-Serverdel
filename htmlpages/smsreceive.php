@@ -18,9 +18,6 @@ class SMSReceiveHandler {
 		
 		$smsReact = new smsReaction();
 		
-		//$smstext = $_GET['text'];
-		//$phonenumber = $receiverNumberWCountryCode;//'87654321';
-		
 		if (is_null( $phonenumber )) {
 			error_log('Phone number missing', 0);
 			return;
@@ -44,6 +41,7 @@ class SMSReceiveHandler {
 		}
 		if (count( $smsparam ) <= 1) {
 			// TODO: Should we send message to sender about this?
+			// $this->config['lang_no_unknownformat']
 			error_log('Too few parameters - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 			return;
 		}
@@ -80,6 +78,11 @@ class SMSReceiveHandler {
 			}
 			$teamname = $smsparam[3];
 			
+			// Check if user took <lagnavn> too literally, and remove <> if he did
+			if (substr($teamname, 1, 1) == '<' && substr($teamname, -1, 1) == '>') {
+				$teamname = substr($teamname, 1, -1);
+			}
+			
 			$newTeamCreated = false;
 			
 			$teamid = $smsReact->getTeamIdByTeamName( $teamname );
@@ -94,9 +97,12 @@ class SMSReceiveHandler {
 			if ($newTeamCreated) {
 				$smsReact->sendMessage( str_replace('$teamname$', $teamname, $this->config['lang_no_createdandsignedupforteam']), $phonenumber );
 				error_log('New team ('.$teamname.') created and added new member to team. - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
+				return;
 			}
 			else {
 				$smsReact->sendMessage( str_replace('$teamname$', $teamname, $this->config['lang_no_signedupforteam']), $phonenumber );
+				error_log('Added new member to team "'.$teamname.'" - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
+				return;
 			}
 		}
 		// -> Format: <keyword> <question number> <answer alternative> || <keyword> <question number><answer alternative>
@@ -106,8 +112,8 @@ class SMSReceiveHandler {
 			if (!$combined && !array_key_exists(3, $smsparam) ||
 			(array_key_exists(3, $smsparam) && (is_null( $smsparam[3] ) || empty( $smsparam[3] ) || !ctype_alpha( $smsparam[3] ) || strlen( $smsparam[3] ) != 1))
 			) {
-				$smsReact->sendMessage( $this->config['lang_no_invalidanswerprovided'], $phonenumber );
-				error_log('Invalid answer provided - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
+				$smsReact->sendMessage( $this->config['lang_no_invalidansweralternativeprovided'], $phonenumber );
+				error_log('Invalid answer alternative provided - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 				return;
 			}
 			
@@ -138,16 +144,19 @@ class SMSReceiveHandler {
 			if ($teamid == 0) {
 				// Team member not member of any team
 				$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array(strtoupper($answer), $questionnumber), $this->config['lang_no_registeredanswerbutnoteam']), $phonenumber );
-				error_log('Registered answer ('.$answer.'), but not member of team  - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
+				error_log('Registered answer ('.$answer.'), but not member of team - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
+				return;
 			}
 			else {
 				// Team member of team
 				$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array(strtoupper($answer), $questionnumber), $this->config['lang_no_registeredanswer']), $phonenumber );
 				error_log('Registered answer ('.$answer.') - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
+				return;
 			}
 		}
 		// Unknown format (unknown command)
 		else {
+			$smsReact->sendMessage( $this->config['lang_no_unknownformat'], $phonenumber );
 			error_log('Unknown format! - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 			return;
 		}
