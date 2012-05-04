@@ -35,7 +35,8 @@ class smsReaction {
 	}
 	
 	function sendMessage($message, $phonenumber) {
-//		$this->smsService->sendSMSMessage($phonenumber, $message);
+		$this->smsService->sendSMSMessage($phonenumber, $message);
+
 		echo 'sendMessage@'.$phonenumber.': '.$message.PHP_EOL;
 	}
 	
