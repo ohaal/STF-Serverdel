@@ -9,4 +9,15 @@ class ReturnValue {
 		$this->Description = $description;
 		$this->Reference = $ref;
 	}
+	
+	public function getCode(){
+		return $this->Code;
+	}
+	public function getDescription(){
+		return $this->Description;
+	}
+	public function getReference(){
+		return $this->Reference;
+	}
+	
 }

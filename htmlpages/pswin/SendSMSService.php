@@ -15,7 +15,7 @@ class SendSMS {
 		// Create a new message
 		$objMessage = new SMSMessage();
 		$objMessage->ReceiverNumber =$receiverNumberWCountryCode;
-		$objMessage->SenderNumber = 'STF';
+		$objMessage->SenderNumber = '2077';
 		$objMessage->Text = $text;
 		$objMessage->Tariff = 0;
 		$objMessage->TimeToLive = 0;
@@ -33,8 +33,19 @@ class SendSMS {
 		// Send message
 		error_log("sending SMS", 0);
 		$objReturn = $objService->SendSingleMessage($objSendSingleMessage);
-
-		var_dump($objReturn);
+		
+		
+        $sendSingleMessageResult = $objReturn->getSendSingleMessageResult();
+        
+        $statusCode = $sendSingleMessageResult->getCode();
+        $statusDescription = $sendSingleMessageResult->getDescription();
+        
+        if($statusCode != '200') {
+        	error_log("Something went wrong when sending SMS '" . $text ."' to number '" . $receiverNumberWCountryCode ."'. ErrorCode: " . $statusCode . ", " . $statusDescription, 0);
+        } else {
+        	error_log("Successfully sent SMS '" . $text ."' to number '" . $receiverNumberWCountryCode ."'.", 0);
+        }
+		
 	}
 }
 

@@ -37,9 +37,7 @@ class SMSReceiveService {
 			$res->ReceiveSMSMessageResult = new ReturnValue('500', '', 'abc');
 			return $res;
 		}
-		
-		
-	
+
 		// Call function to handle the incoming SMS
 		$smsHandler = new SMSReceiveHandler();
 		$smsHandler->handleSms($sender, $message);

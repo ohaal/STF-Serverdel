@@ -24,7 +24,16 @@ class SMSMessage {
 }
 
 class SendSingleMessageResponse {
-  public $SendSingleMessageResult; // ReturnValue
+	/* @var $SendSingleMessageResult */
+	public $SendSingleMessageResult; // ReturnValue
+
+  /**
+   *
+   * @return ReturnValue
+   */
+  public function getSendSingleMessageResult () {
+  	return $this->SendSingleMessageResult;
+  }
 }
 
 class SendMessages {
