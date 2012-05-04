@@ -22,11 +22,11 @@ class SMSReceiveHandler {
 		//$phonenumber = $receiverNumberWCountryCode;//'87654321';
 		
 		if (is_null( $phonenumber )) {
-			echo 'Phone number missing';
+			error_log('Phone number missing', 0);
 			die();
 		}
 		if (is_null( $smstext )) {
-			echo 'SMS text missing';
+			error_log('SMS text missing', 0);
 			die();
 		}
 		
@@ -44,7 +44,7 @@ class SMSReceiveHandler {
 		}
 		if (count( $smsparam ) <= 1) {
 			// TODO: Should we send message to sender about this?
-			echo 'Too few parameters';
+			error_log('Too few parameters - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 			die();
 		}
 		$keyword = strtolower($smsparam[1]);
@@ -54,7 +54,7 @@ class SMSReceiveHandler {
 		if ($quizid < 0) {
 			// TODO: Should we send message to sender about this?
 			// $this->config['lang_no_invalidkeyword']
-			echo 'Invalid keyword.';
+			error_log('Invalid keyword: '.$keyword.' - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 			die();
 		}
 		
@@ -75,7 +75,7 @@ class SMSReceiveHandler {
 		if ($smsparam[2] == 'lag' || $smsparam[2] == 'lagnavn') {
 			if (!array_key_exists(3, $smsparam) || is_null( $smsparam[3] ) || empty( $smsparam[3] )) {
 				$smsReact->sendMessage( $this->config['lang_no_noteamnamegiven'], $phonenumber );
-				echo 'No team name given';
+				error_log('No team name given - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 				die();
 			}
 			$teamname = $smsparam[3];
@@ -93,6 +93,7 @@ class SMSReceiveHandler {
 			$smsReact->addParticipantToTeam( $phonenumber, $quizid, $teamid );
 			if ($newTeamCreated) {
 				$smsReact->sendMessage( str_replace('$teamname$', $teamname, $this->config['lang_no_createdandsignedupforteam']), $phonenumber );
+				error_log('New team ('.$teamname.') created and added new member to team. - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 			}
 			else {
 				$smsReact->sendMessage( str_replace('$teamname$', $teamname, $this->config['lang_no_signedupforteam']), $phonenumber );
@@ -106,7 +107,7 @@ class SMSReceiveHandler {
 			(array_key_exists(3, $smsparam) && (is_null( $smsparam[3] ) || empty( $smsparam[3] ) || !ctype_alpha( $smsparam[3] ) || strlen( $smsparam[3] ) != 1))
 			) {
 				$smsReact->sendMessage( $this->config['lang_no_invalidanswerprovided'], $phonenumber );
-				echo 'Invalid answer provided';
+				error_log('Invalid answer provided - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 				die();
 			}
 			
@@ -127,7 +128,7 @@ class SMSReceiveHandler {
 			// Check if both question number and answer number are valid
 			if (!$smsReact->isValidQuestionNumberAndAnswerNumber( $questionnumber, $answernumber, $quizid )) {
 				$smsReact->sendMessage( $this->config['lang_no_invalidquestionnumberoranswer'], $phonenumber );
-				echo 'Invalid question number or answer';
+				error_log('Invalid question number ('.$questionnumber.') or answer ('.$answer.') - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 				die();
 			}
 			
@@ -137,15 +138,17 @@ class SMSReceiveHandler {
 			if ($teamid == 0) {
 				// Team member not member of any team
 				$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array(strtoupper($answer), $questionnumber), $this->config['lang_no_registeredanswerbutnoteam']), $phonenumber );
+				error_log('Registered answer ('.$answer.'), but not member of team  - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 			}
 			else {
 				// Team member of team
 				$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array(strtoupper($answer), $questionnumber), $this->config['lang_no_registeredanswer']), $phonenumber );
+				error_log('Registered answer ('.$answer.') - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 			}
 		}
 		// Unknown format (unknown command)
 		else {
-			echo 'Unknown format!';
+			error_log('Unknown format! - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 			die();
 		}
 
