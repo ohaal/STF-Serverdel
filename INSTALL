@@ -5,8 +5,8 @@ CREATE A DATABASE AND USER
 		- GRANT ALL PRIVILEGES ON stfquiz.* TO 'stf' IDENTIFIED BY 'stf';
 	- To import the database, in the shell type (the stfquiz.sql-file is the file contained in the STFquiz installation):
 		- `mysql -u stf -pstf stfquiz < stfquiz.sql`
-    - Create a file named dbdetails.php and put it in the "htmlpages" directory
-        - Look at dbdetails_example.php in the same directory for inspiration
+    - Copy dbdetails_example.php in the "htmlpages" directory and name it dbdetails.php, then edit the values
+    - Copy config_example.php in the "htmlpages" directory and name it config.php, then edit the values
 
 INSTALL FPDF
 	- Go to http://www.fpdf.org/en/download.php
@@ -18,4 +18,4 @@ INSTALL FPDF
 	- Copy the main file, "fpdf.php" and the directory named "font" into the "htmlpages" directory of your STFquiz installation
 	
 START THE MMS-ADMIN SERVER (REQUIRED FOR MMS ADMINISTRATION)
-	- When in the htmlpages directory, run this command from the shell: php5 ./mmsadminserver.php
+	- When in the "htmlpages" directory, run this command from the shell: php5 ./mmsadminserver.php
