@@ -70,7 +70,7 @@ class SMSReceiveHandler {
 		
 		// Expected SMS text formats (we will act differently based on the format):
 		// -> Format: <keyword> lag <teamname> || <keyword> lagnavn <teamname>
-		if ($smsparam[2] == 'lag' || $smsparam[2] == 'lagnavn') {
+		if ($smsparam[2] == 'lag' || $smsparam[2] == 'lagnavn' || $smsparam[2] == 'navn') {
 			if (!array_key_exists(3, $smsparam) || is_null( $smsparam[3] ) || empty( $smsparam[3] )) {
 				$smsReact->sendMessage( $this->config['lang_no_noteamnamegiven'], $phonenumber );
 				error_log('No team name given - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
