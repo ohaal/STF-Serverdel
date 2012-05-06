@@ -107,7 +107,7 @@ class SMSReceiveHandler {
 		// -> Format: <keyword> <question number> <answer alternative> || <keyword> <question number><answer alternative>
 		// Examples: STF 1 a
 		//           STF 3c
-		else if (is_numeric( $smsparam[2] ) || $combined = preg_match('/^([0-9])+([a-eA-E])$/', $smsparam[2], $questionanswer)) {
+		else if (is_numeric( $smsparam[2] ) || $combined = preg_match('/^([0-9]+)([a-eA-E])$/', $smsparam[2], $questionanswer)) {
 			if (!$combined && !array_key_exists(3, $smsparam) ||
 			(array_key_exists(3, $smsparam) && (is_null( $smsparam[3] ) || empty( $smsparam[3] ) || !ctype_alpha( $smsparam[3] ) || strlen( $smsparam[3] ) != 1))
 			) {
