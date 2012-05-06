@@ -79,7 +79,7 @@ class SMSReceiveHandler {
 			$teamname = $smsparam[3];
 			
 			// Check if user took <lagnavn> too literally, and remove <> if he did
-			if (substr($teamname, 1, 1) == '<' && substr($teamname, -1, 1) == '>') {
+			if (substr($teamname, 0, 1) == '<' && substr($teamname, -1, 1) == '>') {
 				$teamname = substr($teamname, 1, -1);
 			}
 			
