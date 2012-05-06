@@ -39,9 +39,8 @@ class SMSReceiveHandler {
 		else {
 			$smsparam = explode( ' ', $smstext, 4 );
 		}
-		if (count( $smsparam ) <= 1) {
-			// TODO: Should we send message to sender about this?
-			// $this->config['lang_no_unknownformat']
+		if (count( $smsparam ) <= 2) {
+			$smsReact->sendMessage( $this->config['lang_no_unknownformat'], $phonenumber );
 			error_log('Too few parameters - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 			return;
 		}
