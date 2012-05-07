@@ -1,6 +1,4 @@
 <?php
-// TODO: Move messages to seperate config file, or get a spec
-
 require_once ('sms.php');
 require_once ('config.php');
 
@@ -17,15 +15,6 @@ class SMSReceiveHandler {
 	public function handleSms($phonenumber, $smstext) {
 		
 		$smsReact = new smsReaction();
-		
-		if (is_null( $phonenumber )) {
-			error_log('Phone number missing', 0);
-			return;
-		}
-		if (is_null( $smstext )) {
-			error_log('SMS text missing', 0);
-			return;
-		}
 		
 		// Account for and remove any accidental double (or more) spaces in message
 		$smstext = preg_replace( '/\s{2,}/', ' ', $smstext );
