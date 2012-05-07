@@ -372,12 +372,14 @@ function getHighScores(quiz) {
 		data.addColumn('number', 'Score');
 		data.addColumn('string', 'teamid');
 		var maxscore= 0;
+		var size = 0;
 		for (num in winnerlist) {
 			var srow=winnerlist[num];
 			if (srow['score'] > maxscore) {
 				maxscore = srow['score'];
 			}
 			data.addRow([srow['teamname'], srow['score'], srow['teamid']]);
+			size++;
 		}
 		maxscore = maxscore+1;
 		
@@ -394,9 +396,12 @@ function getHighScores(quiz) {
 		var view=new google.visualization.DataView(data);
 		view.setColumns([0,1]);
 		
+		var chartheight = size*11+100;
+		
 		var options = {
 			legend: 'none',
-			vAxis: {viewWindow: {min: 0, max: maxscore}, minValue: 0, viewWindowMode: 'explicit', interval: 1},
+			hAxis: {viewWindow: {min: 0, max: maxscore}, minValue: 0, viewWindowMode: 'explicit', interval: 1},
+			height: chartheight,
 		};
 		// Empty the highscore table (fixes small bug where height of chart would increase on every quiz change)
 		$('#highscoretable_div').empty();
