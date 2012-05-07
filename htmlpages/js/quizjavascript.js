@@ -400,7 +400,7 @@ function getHighScores(quiz) {
 		};
 		// Empty the highscore table (fixes small bug where height of chart would increase on every quiz change)
 		$('#highscoretable_div').empty();
-		var chart = new google.visualization.ColumnChart(document.getElementById('highscoretable_div'));
+		var chart = new google.visualization.BarChart(document.getElementById('highscoretable_div'));
 		
 		function scoreClicked() {
 			var selectedItem = chart.getSelection()[0];
