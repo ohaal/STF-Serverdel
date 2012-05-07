@@ -86,7 +86,7 @@ div#quizselect, div#newquizdiv {
 	display: inline-block;
 }
 div#highscoretable_div {
-	top: 30px;
+	top: 0px;
 }
 div#quizselect {
 	text-align: right;

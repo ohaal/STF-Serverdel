@@ -395,14 +395,15 @@ function getHighScores(quiz) {
 		
 		var view=new google.visualization.DataView(data);
 		view.setColumns([0,1]);
-		
-		var chartheight = size*11+100;
-		
-		var options = {
-			legend: 'none',
-			hAxis: {viewWindow: {min: 0, max: maxscore}, minValue: 0, viewWindowMode: 'explicit', interval: 1},
-			height: chartheight,
-		};
+
+        var chartheight = size*10;
+        var options = {
+                legend: 'none',
+                hAxis: {viewWindow: {min: 0, max: maxscore}, minValue: 0, viewWindowMode: 'explicit'},
+                height: (chartheight+50),
+                chartArea: {width: '70%', height: chartheight},
+                fontSize: 10
+        };
 		// Empty the highscore table (fixes small bug where height of chart would increase on every quiz change)
 		$('#highscoretable_div').empty();
 		var chart = new google.visualization.BarChart(document.getElementById('highscoretable_div'));
