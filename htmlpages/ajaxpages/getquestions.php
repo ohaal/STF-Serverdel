@@ -52,18 +52,18 @@ $replace = array("\\\\", "\\/", "\\".'"', "\\b", "\\t", "\\n", "\\f", "\\r", "\\
 foreach ( $questionsArray as $key => $question ) {
 	$ret .= '{"idquestions": "' . $key . '",'.
 		' "quizid":' . $question ['quizid'] . ','.
-		' "quizheader": "' . $question ['quizheader'] . '",'.
+		' "quizheader": "' . str_replace($search, $replace, $question ['quizheader']) . '",'.
 		' "quizingress": "' . str_replace($search, $replace, $question ['quizingress']) . '",'.
-		' "quizfooter": "' . $question ['quizfooter'] . '",'.
+		' "quizfooter": "' . str_replace($search, $replace, $question ['quizfooter']) . '",'.
 		' "questionnumber":' . $question ['questionnumber'] . ','.
-		' "questiontext": "' . $question ['questiontext'] . '",'.
-		' "questionheading": "' . $question ['questionheading'] . '",'.
+		' "questiontext": "' . str_replace($search, $replace, $question ['questiontext']) . '",'.
+		' "questionheading": "' . str_replace($search, $replace, $question ['questionheading']) . '",'.
 		' "questioningress": "' . str_replace($search, $replace, $question ['questioningress']) . '",'.
 		' "correctanswer": ' . $question ['correctanswer'];
 	if (isset ( $question ['answers'] ) && sizeof ( $question ['answers'] ) > 0) {
 		$ret .= ', "answers": [';
 		foreach ( $question ['answers'] as $answer ) {
-			$ret .= '{"answernumber":' . $answer ['answernumber'] . ', "answertext": "' . $answer ['answertext'] . '"},';
+			$ret .= '{"answernumber":' . $answer ['answernumber'] . ', "answertext": "' . str_replace($search, $replace, $answer ['answertext']) . '"},';
 		}
 		$ret = substr ( $ret, 0, - 1 ); // remove last ","
 		$ret .= ' ]';
