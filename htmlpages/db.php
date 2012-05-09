@@ -90,13 +90,13 @@ class dbConnection {
 		if (!is_numeric($quiz)) {
 			return $ret;
 		}
-		$sql = "SELECT questions.idquestion, questions.quizid as quizid, questions.questionnumber as questionnumber, questions.questiontext, questions.correctanswer, answers.quizid as aquizid, answers.answernumber, answers.answertext FROM questions LEFT JOIN answers ON (questions.quizid = answers.quizid AND questions.idquestion = answers.questionid)  WHERE questions.quizid = $quiz ORDER BY questions.questionnumber, answers.answernumber";
+		$sql = "SELECT questions.idquestion, questions.quizid as quizid, quiz.quizheader as quizheader, quiz.quizingress as quizingress, quiz.quizfooter as quizfooter, questions.questionnumber as questionnumber, questions.questiontext, questions.questionheading, questions.questioningress, questions.correctanswer, answers.quizid as aquizid, answers.answernumber, answers.answertext FROM questions LEFT JOIN (answers, quiz) ON (questions.quizid = answers.quizid AND questions.quizid = quiz.idquiz AND questions.idquestion = answers.questionid) WHERE questions.quizid = $quiz ORDER BY questions.questionnumber, answers.answernumber";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
 				while ( $q = $result->fetch_object () ) {
 					$key = "".$q->quizid.".".$q->questionnumber.".".$q->idquestion;
 					if (!array_key_exists($key, $ret)) {
-						$ret[$key] = array('idquestion'=> $q->idquestion,'quizid' =>$q->quizid, 'questionnumber' => $q->questionnumber, 'questiontext' => $q->questiontext, 'correctanswer' => $q->correctanswer);
+						$ret[$key] = array('idquestion'=> $q->idquestion, 'quizid' => $q->quizid, 'quizheader' => $q->quizheader, 'quizingress' => $q->quizingress, 'quizfooter' => $q->quizfooter, 'questionnumber' => $q->questionnumber, 'questiontext' => $q->questiontext, 'questionheading' => $q->questionheading, 'questioningress' => $q->questioningress, 'correctanswer' => $q->correctanswer);
 					}
 					if ($q->answernumber) {
 						$ret[$key]['answers'][$q->answernumber] = array('answernumber' => $q->answernumber, 'answertext' => $q->answertext);
@@ -138,7 +138,7 @@ class dbConnection {
 			$stmt->close();
 			$this->addAnswers($quizid, $questionnumber, $answers);
 		} else {
-			printf("Prepared Statement Error: %s\n", $stmt->error);
+			printf("Prepared Statement Error: %s\n", $this->dbconn->error);
 		}
 	}
 	
@@ -149,8 +149,30 @@ class dbConnection {
 			$stmt->close();
 		}
 		else {
-			printf( "Prepared Statement Error: %s\n", $stmt->error );
+			printf( "Prepared Statement Error: %s\n", $this->dbconn->error );
 		}
+	}
+	
+	function setQuizPDFData($quizid, $quizheader, $quizingress, $quizfooter) {
+		if ($stmt = $this->dbconn->prepare( "UPDATE quiz SET quizheader=?, quizingress=?, quizfooter=? WHERE idquiz=?;" )) {
+			$stmt->bind_param( 'sssi', $quizheader, $quizingress, $quizfooter, $quizid );
+			$stmt->execute();
+			$stmt->close();
+		}
+		else {
+			printf( "Prepared Statement Error: %s\n", $this->dbconn->error );
+		}		
+	}
+	
+	function setQuestionPDFData($quizid, $questionnumber, $questionheading, $questioningress) {
+		if ($stmt = $this->dbconn->prepare( "UPDATE questions SET questionheading=?, questioningress=? WHERE quizid=? AND questionnumber=?;" )) {
+			$stmt->bind_param( 'ssii', $questionheading, $questioningress, $quizid, $questionnumber );
+			$stmt->execute();
+			$stmt->close();
+		}
+		else {
+			printf( "Prepared Statement Error: %s\n", $this->dbconn->error );
+		}		
 	}
 	
 	function getQuizState($quizid) {
@@ -163,7 +185,7 @@ class dbConnection {
 			$stmt->close();
 		}
 		else {
-			printf( "Prepared Statement Error: %s\n", $stmt->error );
+			printf( "Prepared Statement Error: %s\n", $this->dbconn->error );
 		}
 		return $quizstate;
 	}

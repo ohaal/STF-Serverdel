@@ -41,6 +41,8 @@ DROP TABLE IF EXISTS `questions`;
 CREATE TABLE `questions` (
   `quizid` int(11) NOT NULL,
   `questionnumber` int(11) NOT NULL,
+  `questionheading` varchar(200) DEFAULT '',
+  `questioningress` varchar(1000) DEFAULT '',
   `questiontext` varchar(1000) NOT NULL DEFAULT '',
   `correctanswer` int(11) NOT NULL DEFAULT '0',
   `idquestion` int(11) NOT NULL AUTO_INCREMENT,
@@ -58,6 +60,9 @@ DROP TABLE IF EXISTS `quiz`;
 CREATE TABLE `quiz` (
   `idquiz` int(11) NOT NULL AUTO_INCREMENT,
   `quizname` varchar(45) NOT NULL,
+  `quizheader` varchar(200) DEFAULT '',
+  `quizingress` varchar(1000) DEFAULT '',
+  `quizfooter` varchar(200) DEFAULT '',
   `expiredate` datetime DEFAULT NULL,
   `state` tinyint(1) NOT NULL DEFAULT '0',
   `keyword` varchar(20) NOT NULL,

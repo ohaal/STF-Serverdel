@@ -7,8 +7,13 @@
 //   {
 //      "idquestions":"1.1.1",
 //      "quizid":1,
+//      "quizheader":"some quizheader",
+//      "quizingress":"some quizingress,
+//      "quizfooter":"some quizfooter,
 //      "questionnumber":1,
 //      "questiontext":"some question",
+//      "questionheading":"some heading",
+//      "questioningress":"some ingress",
 //      "correctanswer":3,
 //      "answers":[
 //         {
@@ -41,8 +46,20 @@ $questionsArray = $quizadmin->getAllQuestionsForQuiz ( $quizid );
 // Generate our own JSON, because json_encode() does not do it the way we want
 $ret = "";
 $ret .= "[ ";
+// Arrays to solve issues with special characters / new lines
+$search = array("\\", '/', '"', "\b", "\t", "\n", "\f", "\r", "\u");
+$replace = array("\\\\", "\\/", "\\".'"', "\\b", "\\t", "\\n", "\\f", "\\r", "\\u");
 foreach ( $questionsArray as $key => $question ) {
-	$ret .= '{"idquestions": "' . $key . '", "quizid":' . $question ['quizid'] . ', "questionnumber":' . $question ['questionnumber'] . ', "questiontext": "' . $question ['questiontext'] . '", "correctanswer": ' . $question ['correctanswer'];
+	$ret .= '{"idquestions": "' . $key . '",'.
+		' "quizid":' . $question ['quizid'] . ','.
+		' "quizheader": "' . $question ['quizheader'] . '",'.
+		' "quizingress": "' . str_replace($search, $replace, $question ['quizingress']) . '",'.
+		' "quizfooter": "' . $question ['quizfooter'] . '",'.
+		' "questionnumber":' . $question ['questionnumber'] . ','.
+		' "questiontext": "' . $question ['questiontext'] . '",'.
+		' "questionheading": "' . $question ['questionheading'] . '",'.
+		' "questioningress": "' . str_replace($search, $replace, $question ['questioningress']) . '",'.
+		' "correctanswer": ' . $question ['correctanswer'];
 	if (isset ( $question ['answers'] ) && sizeof ( $question ['answers'] ) > 0) {
 		$ret .= ', "answers": [';
 		foreach ( $question ['answers'] as $answer ) {

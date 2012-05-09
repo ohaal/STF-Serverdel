@@ -4,6 +4,7 @@ require_once ('config.php');
 ?>
 <html>
   <head>
+    <meta charset="UTF-8" />
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
 		google.load("jquery", "1.7.1");
@@ -12,7 +13,6 @@ require_once ('config.php');
     <link rel="stylesheet" href="css/quizstyling.css">
     <link type="text/css" href="css/custom-theme/jquery-ui-1.8.17.custom.css" rel="stylesheet" />
     <script type="text/javascript" src="js/quizjavascript.js"></script>
-
     <title>
       Quiz admin
     </title>
@@ -40,13 +40,16 @@ require_once ('config.php');
       </div>
 
       <div id="createpdfoverlay" class="dialog">
-        <form name="createpdf" action="getquizpdf.php" method="post" enctype="multipart/form-data" accept-charset="ISO-8859-1">
+        <form name="createpdf" action="getquizpdf.php" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+          <!--  A simple hack to force UTF-8 in IE, send UTF-8 only character -->
+          <input name="iehack" type="hidden" value="&#9760;" />
+          <!-- /IE Hack -->
           <input class="quizidvalue" type="hidden" name="quizid" value="" />
-          Quiz Header: <input type="text" name="header" />*<br/>
+          Quiz Header: <input type="text" name="header" style="width: 440px;" />*<br/>
           Quiz Ingress: <textarea name="ingress"></textarea><br/>
           <hr />
           <div id="pdfquestions"></div>
-          Footer: <input type="text" name="footer"/>*<br/>
+          Quiz Footer: <input type="text" name="footer" style="width: 440px;" />*<br/>
           <b>$qnum</b> will be replaced with the question number.
           <hr />
           Image bottom left: <input type="file" name="imgbottomleft" /><br/>
@@ -67,7 +70,6 @@ require_once ('config.php');
         <?php
         $extraparam = '';
         if (!$config["keywords_enabled"]) {
-        	//$extraparam = ' value="'.$keywords_default.'" style="display:none;"';
         	$extraparam = ' value="'.$config["keywords_default"].'" style="display:none;"';
         }
         else {

@@ -105,9 +105,9 @@ function getQuestions(resultdiv, quiz) {
 			questions += '</div>';
 			
 			pdfquestions += '<b>Question '+questionlist[i].questionnumber+': '+questionlist[i].questiontext+'</b><br />';
-			pdfquestions += 'Question Heading <input type="text" name="quizheading-'+questionlist[i].questionnumber+'" /><br />';
-			pdfquestions += 'Question Ingress <input type="text" name="quizheader-'+questionlist[i].questionnumber+'" /><br />';
-			pdfquestions += 'Question Image <input type="file" name="quizimage-'+questionlist[i].questionnumber+'" />';
+			pdfquestions += 'Question Heading: <input type="text" name="questionheading-'+questionlist[i].questionnumber+'" value="'+questionlist[i].questionheading+'" /><br />';
+			pdfquestions += 'Question Ingress: <textarea name="questioningress-'+questionlist[i].questionnumber+'">'+questionlist[i].questioningress+'</textarea><br />';
+			pdfquestions += 'Question Image: <input type="file" name="questionimage-'+questionlist[i].questionnumber+'" />';
 			pdfquestions += '<hr />';
 		}
 		$(resultdiv).html(questions);
@@ -151,25 +151,43 @@ function updatelinksandforms(questionlist) {
 	// \(						= A normal '(' (needs to be escaped, since it has special meaning in regex)
 	// (						= Start (third) capture group
 	// Inactive|Active|Finished	= Match one of these '|'-seperated strings
-	// )						= End (third) capture group (contains 3 options)
+	// )						= End (third) capture group (contains 1 of 3 options)
 	// \)						= A normal ')' (needs to be escaped, since it has special meaning in regex)
 	// $						= End of line
 	// The '/' are there just to encase the regex, the spaces are just regular spaces
-	var quizinfo=grabinforegex.exec(selectedquiz);
-	var quizname=quizinfo[2];
-	var keyword=quizinfo[1]+' ';
-	// Update (at the moment this occurs, hidden,) create pdf form
-	$('input[name="header"]').val(quizname);
+	if (selectedquiz.length > 0) {
+		var quizinfo=grabinforegex.exec(selectedquiz);
+		var quizname=quizinfo[2];
+		var keyword=quizinfo[1]+' ';
 	
-	var keywords_enabled = true;
-	// This is a hacky way to find out if multiple keywords are allowed in the quiz
-	if ($('#inputquizkeyword').css('display') === 'none') {
-		keywords_enabled = false;
+		var keywords_enabled = true;
+		// This is a hacky way to find out if multiple keywords are allowed in the quiz
+		if ($('#inputquizkeyword').css('display') === 'none') {
+			keywords_enabled = false;
+		}
+		if (!keywords_enabled) {
+			keyword = '';
+		}
+	
+		var quizheader = quizname;
+		var quizingress = '';
+		var quizfooter = 'Send SMS "STF '+keyword+'$qnum <svaralternativ>" til 2077';
+		if (questionlist.length > 0) {
+			if (questionlist[0].quizheader != '') {
+				quizheader = questionlist[0].quizheader; 
+			}
+			if (questionlist[0].quizingress != '') {
+				quizingress = questionlist[0].quizingress; 
+			}
+			if (questionlist[0].quizfooter != '') {
+				quizfooter = questionlist[0].quizfooter; 
+			}
+		}
 	}
-	if (!keywords_enabled) {
-		keyword = '';
-	}
-	$('input[name="footer"]').val('Send SMS med "STF '+keyword+'$qnum <svaralternativ>" til 2077');
+	// Update the (hidden at the moment this occurs,) create pdf form
+	$('input[name="header"]').val(quizheader);
+	$('textarea[name="ingress"]').val(quizingress);
+	$('input[name="footer"]').val(quizfooter);
 	
 	// Reset create PDF errorlist 
 	$("span#createpdferror").html("");

@@ -80,6 +80,12 @@ class quizAdmin {
 	function deleteQuestion($quizid, $questionid) {
 		$this->db->deleteQuestion($quizid, $questionid);
 	}
+	function setQuizPDFData($quizid, $quizheader, $quizingress, $quizfooter) {
+		$this->db->setQuizPDFData($quizid, $quizheader, $quizingress, $quizfooter);
+	}
+	function setQuestionPDFData($quizid, $questionnumber, $questionheading, $questioningress) {
+		$this->db->setQuestionPDFData($quizid, $questionnumber, $questionheading, $questioningress);
+	}
 	
 	function getCorrectAnswers($quizid, $correctanswersneeded=null) {
 		$ret = $this->db->getCorrectAnswersForQuiz($quizid, $correctanswersneeded);

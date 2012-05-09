@@ -1,6 +1,6 @@
 <?php
 if (!empty( $_POST['quizid'] )) {
-	$quizid = $_POST['quizid'];
+	$quizid = iconv('UTF-8', 'ISO-8859-1', $_POST['quizid']);
 	if (!is_numeric( $quizid )) {
 		die();
 	}
@@ -9,28 +9,44 @@ if (!empty( $_POST['quizid'] )) {
 	die();
 }
 if (!empty( $_POST['header'] )) {
-	$quizheader = $_POST['header'];
+	$quizheader = iconv('UTF-8', 'ISO-8859-1', $_POST['header']);
 } else {
 	echo 'No header set';
 	die();
 }
 if (!empty( $_POST['footer'] )) {
-	$quizfooter = $_POST['footer'];
+	$quizfooter = iconv('UTF-8', 'ISO-8859-1', $_POST['footer']);
 } else {
 	echo 'No footer set';
 	die();
 }
 if (!empty( $_POST['ingress'] )) {
-	$quizingress = $_POST['ingress'];
+	$quizingress = iconv('UTF-8', 'ISO-8859-1', $_POST['ingress']);
 } else {
 	$quizingress = '';
 }
 
+if (strlen($quizheader) > 200) {
+	echo 'Quiz header too long, max 200 characters';
+	die();
+}
+if (strlen($quizfooter) > 200) {
+	echo 'Quiz footer too long, max 200 characters';
+	die();
+}
+if (strlen($quizingress) > 1000) {
+	echo 'Quiz ingress too long, max 1000 characters';
+	die();
+}
+
+// Add quiz PDF values to database
+require_once ('quizadmin.php');
+$quizadmin = new quizAdmin();
+// Make sure not to send ISO-8859-1, but UTF-8 into DB
+$quizadmin->setQuizPDFData( $_POST['quizid'], $_POST['header'], $_POST['ingress'], $_POST['footer'] );
+
 //Need FDPF to generate PDF's. Check your local distro for installation
 require_once ('fpdf.php');
-require_once ('quizadmin.php');
-
-$quizadmin = new quizAdmin();
 $questionsArray = $quizadmin->getAllQuestionsForQuiz( $quizid );
 
 // Create a new PDF with Portrait orientation, mm as unit and in A4 format
@@ -80,7 +96,7 @@ foreach ($questionsArray as $key => $question) {
 	//////////////////////////////////////////////////////////////
 	// Image
 	//////////////////////////////////////////////////////////////
-	$file = 'quizimage-' . $question['questionnumber'];
+	$file = 'questionimage-' . $question['questionnumber'];
 	if (!empty( $_FILES[$file]['tmp_name'] )) {
 		// Attempt to convert image pixels to mm
 		$imgSize = getimagesize( $_FILES[$file]['tmp_name'] );
@@ -127,15 +143,18 @@ foreach ($questionsArray as $key => $question) {
 	//////////////////////////////////////////////////////////////
 	$pdf->Ln(4);
 	$pdf->SetFont( 'Arial', 'B', 18 );
-	$questionHeading = $_POST['quizheading-' . $question['questionnumber']];
-	$pdf->MultiCell( 0, 8, $questionHeading, 0, 'C' );
+	$questionHeading = $_POST['questionheading-' . $question['questionnumber']];
+	$pdf->MultiCell( 0, 8, iconv('UTF-8', 'ISO-8859-1', $questionHeading), 0, 'C' );
 	
 	//////////////////////////////////////////////////////////////
 	// Question ingress
 	//////////////////////////////////////////////////////////////
 	$pdf->SetFont( 'Arial', '', 16 );
-	$questionHeader = $_POST['quizheader-' . $question['questionnumber']];
-	$pdf->MultiCell( 0, 8, $questionHeader, 0, 'C' );
+	$questionIngress = $_POST['questioningress-' . $question['questionnumber']];
+	$pdf->MultiCell( 0, 8, iconv('UTF-8', 'ISO-8859-1', $questionIngress), 0, 'C' );
+	
+	// Add question PDF values to database, make sure not to send ISO-8859-1, but UTF-8 into DB
+	$quizadmin->setQuestionPDFData($quizid, $question['questionnumber'], $questionHeading, $questionIngress);
 	
 	//////////////////////////////////////////////////////////////
 	// Actual question
@@ -168,7 +187,7 @@ foreach ($questionsArray as $key => $question) {
 	if (!empty( $_FILES[$file]['tmp_name'] )) {
 		// We want width to never exceed 50mm
 		$reqW = 50;
-		// We want height to never exceed 25mm
+		// We want height to never exceed 20mm
 		$reqH = 20;
 		
 		// Attempt to convert image pixels to mm 
@@ -180,7 +199,6 @@ foreach ($questionsArray as $key => $question) {
 		if (($reqW / $imgW) > ($reqH / $imgH)) {
 			$imgW_force = null;
 			$imgH_force = $reqH; // We choose that height should decide image size
-			
 
 			// Bottom of image hits absolute bottom of page
 			$imgY = MAXHEIGHT - $reqH;
@@ -220,7 +238,7 @@ foreach ($questionsArray as $key => $question) {
 	if (!empty( $_FILES[$file]['tmp_name'] )) {
 		// We want width to never exceed 50mm
 		$reqW = 50;
-		// We want height to never exceed 25mm
+		// We want height to never exceed 20mm
 		$reqH = 20;
 		
 		// Attempt to convert image pixels to mm 
