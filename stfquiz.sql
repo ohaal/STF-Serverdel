@@ -28,7 +28,7 @@ CREATE TABLE `answers` (
   `answernumber` int(11) NOT NULL,
   `answertext` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`quizid`,`questionid`,`answernumber`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -47,7 +47,7 @@ CREATE TABLE `questions` (
   `correctanswer` int(11) NOT NULL DEFAULT '0',
   `idquestion` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`idquestion`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -67,7 +67,7 @@ CREATE TABLE `quiz` (
   `state` tinyint(1) NOT NULL DEFAULT '0',
   `keyword` varchar(20) NOT NULL,
   PRIMARY KEY (`idquiz`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -83,7 +83,7 @@ CREATE TABLE `teamanswers` (
   `questionid` int(11) NOT NULL,
   `answer` int(11) NOT NULL,
   PRIMARY KEY (`idanswers`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -98,7 +98,7 @@ CREATE TABLE `teammember` (
   `quizid` int(11) NOT NULL,
   `teamid` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`quizid`,`phonenumber`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -112,7 +112,7 @@ CREATE TABLE `teams` (
   `idteam` int(11) NOT NULL AUTO_INCREMENT,
   `teamname` varchar(80) NOT NULL,
   PRIMARY KEY (`idteam`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
