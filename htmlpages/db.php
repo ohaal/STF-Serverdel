@@ -355,7 +355,7 @@ class dbConnection {
 				"FROM teams, teammember, teamanswers, questions ".
 				"WHERE (teammember.quizid=$quizid AND teams.idteam=teammember.teamid) AND (teamanswers.phonenumber=teammember.phonenumber AND teamanswers.questionid=questions.idquestion AND teamanswers.answer=questions.correctanswer) AND (questions.quizid=teammember.quizid) ".
 				"GROUP BY teams.idteam ".
-				$minimumcorrect;
+				$minimumcorrect.
 				"ORDER BY correct DESC, teams.idteam, questions.questionnumber;";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {

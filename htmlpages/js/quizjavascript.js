@@ -125,6 +125,14 @@ function getQuestions(resultdiv, quiz) {
 	});
 }
 
+function keywordsenabled() {
+	// This is a hacky way to find out if multiple keywords are allowed in the quiz
+	if ($('#inputquizkeyword').css('display') === 'none') {
+		return false;
+	}
+	return true;
+}
+
 // This will always be triggered after quizid is changed (from getQuestions)
 function updatelinksandforms(questionlist) {
 	var quizid = $('select#quizname').val();
@@ -160,11 +168,7 @@ function updatelinksandforms(questionlist) {
 		var quizname=quizinfo[2];
 		var keyword=quizinfo[1]+' ';
 	
-		var keywords_enabled = true;
-		// This is a hacky way to find out if multiple keywords are allowed in the quiz
-		if ($('#inputquizkeyword').css('display') === 'none') {
-			keywords_enabled = false;
-		}
+		var keywords_enabled = keywordsenabled();
 		if (!keywords_enabled) {
 			keyword = '';
 		}
@@ -214,6 +218,7 @@ function updatelinksandforms(questionlist) {
 		$('a#changequizstate').show();
 		$('a#newquestion').hide();
 		$('a#highscorelink').show();
+		$('a#createpdf').show();
 	}
     else if (inactive) {
     	$('a#changequizstate').text('Activate and lock');
@@ -257,6 +262,7 @@ function updatelinksandforms(questionlist) {
     	$('a#changequizstate').hide();
     	$('a#newquestion').hide();
     	$('a#highscorelink').show();
+		$('a#createpdf').show();
     }
 }
 
@@ -480,8 +486,8 @@ function fillMinimumCorrectOptions(correctAnswers) {
 }
 function fillAmountOfWinnersOptions(maxAmount) {
 	options = '';
-	// Fill amount of winners - we hard cap the value to 10 if more than that amount of teams meet the requirements
-	var maxcap = maxAmount > 10 ? 10 : maxAmount;
+	// Fill amount of winners - we hard cap the value to 20 if more than that amount of teams meet the requirements
+	var maxcap = maxAmount > 20 ? 20 : maxAmount;
 	for (i = 1; i <= maxcap; i++) {
 		options += '<option value="' + i + '">'+i+'</option>';
 	}
@@ -491,7 +497,6 @@ function fillAmountOfWinnersOptions(maxAmount) {
 
 function getTeaminfoForQuiz(teamid, quiz) {
 	$.getJSON("ajaxpages/getteaminfoforquiz.php", {teamid: teamid, quizid: quiz, ajax : 'true'}, function(j) {
-			
 		var html ='';
 		var phonenumbers = j['info']['phonenumbers'];
 		var teamname = j['info']['teamname'];
@@ -667,7 +672,12 @@ $(document).ready(function() {
 			$.get("ajaxpages/addquizname.php", {quizname: qname, quizkeyword: qkey}, function() {
 				getQuizNames();
 				$("div#newquizoverlay").dialog("close");
-				$("div#newquizoverlay input.inputquiz").val("");
+				if (keywordsenabled()) {
+					$("div#newquizoverlay input.inputquiz").val("");
+				}
+				else {
+					$("div#newquizoverlay input#inputquizname").val("");
+				}
 				// Empty error list since we are successful
 				$("span#newquizerror").html("");
 			});
@@ -772,9 +782,9 @@ $(document).ready(function() {
 				scoretable += ' <thead class="ui-widget-header">';
 				scoretable += '  <tr>';
 				scoretable += '   <th>Pos.</th>';
-				scoretable += '   <th>Team name</th>';
+				scoretable += '   <th>Name</th>';
 				scoretable += '   <th>Correct answers</th>';
-				scoretable += '   <th>Phone numbers</th>';
+				scoretable += '   <th>Phone number</th>';
 				scoretable += '  </tr>';
 				scoretable += ' </thead>';
 				scoretable += ' <tbody class="ui-widget-content">';

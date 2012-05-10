@@ -114,10 +114,10 @@ for ($i=1;$i<=5;$i++) {
       </div>
       <div id="quizselect" class="hideifnoquiz">
 	    <select id="quizname"></select><br />
-	    <a id="createpdf" href="#">Create PDF</a><br />
-	    <a id="highscorelink" href="#" target="_blank">Show scores</a><br />
-	    <a id="changequizstate" href="#"></a><br />
-        <a id="newquestion" href="#">New Question</a>
+	    <a id="createpdf" href="#">Create PDF<br /></a>
+	    <a id="highscorelink" href="#" target="_blank">Show scores<br /></a>
+        <a id="newquestion" href="#">New Question<br /></a>
+	    <a id="changequizstate" href="#"></a>
       </div>
       <div id="questions"></div>
     </div>
