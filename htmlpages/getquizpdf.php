@@ -94,7 +94,7 @@ foreach ($questionsArray as $key => $question) {
 	$pdf->Cell( 0, 3, '', 0, 1, 'L' );
 	
 	//////////////////////////////////////////////////////////////
-	// Image
+	// Question image
 	//////////////////////////////////////////////////////////////
 	$file = 'questionimage-' . $question['questionnumber'];
 	if (!empty( $_FILES[$file]['tmp_name'] )) {
