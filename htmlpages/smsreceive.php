@@ -16,25 +16,29 @@ class SMSReceiveHandler {
 		
 		$smsReact = new smsReaction();
 		
-		// Account for and remove any accidental double (or more) spaces in message
+		// Account for and remove any accidental double (or more) whitespaces in message
 		$smstext = preg_replace( '/\s{2,}/', ' ', $smstext );
 		
-
 		// Split SMS message into array for easier handling
-		if (!$this->config["keywords_enabled"]) {
+		// If keywords enabled, format will be: STF <keyword> <remaining data>
+		if ($this->config['keywords_enabled']) {
 			$smsparam = explode( ' ', $smstext, 3 );
-			array_unshift($smsparam, $this->config["keywords_default"]);
+			$keyword = strtolower($smsparam[1]);
 		}
+		// If keywords not enabled, format will be: STF <remaining data>
 		else {
-			$smsparam = explode( ' ', $smstext, 4 );
+			$smsparam = explode( ' ', $smstext, 2 );
+			// Throw in the default keyword, so we don't have to make exceptions all over the code for this
+			array_unshift($smsparam, $this->config['keywords_default']);
+			$keyword = $this->config['keywords_default'];
 		}
-		if (count( $smsparam ) <= 2) {
+		if (count( $smsparam ) < 3) {
 			$smsReact->sendMessage( $this->config['lang_no_unknownformat'], $phonenumber );
 			error_log('Too few parameters - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 			return;
 		}
-		$keyword = strtolower($smsparam[1]);
-	
+		$remainingdata = $smsparam[2];
+
 		// Get the quiz id based on keyword (looks for active quiz with keyword)
 		$quizid = $smsReact->getQuizIdByKeyword( $keyword );
 		if ($quizid < 0) {
@@ -53,67 +57,44 @@ class SMSReceiveHandler {
 			$smsReact->createParticipant( $phonenumber, $quizid );
 			$teamid = 0;
 		}
-		
-		$combined = false;
-		
-		// Expected SMS text formats (we will act differently based on the format):
-		// -> Format: <keyword> lag <teamname> || <keyword> lagnavn <teamname>
-		if (strtolower($smsparam[2]) == 'lag' || strtolower($smsparam[2]) == 'lagnavn' || strtolower($smsparam[2]) == 'navn') {
-			if (!array_key_exists(3, $smsparam) || is_null( $smsparam[3] ) || empty( $smsparam[3] )) {
-				$smsReact->sendMessage( $this->config['lang_no_noteamnamegiven'], $phonenumber );
-				error_log('No team name given - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
-				return;
-			}
-			$teamname = $smsparam[3];
-			
-			// Check if user took <lagnavn> too literally, and remove <> if he did
-			if (substr($teamname, 0, 1) == '<' && substr($teamname, -1, 1) == '>') {
-				$teamname = substr($teamname, 1, -1);
-			}
-			
-			$newTeamCreated = false;
-			
-			$teamid = $smsReact->getTeamIdByTeamName( $teamname );
-			// TeamId < 0	no team found with this name
-			// TeamId > 0	team found
+		if ($teamid == 0) {
+			// Create a team for this participant
+			// (we give each participant a team of their own, to avoid redoing ~the entire code because of removing team functionality)
+			$teamname = $phonenumber;
+			$teamid = $smsReact->getTeamIdByTeamName($teamname);
+			// TeamId < 0	No team found with this name
+			// TeamId > 0	Team found with ID
 			if ($teamid < 0) {
-				$newTeamCreated = true;
-				$teamid = $smsReact->createTeam( $teamname );
+				// Create team if team does not already exist
+		 		$teamid = $smsReact->createTeam( $teamname );
 			}
-			// Associate phone number with team (connects all current answers by this phone number with team)
+			// Associate participant with team
 			$smsReact->addParticipantToTeam( $phonenumber, $quizid, $teamid );
-			if ($newTeamCreated) {
-				$smsReact->sendMessage( str_replace('$teamname$', $teamname, $this->config['lang_no_createdandsignedupforteam']), $phonenumber );
-				error_log('New team ('.$teamname.') created and added new member to team. - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
-				return;
-			}
-			else {
-				$smsReact->sendMessage( str_replace('$teamname$', $teamname, $this->config['lang_no_signedupforteam']), $phonenumber );
-				error_log('Added new member to team "'.$teamname.'" - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
-				return;
-			}
 		}
-		// -> Format: <keyword> <question number> <answer alternative> || <keyword> <question number><answer alternative>
-		// Examples: STF 1 a
-		//           STF 3c
-		else if (is_numeric( $smsparam[2] ) || $combined = preg_match('/^([0-9]+)([a-eA-E])$/', $smsparam[2], $questionanswer)) {
-			if (!$combined && !array_key_exists(3, $smsparam) ||
-			(array_key_exists(3, $smsparam) && (is_null( $smsparam[3] ) || empty( $smsparam[3] ) || !ctype_alpha( $smsparam[3] ) || strlen( $smsparam[3] ) != 1))
-			) {
-				$smsReact->sendMessage( $this->config['lang_no_invalidansweralternativeprovided'], $phonenumber );
-				error_log('Invalid answer alternative provided - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
-				return;
-			}
+
+		// Use a regex to handle the remaining data in a best possible way
+		// Remaining data can be formatted in these ways:
+		// <question number> <answer alternative> || <question number><answer alternative> ||
+		// <answer alternative> <question number> || <answer alternative><question number>
+		// Examples: "STF 1 a" || "STF 3c" || "STF d2" || "STF b 4"
+		// Simple explanation of regex used:
+		// ^[\s.\'"`:<\/>;,-_]*?	Match any amount of the characters inside brackets at beginning of line, \s means any whitespace char (lazy)
+		// ([1-9][0-9]*)			Capture numbers larger than 0 (first capture group)
+		// [\s.\'"`:<\/>;,-_]*?		Match any amount of the characters inside brackets, \s means any whitespace char (lazy)
+		// ([a-eA-E])				Capture a single character between A and E (match for both upper- and lower-case)
+		// The other regex is pretty much the same, just with the letter first instead of the number
+		if (preg_match('/^[\s.\'":<\/>;,-_]*?([1-9][0-9]*)[\s.\'"`:<\/>;,-_]*?([a-eA-E])/', $remainingdata, $questionanswer) ||
+			preg_match('/^[\s.\'":<\/>;,-_]*?([a-eA-E])[\s.\'"`:<\/>;,-_]*?([1-9][0-9]*)/', $remainingdata, $answerquestion)) {
 			
-			if ($combined && !empty($questionanswer)) {
+			if (!empty($questionanswer)) {
 				$questionnumber = $questionanswer[1];
 				$answer = $questionanswer[2];
 			}
 			else {
-				$questionnumber = $smsparam[2];
-				$answer = $smsparam[3];
+				$answer = $answerquestion[1];
+				$questionnumber = $answerquestion[2];
 			}
-			
+		
 			// Simple fix for request about using letters instead of numbers as answer alternatives @replacealphawithnumber
 			$search  = array('a','b','c','d','e');
 			$replace = array('1','2','3','4','5');
@@ -121,7 +102,7 @@ class SMSReceiveHandler {
 			
 			// Check if both question number and answer number are valid
 			if (!$smsReact->isValidQuestionNumberAndAnswerNumber( $questionnumber, $answernumber, $quizid )) {
-				$smsReact->sendMessage( $this->config['lang_no_invalidquestionnumberoranswer'], $phonenumber );
+				$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array(strtoupper($answer), $questionnumber), $this->config['lang_no_invalidquestionnumberoranswer']), $phonenumber );
 				error_log('Invalid question number ('.$questionnumber.') or answer ('.$answer.') - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 				return;
 			}
@@ -129,21 +110,29 @@ class SMSReceiveHandler {
 			// Add answer to participant
 			$smsReact->addAnswerToParticipant( $answernumber, $questionnumber, $phonenumber, $quizid );
 			
-			if ($teamid == 0) {
-				// Team member not member of any team
-				$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array(strtoupper($answer), $questionnumber), $this->config['lang_no_registeredanswerbutnoteam']), $phonenumber );
-				error_log('Registered answer ('.$answer.'), but not member of team - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
-				return;
-			}
-			else {
-				// Team member of team
-				$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array(strtoupper($answer), $questionnumber), $this->config['lang_no_registeredanswer']), $phonenumber );
-				error_log('Registered answer ('.$answer.') - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
-				return;
-			}
+			// Reply success
+			$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array(strtoupper($answer), $questionnumber), $this->config['lang_no_registeredanswer']), $phonenumber );
+			error_log('Registered answer ('.$answer.') - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
+			return;
 		}
-		// Unknown format (unknown command)
+		// Not captured by regex, user must have done something wrong, let's figure out what
+		// Only submitting answer, only submitting question number, see common errors ("Unknown format" in log)
 		else {
+			// Match question number only?
+			if (preg_match('/^[\s.\'"`:<\/>;,-_]*?[1-9][0-9]*/', $remainingdata)) {
+				$smsReact->sendMessage( $this->config['lang_no_invalidansweralternativeprovided'], $phonenumber );
+				error_log('Answer alternative invalid or missing - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
+				return;				
+			}
+
+			// Match answer only?
+			if (preg_match('/^[\s.\'"`:<\/>;,-_]*?[a-eA-E][\s.\'":<\/>;,-_]+/', $remainingdata)) {
+				$smsReact->sendMessage( $this->config['lang_no_invalidquestionnumberprovided'], $phonenumber );
+				error_log('Question number invalid or missing - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
+				return;				
+			}
+			
+			// Did not recognize specific error, -> unknown format (unknown command)
 			$smsReact->sendMessage( $this->config['lang_no_unknownformat'], $phonenumber );
 			error_log('Unknown format! - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 			return;
