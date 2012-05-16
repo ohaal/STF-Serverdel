@@ -13,6 +13,10 @@ $config['keywords_enabled'] = false;
 // Default keyword when not enabled (all new quiz are made with this keyword)
 $config['keywords_default'] = 'STF';
 
+// Set host and port for websocket server (MMSadmin)
+$config['ws_host'] = '127.0.0.1';
+$config['ws_port'] = '7678';
+
 // Most of these are SMS related. Avoid messages with a length higher than 160 characters, as that will cause the message to be sent over two or more SMS
 $config['lang_no_invalidkeyword'] = 'Stavanger Turistforening har for øyeblikket ingen aktive quiz.';
 $config['lang_no_invalidansweralternativeprovided'] = 'Du må angi et gyldig svaralternativ! Send STF <spørsmålsnummer> <svaralternativ> til '.$config['pswin_servicenumber'].'.';

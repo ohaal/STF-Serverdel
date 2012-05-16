@@ -1,3 +1,6 @@
+<?php
+require 'config.php'; 
+?>
 <!DOCTYPE html>
 <html>
   <head>
@@ -20,6 +23,10 @@
     <script tyoe="text/javscript" src="js/mmsadminclient.js"></script>
   </head>
   <body>
+  <div id="hiddenmetainfo" style="display:none;">
+  	<span id="wshost"><?php print($config['ws_host']); ?></span>
+  	<span id="wsport"><?php print($config['ws_port']); ?></span>
+  </div>
   <div id="splashscreen">
     <input type="text" id="inputnick" name="inputnick" />
     <button value="setnick" id="setnickbutton">Set nick</button>

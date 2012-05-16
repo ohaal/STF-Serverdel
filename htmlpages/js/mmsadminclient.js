@@ -60,7 +60,9 @@ function set_nick_and_connect( nick ) {
 	toggle_visibility('undetermined');	
 	
 	log('Connecting...');
-	Server = new FancyWebSocket('ws://192.168.40.190:1337');
+	var host = $('div#hiddenmetainfo span#wshost').text();
+	var port = $('div#hiddenmetainfo span#wsport').text();
+	Server = new FancyWebSocket('ws://'+host+':'+port);
 
 	/////////////////////////////////////////////////
 	// EVENTS - Catch commands received from server
