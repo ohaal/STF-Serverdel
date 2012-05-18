@@ -20,7 +20,7 @@ require 'config.php';
     </script>
     <script type="text/javascript" src="contentflow/contentflow_src.js"></script>
     <script type="text/javascript" src="js/fancywebsocket.js"></script>
-    <script tyoe="text/javscript" src="js/mmsadminclient.js"></script>
+    <script type="text/javascript" src="js/mmsadminclient.js"></script>
   </head>
   <body>
   <div id="hiddenmetainfo" style="display:none;">
