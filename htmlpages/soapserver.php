@@ -4,6 +4,7 @@ require_once('pswin/ReturnValue.php');
 ini_set("soap.wsdl_cache_enabled", "0"); // disabling WSDL cache
 
 require_once ('smsreceive.php');
+require_once ('mmsreceive.php');
 class SMSReceiveService {
 	/**
 	 * This function is called from PSWin when pushing MMS
@@ -13,7 +14,25 @@ class SMSReceiveService {
 	 */
 	public static function ReceiveMMSMessage(ReceiveMMSMessage $parameters) {
 		$res = new ReceiveMMSMessageResponse();
-		$res->ReceiveMMSMessageResult = new ReturnValue('200', 'OK', 'OK');
+		
+		error_log("in ReceiveMMSMessage");
+		
+		$m = $parameters->getM();
+		$sender = $m->getSenderNumber();
+		$subject = $m->getSubject();
+		$data = $m->getData();
+		
+		if(empty($sender) || empty($data)) {
+			error_log("Recived MMS message, but either sender number og content (data) was empty: sender: "+$sender,0);
+			$res->ReceiveMMSMessageResult = new ReturnValue('500', 'No sender or data', 'No sender or data');
+			return $res;
+		}
+		
+		// Call function to handle the incoming SMS
+		$mmsHandler = new MMSReceiveHandler();
+		$mmsHandler->handleMms($sender, $subject, $data);
+
+		$res->ReceiveMMSMessageResult = new ReturnValue('200', $subject, $subject);
 		
 		return $res;
 		
@@ -34,7 +53,7 @@ class SMSReceiveService {
 		
 		if(empty($sender) || empty($message)) {
 			error_log("Recived SMS message, but either sender number og text was empty: sender: "+$sender+", message: "+message,0);
-			$res->ReceiveSMSMessageResult = new ReturnValue('500', '', 'abc');
+			$res->ReceiveSMSMessageResult = new ReturnValue('500', 'No sender or text', 'No sender or text');
 			return $res;
 		}
 
