@@ -32,5 +32,5 @@ $config['lang_no_mmsreceived'] = 'Din MMS er mottatt og lagt til i køen for god
 
 // Don't change anything below this line 
 if (!key_exists('ws_ip_lan_bind', $config)) {
-	$config['server_ip'] = gethostbyname(php_uname('n'));
+	$config['ws_ip_lan_bind'] = gethostbyname(php_uname('n'));
 }
