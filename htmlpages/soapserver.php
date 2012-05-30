@@ -23,7 +23,7 @@ class SMSReceiveService {
 		$data = $m->getData();
 		
 		if(empty($sender) || empty($data)) {
-			error_log("Recived MMS message, but either sender number og content (data) was empty: sender: "+$sender,0);
+			error_log("Recived MMS message, but either sender number og content (data) was empty: sender: ".$sender,0);
 			$res->ReceiveMMSMessageResult = new ReturnValue('500', 'No sender or data', 'No sender or data');
 			return $res;
 		}
@@ -51,8 +51,11 @@ class SMSReceiveService {
 		$sender = $m->getSenderNumber();
 		$message = $m->getText();
 		
+		// TODO: Debug, see what we receive in address field
+		error_log('Address: '.$m->getAddress(), 0);
+		
 		if(empty($sender) || empty($message)) {
-			error_log("Recived SMS message, but either sender number og text was empty: sender: "+$sender+", message: "+message,0);
+			error_log("Recived SMS message, but either sender number og text was empty: sender: ".$sender.", message: ".message,0);
 			$res->ReceiveSMSMessageResult = new ReturnValue('500', 'No sender or text', 'No sender or text');
 			return $res;
 		}
@@ -120,7 +123,9 @@ class IncomingSMSMessage {
 	public function getText(){
 		return $this->Text;
 	}
-
+	public function getAddress(){
+		return $this->Address;
+	}
 }
 
 class GSMPosition {
