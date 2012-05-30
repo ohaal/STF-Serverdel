@@ -24,8 +24,7 @@ class MMSReceiveHandler {
 		$timestamp = time();
 		$savepath = $this->config['mms_folder'].SEP.$phonenumber.SEP.$timestamp.SEP;
 		$this->create_dirs($savepath);
-		$savepath = realpath($savepath);
-		if ($savepath === false) {
+		if (!is_dir($savepath)) {
 			error_log('Could not create folder structure for saving MMS data. Permission problem?', 0);
 			return false;
 		}
@@ -51,9 +50,9 @@ class MMSReceiveHandler {
 		}
 		$xmlobj = simplexml_load_file($xmlfilepath);
 		// Remove xml file
-		if (!unlink($xmlfilepath)) {
-			error_log('Unable to delete file '.$xmlfilepath, 0);
-		}
+//		if (!unlink($xmlfilepath)) {
+//			error_log('Unable to delete file '.$xmlfilepath, 0);
+//		}
 		
 		// Get image filename
 		$imgfile = (string)$xmlobj->body->par->img->attributes()->src;
@@ -70,11 +69,21 @@ class MMSReceiveHandler {
 		$newpath = $savepath.'..'.SEP.$timestamp.'.jpg';
 		$renamesuccess = rename($imgfilepath, $newpath);
 		if ($renamesuccess) {
-			$imgfilepath = realpath($newpath);
+			$imgfilepath = $newpath;
 		}
 		else {
-			error_log('Could not rename MMS image file '.$imgfilepath, 0);
-			return false;
+			// Fallback solution: look for the file in the specific folder
+			$files = glob($savepath.'*.jpg');
+			if (count($files) != 1) {
+				error_log('Warning: Unexpectedly more than one .jpg file in '.$savepath.', using first file', 0);
+			}
+			// Try renaming again
+			$renamesuccess = rename($files[0], $newpath);
+			if (!$renamesuccess) {
+				error_log('Could not rename MMS image file '.$imgfilepath, 0);
+				$imgfilepath = $newpath;
+				return false;
+			}
 		}
 		
 		// Check for text message file(s) in XML 
@@ -104,9 +113,9 @@ class MMSReceiveHandler {
 					// Append message part to message
 					$message .= $msgpart;					
 					// Remove text file
-					if (!unlink($txtfilepath)) {
-						error_log('Unable to delete file '.$txtfilepath, 0);
-					}
+//					if (!unlink($txtfilepath)) {
+//						error_log('Unable to delete file '.$txtfilepath, 0);
+//					}
 				}
 				else {
 					error_log('Could not find text message file '.$txtfilepath, 0);
