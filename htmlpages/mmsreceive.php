@@ -24,7 +24,8 @@ class MMSReceiveHandler {
 		$timestamp = time();
 		$savepath = $this->config['mms_folder'].SEP.$phonenumber.SEP.$timestamp.SEP;
 		$this->create_dirs($savepath);
-		if (!is_dir($savepath)) {
+		$savepath = realpath($savepath);
+		if ($savepath === false || !is_dir($savepath)) {
 			error_log('Could not create folder structure for saving MMS data. Permission problem?', 0);
 			return false;
 		}
@@ -69,7 +70,7 @@ class MMSReceiveHandler {
 		$newpath = $savepath.'..'.SEP.$timestamp.'.jpg';
 		$renamesuccess = rename($imgfilepath, $newpath);
 		if ($renamesuccess) {
-			$imgfilepath = $newpath;
+			$imgfilepath = realpath($newpath);
 		}
 		else {
 			// Fallback solution: look for the file in the specific folder
@@ -80,8 +81,8 @@ class MMSReceiveHandler {
 			// Try renaming again
 			$renamesuccess = rename($files[0], $newpath);
 			if (!$renamesuccess) {
-				error_log('Could not rename MMS image file '.$imgfilepath, 0);
-				$imgfilepath = $newpath;
+				error_log('Could not rename MMS image file '.$files[0], 0);
+				$imgfilepath = realpath($newpath);
 				return false;
 			}
 		}
