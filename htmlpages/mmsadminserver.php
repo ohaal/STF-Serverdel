@@ -48,7 +48,7 @@ function eventChatMsg($clientID, $ip, $params) {
 // This is triggered when an MMS is received
 function eventUpdateMms($clientID, $ip) {
 	global $Server, $mms;
-	$Server->log('Received poke from self ('.$ip.'), telling clients to review MMS lists');
+	$Server->log('Received poke from self ('.$ip.'). Telling all clients to review MMS lists.');
 	
 	$data = array(
 		'accepted' => $mms->getAccepted(),
@@ -203,23 +203,23 @@ function wsOnClose($clientID, $status) {
 
 	// This is a bit of a hack to save time by avoiding implementing a WebSocket client in PHP
 	// We tell the users to update their MMS lists if the IP disconnecting is the servers IP
-	if ($ip == $config['server_ip']) {
+	if ($ip == $config['ws_ip_lan_bind']) {
 		eventUpdateMms($clientID, $ip);
 		return;
 	}
 	
 	if (key_exists($clientID, $userlist)) {
 		$Server->log( "$ip ($clientID) has disconnected." );
-		$data = array(
-			'userlist' => $userlist
-		);
-		SendToAllClientsExcept($clientID, 'updateuserlist', $data);
 		//Send a user left notice to everyone in the room except user who left
 		$data = array(
 			'message' => $userlist[$clientID].' disconnected.'
 		);
 		SendToAllClientsExcept($clientID, 'servmsg', $data);
 		unset($userlist[$clientID]);
+		$data = array(
+			'userlist' => $userlist
+		);
+		SendToAllClientsExcept($clientID, 'updateuserlist', $data);
 	}
 	else {
 		error_log('Attempted to remove clientID which was not in userlist - misconfigured server address? ID:'.$clientID, 0);
@@ -237,5 +237,5 @@ $Server->bind('close', 'wsOnClose');
 // for other computers to connect, you will probably need to change this to your LAN IP or external IP,
 // alternatively use: gethostbyaddr(gethostbyname($_SERVER['SERVER_NAME']))
 $Server->wsStartServer($config['ws_ip_lan_bind'], $config['ws_port']);
-
+$Server->log('Server started.');
 ?>

@@ -30,10 +30,7 @@ $config['lang_no_registeredanswer'] = 'Ditt svar ($answer$) på spørsmål $ques
 $config['lang_no_unknownformat'] = 'For å svare på et spørsmål, send STF <spørsmålsnummer> <svaralternativ> til '.$config['pswin_servicenumber'].'.';
 $config['lang_no_mmsreceived'] = 'Din MMS er mottatt og lagt til i køen for godkjenning.';
 
-// This is used for checking if a connection is coming from the server itself - mostly not necessary to set this manually
-//$config['server_ip'] = '127.0.0.1';
-
 // Don't change anything below this line 
-if (!key_exists('server_ip', $config)) {
+if (!key_exists('ws_ip_lan_bind', $config)) {
 	$config['server_ip'] = gethostbyname(php_uname('n'));
 }
