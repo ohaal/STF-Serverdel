@@ -54,6 +54,29 @@ function update_userlist( userlist ) {
 	}
 }
 
+function update_mmsitems( state, mmslist ) {
+	// Add MMS to list of unhandled MMS
+//	var randid = Math.floor(Math.random()*1500);
+//	$('div.hiddenItems').html('<div class="item" id="jimmy'+randid+'"><img class="content" src="mmspics/pic0.png" target="_blank"/><div class="caption">pic0: some stripes</div></div>');
+//	var newitem = document.getElementById('jimmy'+randid);
+//	
+//	if (state == 'accepted') {
+//		for (mms in mmslist) {
+//			cfAccepted.addItem(newitem, 'end');
+//		}
+//	}
+//	else if (state == 'declined') {
+//		for (mms in mmslist) {
+//			cfDeclined.addItem(newitem, 'end');
+//		}
+//	}
+//	else {
+//		for (mms in mmslist) {
+//			cfUndetermined.addItem(newitem, 'end');
+//		}
+//	}
+}
+
 function set_nick_and_connect( nick ) {
 	var userlist = new Object;
 	
@@ -97,18 +120,12 @@ function set_nick_and_connect( nick ) {
 		update_userlist( data.userlist );
 	});
 	
-	// Add MMS to list of unhandled MMS
-//	Server.bind('addmms', function( payload ) {
-//		log( 'Added MMS' );
-//		console.log(payload);
-//		// Add MMS to list of unhandled MMS
-//		var randid = Math.floor(Math.random()*1500);
-//		$('div.hiddenItems').html('<div class="item" id="jimmy'+randid+'"><img class="content" src="mmspics/pic0.png" target="_blank"/><div class="caption">pic0: some stripes</div></div>');
-//		var newitem = document.getElementById('jimmy'+randid);
-//		cfUndetermined.addItem(newitem, 'end');
-//		
-//	});
-
+	Server.bind('updatemmslist', function( data ) {
+		update_mmsitems( 'queued', data.queued );
+		update_mmsitems( 'declined', data.declined );
+		update_mmsitems( 'accepted', data.accepted );
+	});
+	
 	// Accept picture
 //	Server.bind('picture_accept', function( payload ) {
 //		log( payload );
@@ -127,18 +144,27 @@ function set_nick_and_connect( nick ) {
 	Server.connect();
 }
 
+function nickinput() {
+	// ?: Nick input is validated OK
+	if ($('input#inputnick').val().length > 0) {
+		// -> Switch to main screen and connect to server
+		$('div#splashscreen').hide();
+		$('div#main').show();
+		set_nick_and_connect($('input#inputnick').val());
+	}
+	return false;
+}
+
 $(document).ready(function() {
 	// Show only nick input at first
 	$('div#splashscreen').show();
 	$('div#main').hide();
 	
-	$("button#setnickbutton").click(function() {
-		if ($('input#inputnick').val().length > 0) {
-			$('div#splashscreen').hide();
-			$('div#main').show();
-			set_nick_and_connect($('input#inputnick').val());
+	$("button#setnickbutton").click(nickinput);
+	$('input#inputnick').keypress(function(e) {
+		if ( e.keyCode == 13 && this.value ) {
+			nickinput();
 		}
-		return false;
 	});
 	
 	$('#message').keypress(function(e) {
