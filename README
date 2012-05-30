@@ -7,3 +7,9 @@ Den skal ha en MySQL-server og noen PHP-sider som:
 * Visning av MMS-karusell.
 
 MMS-karusell og administrasjon baserer vi på http://www.jacksasylum.eu/ContentFlow
+
+Stavanger Turistforening er en ideell organisasjon. Løsningen er utviklet av Bouvet for Stavanger Turistforening.
+
+Løsningen er lisensiert som CC-BY-SA som betyr at hvem som helst kan videreutvikle men all videreutvikling
+må deles med Stavanger Turistforening. Alle oppfordres til å bli en aktiv del av utviklingen. Utvikling og
+prodsetting administreres av Bouvet.
