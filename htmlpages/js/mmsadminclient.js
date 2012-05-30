@@ -80,7 +80,7 @@ function update_mmsitems( state, mmslist ) {
 function set_nick_and_connect( nick ) {
 	var userlist = new Object;
 	
-	toggle_visibility('undetermined');	
+	toggle_visibility('undetermined');
 	
 	log('Connecting...');
 	var host = $('div#hiddenmetainfo span#wshost').text();
@@ -121,6 +121,8 @@ function set_nick_and_connect( nick ) {
 	});
 	
 	Server.bind('updatemmslist', function( data ) {
+		log('Received updated MMS list');
+		console.log(data);
 		update_mmsitems( 'queued', data.queued );
 		update_mmsitems( 'declined', data.declined );
 		update_mmsitems( 'accepted', data.accepted );
