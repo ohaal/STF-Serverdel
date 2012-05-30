@@ -16,6 +16,9 @@ INSTALL FPDF
 	- Enter the unzipped directory
 		- `cd fpdf17`
 	- Copy the main file, "fpdf.php" and the directory named "font" into the "htmlpages" directory of your STFquiz installation
-	
+
 START THE MMS-ADMIN SERVER (REQUIRED FOR MMS ADMINISTRATION)
 	- When in the "htmlpages" directory, run this command from the shell: php5 ./mmsadminserver.php
+
+PREPARE A FOLDER FOR STORING MMS
+	- The folder configured to be used as storage for MMS images must be available for writing

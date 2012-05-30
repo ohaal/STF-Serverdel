@@ -102,6 +102,41 @@ CREATE TABLE `teammember` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `mms`
+--
+
+DROP TABLE IF EXISTS `mms`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `mms` (
+  `msgid` int(11) NOT NULL AUTO_INCREMENT,
+  `recvdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `text` varchar(900) NOT NULL,
+  `state` tinyint(1) NOT NULL DEFAULT '0',
+  `imgpath` varchar(200) NOT NULL,
+  `phonenumber` varchar(20) NOT NULL,
+  PRIMARY KEY (`msgid`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `sms`
+--
+
+DROP TABLE IF EXISTS `sms`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sms` (
+  `msgid` int(11) NOT NULL AUTO_INCREMENT,
+  `recvdate` datetime NOT NULL,
+  `text` varchar(900) NOT NULL,
+  `phonenumber` varchar(20) NOT NULL,
+  `quizid` int(11) NOT NULL,
+  PRIMARY KEY (`msgid`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `teams`
 --
 

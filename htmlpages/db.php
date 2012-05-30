@@ -57,10 +57,8 @@ class dbConnection {
 	}
 	
 	function addQuizName($quizName, $quizKeyword) {
-		if ($stmt = $this->dbconn->prepare("INSERT INTO quiz (quizname, keyword, state) VALUES (?, ?, ?)")) {
-			// bind_param only accepts variables...
-			$state = 0; // 0 = inactive, all quizzes will start off as inactive
-			$stmt->bind_param('ssi', $quizName, $quizKeyword, $state);
+		if ($stmt = $this->dbconn->prepare("INSERT INTO quiz (quizname, keyword) VALUES (?, ?)")) {
+			$stmt->bind_param('ss', $quizName, $quizKeyword);
 			$stmt->execute();
 			$stmt->close();
 		} else {
@@ -506,6 +504,45 @@ class dbConnection {
 			$stmt->close();
 		} else {
 			printf("Prepared Statement Error: %s\n", $stmt->error);
+		}
+	}
+	
+	function setMmsState($msgid, $state) {
+		if ($stmt = $this->dbconn->prepare("UPDATE mms SET state=? WHERE msgid=?")) {
+			$stmt->bind_param('ii', $state, $msgid);
+			$stmt->execute();
+			$stmt->close();
+		} else {
+			printf("Prepared Statement Error: %s\n", $stmt->error);
+			return false;
+		}
+		return true;
+	}
+	
+	function getMmsList($state) {
+		$mmslist = array();
+		$sql = "SELECT msgid, recvdate, text, imgpath, phonenumber FROM mms WHERE state=$state";
+		if ($result = $this->dbconn->query ( $sql )) {
+			if ($result->num_rows > 0) {
+				while ( $row = $result->fetch_object () ) {
+					$mmslist[] = $row; 
+				}
+			}		
+		} else {
+			print_r($this->dbconn->error);
+		}
+		return $mmslist;
+	}
+	
+	function addMms($phonenumber, $message, $imgpath) {
+		if ($stmt = $this->dbconn->prepare("INSERT INTO mms (phonenumber, text, imgpath) VALUES (?, ?, ?)")) {
+			$stmt->bind_param('sss', $phonenumber, $message, $imgpath);
+			$stmt->execute();
+			$stmt->close();
+			return mysqli_insert_id($this->dbconn);
+		} else {
+			printf("Prepared Statement Error: %s\n", $stmt->error);
+			return -1;
 		}
 	}
 }
