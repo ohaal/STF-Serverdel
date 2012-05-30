@@ -24,7 +24,7 @@ require 'config.php';
   </head>
   <body>
   <div id="hiddenmetainfo" style="display:none;">
-  	<span id="wshost"><?php print($config['ws_host']); ?></span>
+  	<span id="wshost"><?php print($config['ws_ip_wan_bind']); ?></span>
   	<span id="wsport"><?php print($config['ws_port']); ?></span>
   </div>
   <div id="splashscreen">

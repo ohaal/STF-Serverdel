@@ -32,7 +32,7 @@ class mmsReaction {
 		
 		// Tell MMSadmin there is a new MMS available by poking mmsadminserver
 		// We keep the poke as simple as possible so we don't have to implement a PHP WebSocket Client aswell
-		fclose(fsockopen($this->config['ws_host'], $this->config['ws_port'], $errno, $errstr, 2));
+		fclose(fsockopen($this->config['ws_ip_lan_bind'], $this->config['ws_port'], $errno, $errstr, 2));
 
 		// Return increment ID in DB
 		return $msgid;

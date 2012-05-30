@@ -14,7 +14,8 @@ $config['keywords_enabled'] = false;
 $config['keywords_default'] = 'STF';
 
 // Set host and port for websocket server (MMSadmin)
-$config['ws_host'] = '127.0.0.1';
+$config['ws_ip_lan_bind'] = '127.0.0.1';
+$config['ws_ip_wan_bind'] = '127.0.0.1';
 $config['ws_port'] = '7678';
 
 // MMS related options
