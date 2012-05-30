@@ -26,7 +26,7 @@ class MMSReceiveHandler {
 		$this->create_dirs($savepath);
 		$savepath = realpath($savepath);
 		if ($savepath === false) {
-			error_log('Could not create folder structure for saving MMS data, permission problem?: '.$savepath, 0);
+			error_log('Could not create folder structure for saving MMS data. Permission problem?', 0);
 			return false;
 		}
 		$savepath = $savepath.SEP;
