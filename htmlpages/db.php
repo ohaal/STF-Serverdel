@@ -108,6 +108,7 @@ class dbConnection {
 	}
 	
 	function getQuestion($quizid, $questionnumber) {
+		$ret = array();
 		if (!is_numeric($quizid) || ! is_numeric($questionnumber)) {
 			die();
 		}
