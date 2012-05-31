@@ -151,9 +151,11 @@ class MMSReceiveHandler {
 			// Trim whitespaces at end of message
 			$msg = trim($msg);			
 			
+			$relpath = $this->find_relative_path(dirname(__FILE__), $newpath);
+			
 			// Add MMS information to database and push to MMSadmin
 			$mms = new mmsReaction();
-			if ($mms->addMms($phonenumber, $msg, $newpath) < 0) {
+			if ($mms->addMms($phonenumber, $msg, $relpath) < 0) {
 				error_log('Could not add MMS information to database, path: '.$savepath, 0);
 				return false;
 			}			
@@ -252,6 +254,31 @@ class MMSReceiveHandler {
 				}
 			}
 		}
+	}
+	
+	// Find the relative path from frompath to topath
+	private function find_relative_path ( $frompath, $topath ) {
+	    $startpath = explode( SEP, $frompath ); // Start path
+	    $path = explode( SEP, $topath ); // Find relative path from start path
+	    $relpath = '';
+	
+	    $i = 0;
+	    while ( isset($startpath[$i]) && isset($path[$i]) ) {
+	        if ( $startpath[$i] != $path[$i] ) break;
+	        $i++;
+	    }
+	    $j = count( $startpath ) - 1;
+	    while ( $i <= $j ) {
+	        if ( !empty($startpath[$j]) ) $relpath .= '..'.SEP;
+	        $j--;
+	    }
+	    while ( isset($path[$i]) ) {
+	        if ( !empty($path[$i]) ) $relpath .= $path[$i].SEP;
+	        $i++;
+	    }
+	    
+	    // Strip last separator
+	    return substr($relpath, 0, -1);
 	}
 }
 
