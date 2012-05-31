@@ -153,14 +153,13 @@ class MMSReceiveHandler {
 			
 			// Add MMS information to database and push to MMSadmin
 			$mms = new mmsReaction();
-			if ($mms->addMms($phonenumber, $msg, $imgfilepath) < 0) {
+			if ($mms->addMms($phonenumber, $msg, $newpath) < 0) {
 				error_log('Could not add MMS information to database, path: '.$savepath, 0);
 				return false;
 			}			
 			
 			$i++;
 		}
-		
 		// Remove folder
 //		if (!rmdir($savepath)) {
 //			error_log('Unable to delete folder '.$savepath, 0);
