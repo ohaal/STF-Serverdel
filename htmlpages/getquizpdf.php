@@ -279,7 +279,7 @@ foreach ($questionsArray as $key => $question) {
 		$imgX -= 10;
 		
 		// Value used to decide how far footer will be placed from bottom
-		if ($imgY < $minY) {
+		if (!isset($minY) || $imgY < $minY) {
 			$minY = $imgY;
 		}
 		
