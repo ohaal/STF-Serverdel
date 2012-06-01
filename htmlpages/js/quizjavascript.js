@@ -434,7 +434,7 @@ function getHighScores(quiz) {
 		
 		function scoreClicked() {
 			var selectedItem = chart.getSelection()[0];
-			if (typeof selectedItem != 'undefined') {
+			if (typeof selectedItem !== 'undefined') {
 				var teamid = data.getValue(selectedItem.row,2);
 				getTeaminfoForQuiz(teamid, quiz);
 			}
