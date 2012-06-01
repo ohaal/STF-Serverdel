@@ -22,3 +22,11 @@ START THE MMS-ADMIN SERVER (REQUIRED FOR MMS ADMINISTRATION)
 
 PREPARE A FOLDER FOR STORING MMS
 	- The folder configured to be used as storage for MMS images must be available for writing
+	
+ACCEPT LARGE FILES (FOR UPLOAD IMAGE UPLOAD TO PDF GENERATOR)
+	- In php.ini, increase the values for file upload as needed, example:
+		upload_max_filesize = 10M
+		max_file_uploads = 25
+		memory_limit = 128M
+		post_max_size = 20M
+		max_input_time = 180

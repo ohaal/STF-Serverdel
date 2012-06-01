@@ -1,4 +1,5 @@
 <?php
+set_time_limit(0); // We don't want it to timeout when uploading data and generating PDF
 if (!empty( $_POST['quizid'] )) {
 	$quizid = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $_POST['quizid']);
 	if (!is_numeric( $quizid )) {
