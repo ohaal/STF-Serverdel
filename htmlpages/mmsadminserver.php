@@ -47,7 +47,8 @@ function eventChatMsg($clientID, $ip, $params) {
 
 // This is triggered when an MMS is received
 function eventUpdateMms($clientID, $ip) {
-	global $Server, $mms;
+	global $Server;
+	$mms = new mmsReaction();
 	$Server->log('Received poke from self ('.$ip.'). Telling all clients to review MMS lists.');
 	
 	$data = array(
@@ -60,7 +61,7 @@ function eventUpdateMms($clientID, $ip) {
 
 // This is triggered when a user accepts an MMS
 function eventSetAccepted($clientID, $ip, $params) {
-	global $mms;
+	$mms = new mmsReaction();
 	$msgid = $params[0];
 	
 	$success = $mms->setAccepted($msgid);
@@ -83,7 +84,7 @@ function eventSetAccepted($clientID, $ip, $params) {
 
 // This is triggered when a user declines an MMS
 function eventSetDeclined($clientID, $ip, $params) {
-	global $mms;
+	$mms = new mmsReaction();
 	$msgid = $params[0];
 	
 	$success = $mms->setDeclined($msgid);
@@ -181,7 +182,8 @@ function wsOnMessage($clientID, $message, $messageLength, $binary) {
 // upon nick change instead, because we don't have the nickname when the initial connection occurs
 function wsOnOpen($clientID)
 {
-	global $Server, $mms;
+	global $Server;
+	$mms = new mmsReaction();
 	$ip = long2ip( $Server->wsClients[$clientID][6] );
 
 	$Server->log( "$ip ($clientID) has connected." );
@@ -198,7 +200,8 @@ function wsOnOpen($clientID)
 
 // WHEN A CLIENT CLOSES OR LOSES CONNECTION
 function wsOnClose($clientID, $status) {
-	global $Server, $userlist, $config, $mms;
+	global $Server, $userlist, $config;
+	$mms = new mmsReaction();
 	$ip = long2ip( $Server->wsClients[$clientID][6] );
 
 	// This is a bit of a hack to save time by avoiding implementing a WebSocket client in PHP
@@ -228,7 +231,6 @@ function wsOnClose($clientID, $status) {
 }
 
 $userlist = array();
-$mms = new mmsReaction();
 // start the server
 $Server = new PHPWebSocket();
 $Server->bind('message', 'wsOnMessage');
