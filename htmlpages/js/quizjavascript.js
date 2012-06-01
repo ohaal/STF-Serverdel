@@ -434,8 +434,10 @@ function getHighScores(quiz) {
 		
 		function scoreClicked() {
 			var selectedItem = chart.getSelection()[0];
-			var teamid = data.getValue(selectedItem.row,2);
-			getTeaminfoForQuiz(teamid, quiz);
+			if (typeof selectedItem != 'undefined') {
+				var teamid = data.getValue(selectedItem.row,2);
+				getTeaminfoForQuiz(teamid, quiz);
+			}
 		}
 		
 		google.visualization.events.addListener(chart, 'select', scoreClicked);
