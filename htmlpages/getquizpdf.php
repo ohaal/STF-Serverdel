@@ -1,6 +1,6 @@
 <?php
 if (!empty( $_POST['quizid'] )) {
-	$quizid = iconv('UTF-8', 'ISO-8859-1', $_POST['quizid']);
+	$quizid = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $_POST['quizid']);
 	if (!is_numeric( $quizid )) {
 		die();
 	}
@@ -9,19 +9,19 @@ if (!empty( $_POST['quizid'] )) {
 	die();
 }
 if (!empty( $_POST['header'] )) {
-	$quizheader = iconv('UTF-8', 'ISO-8859-1', $_POST['header']);
+	$quizheader = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $_POST['header']);
 } else {
 	echo 'No header set';
 	die();
 }
 if (!empty( $_POST['footer'] )) {
-	$quizfooter = iconv('UTF-8', 'ISO-8859-1', $_POST['footer']);
+	$quizfooter = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $_POST['footer']);
 } else {
 	echo 'No footer set';
 	die();
 }
 if (!empty( $_POST['ingress'] )) {
-	$quizingress = iconv('UTF-8', 'ISO-8859-1', $_POST['ingress']);
+	$quizingress = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $_POST['ingress']);
 } else {
 	$quizingress = '';
 }
@@ -144,14 +144,14 @@ foreach ($questionsArray as $key => $question) {
 	$pdf->Ln(4);
 	$pdf->SetFont( 'Arial', 'B', 18 );
 	$questionHeading = $_POST['questionheading-' . $question['questionnumber']];
-	$pdf->MultiCell( 0, 8, iconv('UTF-8', 'ISO-8859-1', $questionHeading), 0, 'C' );
+	$pdf->MultiCell( 0, 8, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $questionHeading), 0, 'C' );
 	
 	//////////////////////////////////////////////////////////////
 	// Question ingress
 	//////////////////////////////////////////////////////////////
 	$pdf->SetFont( 'Arial', '', 16 );
 	$questionIngress = $_POST['questioningress-' . $question['questionnumber']];
-	$pdf->MultiCell( 0, 8, iconv('UTF-8', 'ISO-8859-1', $questionIngress), 0, 'C' );
+	$pdf->MultiCell( 0, 8, iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $questionIngress), 0, 'C' );
 	
 	// Add question PDF values to database, make sure not to send ISO-8859-1, but UTF-8 into DB
 	$quizadmin->setQuestionPDFData($quizid, $question['questionnumber'], $questionHeading, $questionIngress);
@@ -161,7 +161,7 @@ foreach ($questionsArray as $key => $question) {
 	//////////////////////////////////////////////////////////////
 	$pdf->Ln(4);
 	$pdf->Cell(8);
-	$text = $question['questionnumber'].'. '.iconv('UTF-8', 'ISO-8859-1', $question['questiontext']); // FPDF does not support UTF-8
+	$text = $question['questionnumber'].'. '.iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $question['questiontext']); // FPDF does not support UTF-8
 	$pdf->SetFont( 'Arial', 'B', 20 );
 	$pdf->MultiCell( 0, 8, $text, 0, 1, 'L' );
 	
@@ -176,7 +176,7 @@ foreach ($questionsArray as $key => $question) {
 			$search  = array('1','2','3','4','5');
 			$replace = array('A','B','C','D','E'); 
 			$answernumber = str_replace($search, $replace, $answer['answernumber']);
-			$pdf->Cell( 0, 8, $answernumber . ".  " . iconv('UTF-8', 'ISO-8859-1', $answer['answertext']), 0, 1, 'L' );// FPDF does not support UTF-8
+			$pdf->Cell( 0, 8, $answernumber . ".  " . iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $answer['answertext']), 0, 1, 'L' );// FPDF does not support UTF-8
 		}
 	}
 	
