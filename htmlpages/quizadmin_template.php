@@ -55,7 +55,7 @@ require_once ('config.php');
           Image bottom left: <input type="file" name="imgbottomleft" /><br/>
           Image bottom right: <input type="file" name="imgbottomright" /><br />
           <hr />
-          Important: If you experience problems with images not being displayed,
+          <b>Important:</b> If you experience problems with images not being displayed,
           this might be because large images may have trouble being displayed in the PDF,
           consider trying this online service to reduce the size of your images:
           <a href="http://www.shrinkpictures.com/" target="_blank">www.shrinkpictures.com</a><br />

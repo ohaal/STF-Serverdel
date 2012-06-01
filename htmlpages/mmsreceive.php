@@ -138,7 +138,7 @@ class MMSReceiveHandler {
 //						}
 					}
 					else {
-						error_log('Warning: Could not find text message file '.$txtfilepath, 0);
+						error_log('Warning: Could not find text message file, path: '.$txtfilepath, 0);
 					}
 				}
 			}
