@@ -108,15 +108,15 @@ class dbConnection {
 	}
 	
 	function getQuestion($quizid, $questionnumber) {
-		$ret = array();
 		if (!is_numeric($quizid) || ! is_numeric($questionnumber)) {
 			die();
 		}
+		$ret = array();
 		$sql = "SELECT questions.idquestion, questions.quizid as quizid, questions.questionnumber as questionnumber, questions.questiontext, questions.correctanswer, answers.quizid as aquizid, answers.questionid as aquestionid, answers.answernumber, answers.answertext FROM questions LEFT JOIN answers ON (questions.quizid = answers.quizid AND questions.idquestion = answers.questionid) WHERE questions.quizid = $quizid AND questions.questionnumber = $questionnumber ORDER BY answers.answernumber";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
 				while ( $q = $result->fetch_object () ) {
-					if (!isset($ret)) {
+					if (empty($ret)) {
 						$ret = array('idquestion'=> $q->idquestion, 'quizid' =>$q->quizid, 'questionnumber' => $q->questionnumber, 'questiontext' => $q->questiontext, 'correctanswer' => $q->correctanswer);
 					}
 					if ($q->answernumber) {
