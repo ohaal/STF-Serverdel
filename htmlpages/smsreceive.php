@@ -112,7 +112,7 @@ class SMSReceiveHandler {
 			
 			// Reply success
 			$smsReact->sendMessage( str_replace(array('$answer$', '$questionnumber$'), array(strtoupper($answer), $questionnumber), $this->config['lang_no_registeredanswer']), $phonenumber );
-			error_log('Registered answer ('.$answer.') - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
+			error_log('Registered answer ('.$answer.') on question number '.$questionnumber.' - Phonenumber: '.$phonenumber.' Text: "'.$smstext.'"', 0);
 			return;
 		}
 		// Not captured by regex, user must have done something wrong, let's figure out what
