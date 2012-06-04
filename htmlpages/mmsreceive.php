@@ -78,7 +78,7 @@ class MMSReceiveHandler {
 				// See if any of the files match the current expected name
 				foreach ($files as $filename) {
 					$basename = basename($filename);
-					// Match basename case-insensitive at end of line of expected name
+					// Match basename case-insensitive at end of line of expected name - best guess at which photo belongs to what message
 					//                            .-------´
 					if (preg_match('/'.$basename.'$/i', $imgfile) || count($files) == 1) {
 						$imgfilepath = $filename;
@@ -96,6 +96,7 @@ class MMSReceiveHandler {
 					return false;
 				}
 			}
+			// If more than one picture in same MMS we need to add a suffix, so we dont overwrite any pictures
 			$x = '';
 			if ($i > 1) {
 				$x = '-'.$i;
