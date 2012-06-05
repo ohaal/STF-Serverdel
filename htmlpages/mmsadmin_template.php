@@ -33,9 +33,9 @@ require 'config.php';
   </div>
   <div id="main">
   	<div id="toggle_menu" class="toogleMenu">
-  		<a id="showqueued" href="#" onclick="toggle_visibility('undetermined');">Queue</a> |
-  		<a id="showaccepted" href="#" onclick="toggle_visibility('accepted');">Accepted</a> |
-  		<a id="showdeclined" href="#" onclick="toggle_visibility('declined');">Declined</a>
+  		<a id="showqueued" href="#" onclick="toggle_visibility('queued');">Queued (<span class="queuedamount">0</span>)</a> |
+  		<a id="showaccepted" href="#" onclick="toggle_visibility('accepted');">Accepted (<span class="acceptedamount">0</span>)</a> |
+  		<a id="showdeclined" href="#" onclick="toggle_visibility('declined');">Declined (<span class="declinedamount">0</span>)</a>
   	</div>
 
   	<div id="accepted">
@@ -55,8 +55,8 @@ require 'config.php';
      	</div>
     </div> 
      
-     <div id="undetermined">   
-	    <div id="contentFlowUndetermined" class="ContentFlow">
+     <div id="queued">   
+	    <div id="contentFlowQueued" class="ContentFlow">
 	        <!-- should be place before flow so that contained images will be loaded first -->
 	        <div class="loadIndicator"><div class="indicator"></div></div>
 	
@@ -97,7 +97,6 @@ require 'config.php';
       <select id="userlist" name="userlist" multiple>
       </select>
       <input type="text" id="message" name="message" /><br/>
-      <input type="text" id="addmms" name="addmms" />
     </div>
   </div>
   </body>

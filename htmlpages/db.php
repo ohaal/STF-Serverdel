@@ -522,7 +522,7 @@ class dbConnection {
 	
 	function getMmsList($state) {
 		$mmslist = array();
-		$sql = "SELECT msgid, recvdate, text, imgpath, phonenumber FROM mms WHERE state=$state";
+		$sql = "SELECT msgid, recvdate, text, imgpath, phonenumber FROM mms WHERE state=$state ORDER BY msgid";
 		if ($result = $this->dbconn->query ( $sql )) {
 			if ($result->num_rows > 0) {
 				while ( $row = $result->fetch_object () ) {

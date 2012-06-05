@@ -34,13 +34,12 @@ function SendToClient($clientID, $type, $data) {
 /////////////////////////////////////////
 function eventChatMsg($clientID, $ip, $params) {
 	global $userlist;
-	$message = $params[0];
-	
+
 	$data = array(
 		'clientid' => $clientID,
 		'ip' => $ip,
 		'nickname' => $userlist[$clientID],
-		'message' => $message
+		'message' => $params['chatmsg']
 	);
 	SendToAllClients('chatmsg', $data);
 }
@@ -62,9 +61,8 @@ function eventUpdateMms($clientID, $ip) {
 // This is triggered when a user accepts an MMS
 function eventSetAccepted($clientID, $ip, $params) {
 	$mms = new mmsReaction();
-	$msgid = $params[0];
 	
-	$success = $mms->setAccepted($msgid);
+	$success = $mms->setAccepted($params['msgid']);
 	
 	if ($success) {
 		$data = array(
@@ -72,7 +70,7 @@ function eventSetAccepted($clientID, $ip, $params) {
 			'declined' => $mms->getDeclined(),
 			'queued' => $mms->getQueued()
 		);
-		SendToAllClientsExcept($clientID, 'updatemmslist', $data);
+		SendToAllClients('updatemmslist', $data);
 	}
 	else {
 		$data = array(
@@ -85,9 +83,8 @@ function eventSetAccepted($clientID, $ip, $params) {
 // This is triggered when a user declines an MMS
 function eventSetDeclined($clientID, $ip, $params) {
 	$mms = new mmsReaction();
-	$msgid = $params[0];
 	
-	$success = $mms->setDeclined($msgid);
+	$success = $mms->setDeclined($params['msgid']);
 	
 	if ($success) {
 		$data = array(
@@ -95,7 +92,7 @@ function eventSetDeclined($clientID, $ip, $params) {
 			'declined' => $mms->getDeclined(),
 			'queued' => $mms->getQueued()
 		);
-		SendToAllClientsExcept($clientID, 'updatemmslist', $data);
+		SendToAllClients('updatemmslist', $data);
 	}
 	else {
 		$data = array(
@@ -108,7 +105,7 @@ function eventSetDeclined($clientID, $ip, $params) {
 // This is triggered whenever someone sets their nick, which at the moment is only when someone connects to the server
 function eventSetNick($clientID, $ip, $params) {
 	global $userlist;
-	$newnickname = $params[0];
+	$newnickname = $params['newnickname'];
 	
 	// Avoid confusion, disallow two users the same nickname, add unique trailing number
 	$i = 0;
@@ -172,7 +169,7 @@ function wsOnMessage($clientID, $message, $messageLength, $binary) {
 		break;
 		
 		default:
-			// :|
+			// :)
 		break;
 	}
 }

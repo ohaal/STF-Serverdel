@@ -35,7 +35,7 @@
       <div id="highscoretable_div"></div>
 	  <div id="teamanswers_div"></div>
 	  <br/>
-      *Click on a teams score bar to specifically view their answers to each question.
+      *Click on a participants score bar to specifically view their answers to each question.
     </div>
   </body>
 </html>

@@ -24,7 +24,7 @@ class mmsReaction {
 		return $this->db->setMmsState($msgid, 1);
 	}
 	function setDeclined($msgid) {
-		$this->db->setMmsState($msgid, 2);
+		return $this->db->setMmsState($msgid, 2);
 	}
 	function addMms($phonenumber, $message, $imgpath) {
 		// Add to database
