@@ -1,4 +1,5 @@
 var Server;
+var visibleTab;
 var cfQueued = new ContentFlow('contentFlowQueued', {
 	circularFlow: false,
 	loadingTimeout: 60000,
@@ -109,7 +110,7 @@ function add_mms_item_to_cf( mmsItem, cfObj ) {
 			'<div class="caption">'+
 			'Message:'+mmsItem.text+'<br/>'+
 			'Phonenumber: '+mmsItem.phonenumber+'<br/>'+
-			'Received: '+mmsItem.recvdate+'<br/>'+
+			'Received: '+mmsItem.recvdate+
 			'</div></div>');
 	var addedItemIndex = cfObj.addItem(cfItem.get(0), 'end');
 	return addedItemIndex;
@@ -142,7 +143,7 @@ function delete_mms_item_by_id_from_cf( msgId, cfObj ) {
 		
 		// Empty global caption manually if ContentFlow is empty - for some reason this isn't done automatically
 		if (cfObj.getNumberOfItems() == 0) {
-			$('div.globalCaption').html('&nbsp;');
+			$('div.globalCaption').html('');
 			// Alternatively hide the content flow when it is empty, and reshow when it is not empty?
 		}
 	}
@@ -209,7 +210,6 @@ function set_nick_and_connect( nick ) {
 	});
 
 	// Refresh/Redraw ContentFlows (after initial images are loaded)
-	cfQueued.resize();
 	cfAccepted.resize();
 	cfDeclined.resize();
 	toggle_visibility('queued');
@@ -231,18 +231,25 @@ function toggle_visibility(state) {
 	if (state == 'queued') {
 		$('#contentFlowAccepted').hide();
 		$('#contentFlowDeclined').hide();
-		$('#contentFlowQueued').show().focus();		
+		$('#contentFlowQueued').show().focus();
+		cfQueued.resize();
 	}
 	else if (state == 'accepted') {
 		$('#contentFlowDeclined').hide();
 		$('#contentFlowQueued').hide();
-		$('#contentFlowAccepted').show().focus();		
+		$('#contentFlowAccepted').show().focus();
+		cfAccepted.resize();
 	}
 	else if (state == 'declined') {
 		$('#contentFlowAccepted').hide();
 		$('#contentFlowQueued').hide();
-		$('#contentFlowDeclined').show().focus();		
+		$('#contentFlowDeclined').show().focus();
+		cfDeclined.resize();
 	}
+	else {
+		return false;
+	}
+	visibleTab = state;
 }
 
 $(document).ready(function() {
@@ -279,12 +286,22 @@ $(document).ready(function() {
 	});
 	
 	$('#picture_accept').click(function(e) {
-		var msgId = get_id_by_index(cfQueued.getActiveItem().getIndex(), cfQueued);
+		var cfObj;
+		if (visibleTab == 'queued') cfObj = cfQueued;
+		else if (visibleTab == 'declined') cfObj = cfDeclined;
+		else return false;
+		
+		var msgId = get_id_by_index(cfObj.getActiveItem().getIndex(), cfObj);
 		send( 'setaccepted', {msgid: msgId} );
 	});
 
 	$('#picture_decline').click(function(e) {
-		var msgId = get_id_by_index(cfQueued.getActiveItem().getIndex(), cfQueued);
+		var cfObj;
+		if (visibleTab == 'queued') cfObj = cfQueued;
+		else if (visibleTab == 'accepted') cfObj = cfAccepted;
+		else return false;
+		
+		var msgId = get_id_by_index(cfObj.getActiveItem().getIndex(), cfObj);
 		send( 'setdeclined', {msgid: msgId} );
 	});
 });	
