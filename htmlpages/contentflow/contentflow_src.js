@@ -436,18 +436,13 @@ var ContentFlowItem  = function (CFobj, element, index) {
             this.initClick();
             CFobj._addItemCueProcess(true);
         }.bind(this);
-
+        
         if (this.content.complete && this.content.width > 0)
             window.setTimeout(foobar, 100);
-        else if (this.Browser.IE && !this.content.onload) {
-            var self = this;
-            var t = window.setInterval( function () {
-                if (self.content.complete && self.content.width > 0) {
-                    window.clearInterval(t);
-                    foobar();
-                }
-            }, 10);
-        }
+        else if (this.content.addEventListener)
+            this.content.addEventListener('load', foobar, false);
+        else if (this.content.attachEvent)
+            this.content.attachEvent('onload', foobar);
         else
             this.content.onload = window.setTimeout(foobar, 100);
     }
