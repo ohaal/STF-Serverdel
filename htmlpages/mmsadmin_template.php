@@ -1,5 +1,10 @@
 <?php
-require 'config.php'; 
+require 'config.php';
+require 'mms.php';
+$mms = new mmsReaction();
+$queued = $mms->getQueued();
+$accepted = $mms->getAccepted();
+$declined = $mms->getDeclined();
 ?>
 <!DOCTYPE html>
 <html>
@@ -21,6 +26,21 @@ require 'config.php';
     <script type="text/javascript" src="contentflow/contentflow_src.js"></script>
     <script type="text/javascript" src="js/fancywebsocket.js"></script>
     <script type="text/javascript" src="js/mmsadminclient.js"></script>
+    <script type="text/javascript">
+    	// PHP arrays (via JSON) to JS object "maps" with msgid as key - used for initial view
+		var localQueuedList = <?php print(json_encode($queued)); ?>;
+		var localAcceptedList = <?php print(json_encode($accepted)); ?>;
+		var localDeclinedList = <?php print(json_encode($declined)); ?>;
+		for (var i in localQueuedList) {
+			localQueued[localQueuedList[i].msgid] = localQueuedList[i];
+		}
+		for (var i in localAcceptedList) {
+			localAccepted[localAcceptedList[i].msgid] = localAcceptedList[i];
+		}
+		for (var i in localDeclinedList) {
+			localDeclined[localDeclinedList[i].msgid] = localDeclinedList[i];
+		}
+    </script>
   </head>
   <body>
   <div id="hiddenmetainfo" style="display:none;">
@@ -33,60 +53,95 @@ require 'config.php';
   </div>
   <div id="main">
   	<div id="toggle_menu" class="toogleMenu">
-  		<a id="showqueued" href="#" onclick="toggle_visibility('queued');">Queued (<span class="queuedamount">0</span>)</a> |
-  		<a id="showaccepted" href="#" onclick="toggle_visibility('accepted');">Accepted (<span class="acceptedamount">0</span>)</a> |
-  		<a id="showdeclined" href="#" onclick="toggle_visibility('declined');">Declined (<span class="declinedamount">0</span>)</a>
+  		<a href="#" id="showqueued">Queued (<span class="queuedamount"><?php print(count($queued)); ?></span>)</a> |
+  		<a href="#" id="showaccepted">Accepted (<span class="acceptedamount"><?php print(count($accepted)); ?></span>)</a> |
+  		<a href="#" id="showdeclined">Declined (<span class="declinedamount"><?php print(count($declined)); ?></span>)</a>
   	</div>
+    <div id="contentFlowQueued" class="ContentFlow">
+        <!-- should be place before flow so that contained images will be loaded first -->
+        <div class="loadIndicator"><div class="indicator"></div></div>
 
-  	<div id="accepted">
-	    <div id="contentFlowAccepted" class="ContentFlow">
-	        <!-- should be place before flow so that contained images will be loaded first -->
-	        <div class="loadIndicator"><div class="indicator"></div></div>
-	
-	        <div class="flow">
-	
-	        </div>
-	        <div class="globalCaption"></div>
-	        <div class="scrollbar">
-	            <div class="slider"><div class="position"></div></div>
-	        </div>
-	        <div class="hiddenItems" style="display:none;">
-	        </div>
-     	</div>
-    </div> 
-     
-     <div id="queued">   
-	    <div id="contentFlowQueued" class="ContentFlow">
-	        <!-- should be place before flow so that contained images will be loaded first -->
-	        <div class="loadIndicator"><div class="indicator"></div></div>
-	
-	        <div class="flow">
-	
-	        </div>
-	        <div class="globalCaption"></div>
-	        <div class="scrollbar">
-	            <div class="slider"><div class="position"></div></div>
-	        </div>
-	        <div class="hiddenItems" style="display:none;">
-	        </div>
-	    </div>
-	 </div>
+        <div class="flow">
+<?php
+// Add initial items to flow (__MUCH__ more efficient (and cleaner) than dynamically adding via JavaScript)
+foreach ($queued as $mmsItem) {
+?>
+			<div class="item">
+				<img class="content" src="<?php print($mmsItem->imgpath); ?>" id="msgid<?php print($mmsItem->msgid); ?>" target="_blank"/>
+				<div class="caption">
+					Message: <?php print($mmsItem->text); ?><br/>
+					Phonenumber: <?php print($mmsItem->phonenumber); ?><br/>
+					Received: <?php print($mmsItem->recvdate); ?>
+				</div>
+			</div>
+<?php
+}
+?>
+        </div>
+        <div class="globalCaption"></div>
+        <div class="scrollbar">
+            <div class="slider"><div class="position"></div></div>
+            <div class="preButton"></div>
+            <div class="nextButton"></div>
+        </div>
+    </div>
     
-    <div id="declined">
-	    <div id="contentFlowDeclined" class="ContentFlow">
-	        <!-- should be place before flow so that contained images will be loaded first -->
-	        <div class="loadIndicator"><div class="indicator"></div></div>
-	
-	        <div class="flow">
-	
-	        </div>
-	        <div class="globalCaption"></div>
-	        <div class="scrollbar">
-	            <div class="slider"><div class="position"></div></div>
-	        </div>
-	        <div class="hiddenItems" style="display:none;">
-	        </div>
-	    </div>
+    <div id="contentFlowAccepted" class="ContentFlow">
+        <!-- should be place before flow so that contained images will be loaded first -->
+        <div class="loadIndicator"><div class="indicator"></div></div>
+
+        <div class="flow">
+<?php
+// Add initial items to flow (__MUCH__ more efficient (and cleaner) than dynamically adding via JavaScript)
+foreach ($accepted as $mmsItem) {
+?>
+			<div class="item">
+				<img class="content" src="<?php print($mmsItem->imgpath); ?>" id="msgid<?php print($mmsItem->msgid); ?>" target="_blank"/>
+				<div class="caption">
+					Message: <?php print($mmsItem->text); ?><br/>
+					Phonenumber: <?php print($mmsItem->phonenumber); ?><br/>
+					Received: <?php print($mmsItem->recvdate); ?>
+				</div>
+			</div>
+<?php
+}
+?>
+        </div>
+        <div class="globalCaption"></div>
+        <div class="scrollbar">
+            <div class="slider"><div class="position"></div></div>
+            <div class="preButton"></div>
+            <div class="nextButton"></div>
+        </div>
+    </div>
+    
+    <div id="contentFlowDeclined" class="ContentFlow">
+        <!-- should be place before flow so that contained images will be loaded first -->
+        <div class="loadIndicator"><div class="indicator"></div></div>
+
+        <div class="flow">
+<?php
+// Add initial items to flow (__MUCH__ more efficient (and cleaner) than dynamically adding via JavaScript)
+foreach ($declined as $mmsItem) {
+?>
+			<div class="item">
+				<img class="content" src="<?php print($mmsItem->imgpath); ?>" id="msgid<?php print($mmsItem->msgid); ?>" target="_blank"/>
+				<div class="caption">
+					Message: <?php print($mmsItem->text); ?><br/>
+					Phonenumber: <?php print($mmsItem->phonenumber); ?><br/>
+					Received: <?php print($mmsItem->recvdate); ?>
+				</div>
+			</div>
+<?php
+}
+?>
+        </div>
+        <div class="globalCaption"></div>
+        <div class="scrollbar">
+            <div class="slider"><div class="position"></div></div>
+            <div class="preButton"></div>
+            <div class="nextButton"></div>
+        </div>
     </div>
     
     <button id="picture_accept" name="picture_accept">Accept picture</button>

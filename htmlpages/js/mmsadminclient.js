@@ -1,16 +1,27 @@
-var cfOpts = {
-	reflectionColor: "#FFFFFF",
-	circularFlow: false
-}
-var cfAccepted = new ContentFlow('contentFlowAccepted', cfOpts);
-var cfQueued = new ContentFlow('contentFlowQueued', cfOpts);
-var cfDeclined = new ContentFlow('contentFlowDeclined', cfOpts);
 var Server;
+var cfQueued = new ContentFlow('contentFlowQueued', {
+	circularFlow: false,
+	loadingTimeout: 60000,
+	reflectionHeight: 0,
+	startItem: 'first'
+});
+var cfAccepted = new ContentFlow('contentFlowAccepted', {
+	circularFlow: false,
+	loadingTimeout: 60000,
+	reflectionHeight: 0,
+	startItem: 'last'
+});
+var cfDeclined = new ContentFlow('contentFlowDeclined', {
+	circularFlow: false,
+	loadingTimeout: 60000,
+	reflectionHeight: 0,
+	startItem: 'last'
+});
 
-// Objects used as play-pretend maps
+// Object used as play-pretend map (storing all locally known MMS items)
+var localQueued = {};
 var localAccepted = {};
 var localDeclined = {};
-var localQueued = {};
 
 function log( text ) {
 	var date = new Date();
@@ -25,25 +36,6 @@ function log( text ) {
 	// Autoscroll
 	logelement[0].scrollTop = logelement[0].scrollHeight - logelement[0].clientHeight;
 }
-
-function toggle_visibility(id) {
-	if (id == 'queued') {
-		$('#queued').show();
-		$('#accepted').hide();
-		$('#declined').hide();
-	}
-	else if (id == 'accepted') {
-		$('#queued').hide();
-		$('#accepted').show();
-		$('#declined').hide();
-	}
-	else if (id == 'declined') {
-		$('#queued').hide();
-		$('#accepted').hide();
-		$('#declined').show();
-	}
-}
-
 
 // Send data to server, specific types to trigger specific events
 function send( type, data ) {
@@ -60,94 +52,78 @@ function update_userlist( userlist ) {
 
 // This function syncs server and client side MMS view (looks for new and (re)moved MMS items)
 function update_mmsitems( state, serverList ) {
-	var localMap;
-	var spanObj;
-	var cfObj;
+	var localMap, cfObj;
 	if (state == 'queued') {
-		localMap = localQueued; // Use Queued map
-		spanObj = $('span.queuedamount');
-		cfObj = cfQueued; // ContentFlow
+		localMap = localQueued;
+		cfObj = cfQueued;
 	}
 	else if (state == 'accepted') {
-		localMap = localAccepted; // Use Accepted map
-		spanObj = $('span.acceptedamount');
-		cfObj = cfAccepted; // ContentFlow
+		localMap = localAccepted;
+		cfObj = cfAccepted;
 	}
 	else if (state == 'declined') {
-		localMap = localDeclined; // Use Declined map
-		spanObj = $('span.declinedamount');
-		cfObj = cfDeclined; // ContentFlow
+		localMap = localDeclined;
+		cfObj = cfDeclined;
 	}
 	else {
 		return false;
 	}
 	
-	console.log('#### START UPDATE ####');
-	console.log('state: '+state);
-	
-	console.log('cfObj:');
-	console.log(cfObj);
-
-	// Update value in parenthesis on tab links
-	spanObj.text(serverList.length);
+	// Update any values showing amount of each type
+	var spanNode = $('span.'+state+'amount');
+	spanNode.text(serverList.length);
 	
 	var serverMap = {};
-	// Convert serverList to object ("map") with msgid as keys
+	// Convert serverList to object ("map") with msgid as keys for simple comparison
 	for (var idx in serverList) {
 		serverMap[serverList[idx].msgid] = serverList[idx];
 	}
-	console.log('serverMap:');
-	console.log(serverMap);
 	
-	// Compare serverMap and localMap
+	// Compare serverMap and localMap - serverMap is always correct
 	// Remove objects from localMap which are not in serverMap
 	for (var idx in localMap) {
-		// ?: serverMap with same key as localMap 
+		// ?: serverMap with same key (msgid) as localMap is not set 
 		if (typeof serverMap[localMap[idx].msgid] == 'undefined') {
-			// Do removal
-			delete_dom_mms_item_by_id( localMap[idx].msgid, cfObj );
+			// -> Remove item from localMap
+			delete_mms_item_by_id_from_cf( localMap[idx].msgid, cfObj );
 			delete localMap[idx];
 		}
 	}
 	// Add objects which are in serverMap (but not in localMap) to localMap
 	for (var idx in serverMap) {
-		// ?: localMap with same key as serverMap is not set
+		// ?: localMap with same key (msgid) as serverMap is not set
 		if (typeof localMap[serverMap[idx].msgid] == 'undefined') {
-			// -> Do write item
-			add_dom_mms_item( serverMap[idx], cfObj );
+			// -> Add item to localMap
+			add_mms_item_to_cf( serverMap[idx], cfObj );
 			localMap[serverMap[idx].msgid] = serverMap[idx];
 		}
 	}
 	
-	console.log('localMap:');
-	console.log(localMap);
-	
-	console.log('#### END UPDATE ####');
 	return true;
 }
 
-// Add MMS content to DOM
-function add_dom_mms_item( mmsItem, cfObj ) {
+// Add MMS items to ContentFlow
+function add_mms_item_to_cf( mmsItem, cfObj ) {
 	var cfItem = $('<div class="item">'+
 			'<img class="content" src="'+mmsItem.imgpath+'" id="msgid'+mmsItem.msgid+'" target="_blank"/>'+
 			'<div class="caption">'+
-			mmsItem.text+'<br/>'+
+			'Message:'+mmsItem.text+'<br/>'+
 			'Phonenumber: '+mmsItem.phonenumber+'<br/>'+
-			'Received: '+mmsItem.recvdate+
+			'Received: '+mmsItem.recvdate+'<br/>'+
 			'</div></div>');
-	console.log('-> Adding id: '+mmsItem.msgid+' to:');
-	console.log(cfObj);
-	return cfObj.addItem(cfItem.get(0), 'end');
+	var addedItemIndex = cfObj.addItem(cfItem.get(0), 'end');
+	return addedItemIndex;
 }
 
-// Delete MMS content from DOM
-function delete_dom_mms_item_by_id( msgId, cfObj ) {
+// Delete MMS items from ContentFlow
+function delete_mms_item_by_id_from_cf( msgId, cfObj ) {
+	console.log('delete'+msgId);
 	var foundItem = false;
 	var mmsItemId;
-	// Loop through all contentflow items looking for one with the ID we are looking for
-	// Reason for this is because getItem returns the index of a picture, not the id we are after
+	// Loop through all contentflow items by index looking for one with the ID we are looking for
+	// Reason for this is because getItem returns the index of a picture, not the msgid we are after
 	for (var idx = 0; idx < cfObj.getNumberOfItems(); idx++) {
-		mmsItemId = get_msgid_by_index( idx, cfObj );
+		mmsItemId = get_id_by_index( idx, cfObj );
 		if (mmsItemId == msgId) {
 			foundItem = true;
 			break;
@@ -166,25 +142,23 @@ function delete_dom_mms_item_by_id( msgId, cfObj ) {
 		
 		// Empty global caption manually if ContentFlow is empty - for some reason this isn't done automatically
 		if (cfObj.getNumberOfItems() == 0) {
-			$('div.globalCaption').html('');
+			$('div.globalCaption').html('&nbsp;');
 			// Alternatively hide the content flow when it is empty, and reshow when it is not empty?
 		}
 	}
 	return foundItem;
 }
 
-function get_msgid_by_index( idx, cfObj ) {
-	if (typeof cfObj.getItem(idx).canvas.id != 'undefined')	{
-		// Slight regex to grab the id number at the end of the string id
-		return parseInt(cfObj.getItem(idx).canvas.id.match(/(\d+)$/)[0], 10);
+function get_id_by_index( idx, cfObj ) {
+	if (typeof cfObj.getItem(idx).content.id != 'undefined')	{
+		// Simple regex to grab the id number at the end of the string id - only one match possible (in [0])
+		return parseInt(cfObj.getItem(idx).content.id.match(/(\d+)$/)[0], 10);
 	}
 	return -1;
 }
 
 function set_nick_and_connect( nick ) {
 	var userlist = new Object;
-	
-	toggle_visibility('queued'); // Start off showing the ones in queue
 	
 	log('Connecting...');
 	var host = $('div#hiddenmetainfo span#wshost').text();
@@ -227,29 +201,18 @@ function set_nick_and_connect( nick ) {
 		update_userlist( data.userlist );
 	});
 	
+	// Sync local MMS list with server MMS list
 	Server.bind('updatemmslist', function( data ) {
-		log('Received updated MMS list');
-//		console.log(data);
 		update_mmsitems( 'queued', data.queued );
 		update_mmsitems( 'declined', data.declined );
 		update_mmsitems( 'accepted', data.accepted );
 	});
-	
-	// Accept picture
-//	Server.bind('picture_accept', function( payload ) {
-//		log( payload );
-//		console.log(payload);
-//		log("Accepted picture...");
-//	});
 
-	// Decline picture
-//	Server.bind('picture_decline', function( payload ) {
-//		log( payload );
-//		console.log(payload);
-//		log("Declined picture...");
-//	});
-
-
+	// Refresh/Redraw ContentFlows (after initial images are loaded)
+	cfQueued.resize();
+	cfAccepted.resize();
+	cfDeclined.resize();
+	toggle_visibility('queued');
 	Server.connect();
 }
 
@@ -264,10 +227,42 @@ function validate_nickinput() {
 	return false;
 }
 
+function toggle_visibility(state) {
+	if (state == 'queued') {
+		$('#contentFlowAccepted').hide();
+		$('#contentFlowDeclined').hide();
+		$('#contentFlowQueued').show().focus();		
+	}
+	else if (state == 'accepted') {
+		$('#contentFlowDeclined').hide();
+		$('#contentFlowQueued').hide();
+		$('#contentFlowAccepted').show().focus();		
+	}
+	else if (state == 'declined') {
+		$('#contentFlowAccepted').hide();
+		$('#contentFlowQueued').hide();
+		$('#contentFlowDeclined').show().focus();		
+	}
+}
+
 $(document).ready(function() {
 	// Show only nick input at first
 	$('div#splashscreen').show();
 	$('div#main').hide();
+	
+	// Hiding and showing correct ContentFlows
+	$('a#showqueued').click(function(e) {
+		toggle_visibility('queued');
+		return false;
+	});
+	$('a#showaccepted').click(function(e) {
+		toggle_visibility('accepted');
+		return false;
+	});
+	$('a#showdeclined').click(function(e) {
+		toggle_visibility('declined');
+		return false;
+	});
 	
 	$("button#setnickbutton").click(validate_nickinput);
 	$('input#inputnick').keypress(function(e) {
@@ -284,12 +279,12 @@ $(document).ready(function() {
 	});
 	
 	$('#picture_accept').click(function(e) {
-		var msgid = get_msgid_by_index(cfQueued.getActiveItem().getIndex(), cfQueued);
-		send( 'setaccepted', {msgid: msgid} );
+		var msgId = get_id_by_index(cfQueued.getActiveItem().getIndex(), cfQueued);
+		send( 'setaccepted', {msgid: msgId} );
 	});
 
 	$('#picture_decline').click(function(e) {
-		var msgid = get_msgid_by_index(cfQueued.getActiveItem().getIndex(), cfQueued);
-		send( 'setdeclined', {msgid: msgid} );
+		var msgId = get_id_by_index(cfQueued.getActiveItem().getIndex(), cfQueued);
+		send( 'setdeclined', {msgid: msgId} );
 	});
 });	
