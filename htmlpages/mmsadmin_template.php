@@ -25,7 +25,8 @@ $declined = $mms->getDeclined();
     </script>
     <script type="text/javascript" src="contentflow/contentflow_src.js"></script>
     <script type="text/javascript" src="js/fancywebsocket.js"></script>
-    <script type="text/javascript" src="js/mmsadminclient.js"></script>
+    <script type="text/javascript" src="js/mmsclient.js"></script>
+    <script type="text/javascript" src="js/mmsadmin.js"></script>
     <script type="text/javascript">
     	// PHP arrays (via JSON) to JS object "maps" with msgid as key - used for initial view
 		var localQueuedList = <?php print(json_encode($queued)); ?>;
@@ -69,7 +70,7 @@ foreach ($queued as $mmsItem) {
 			<div class="item">
 				<img class="content" src="<?php print($mmsItem->imgpath); ?>" id="msgid<?php print($mmsItem->msgid); ?>" target="_blank"/>
 				<div class="caption">
-					Message: <?php print($mmsItem->text); ?><br/>
+					<?php print(!empty($mmsItem->text) ? 'Message: '.$mmsItem->text : 'No message! <a class="addmmsmsg" href="#">Add a message</a>'); ?><br/>
 					Phonenumber: <?php print($mmsItem->phonenumber); ?><br/>
 					Received: <?php print($mmsItem->recvdate); ?>
 				</div>
@@ -98,7 +99,7 @@ foreach ($accepted as $mmsItem) {
 			<div class="item">
 				<img class="content" src="<?php print($mmsItem->imgpath); ?>" id="msgid<?php print($mmsItem->msgid); ?>" target="_blank"/>
 				<div class="caption">
-					Message: <?php print($mmsItem->text); ?><br/>
+					<?php print(!empty($mmsItem->text) ? 'Message: '.$mmsItem->text : 'No message! <a class="addmmsmsg" href="#">Add a message</a>'); ?><br/>
 					Phonenumber: <?php print($mmsItem->phonenumber); ?><br/>
 					Received: <?php print($mmsItem->recvdate); ?>
 				</div>
@@ -127,7 +128,7 @@ foreach ($declined as $mmsItem) {
 			<div class="item">
 				<img class="content" src="<?php print($mmsItem->imgpath); ?>" id="msgid<?php print($mmsItem->msgid); ?>" target="_blank"/>
 				<div class="caption">
-					Message: <?php print($mmsItem->text); ?><br/>
+					<?php print(!empty($mmsItem->text) ? 'Message: '.$mmsItem->text : 'No message! <a class="addmmsmsg" href="#">Add a message</a>'); ?><br/>
 					Phonenumber: <?php print($mmsItem->phonenumber); ?><br/>
 					Received: <?php print($mmsItem->recvdate); ?>
 				</div>
