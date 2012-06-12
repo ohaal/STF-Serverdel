@@ -27,14 +27,12 @@ class mmsReaction {
 		return $this->db->setMmsState($msgid, 2);
 	}
 	function addMms($phonenumber, $message, $imgpath) {
-		// Add to database
-		$msgid = $this->db->addMms($phonenumber, $message, $imgpath);
-		
+		// Add to DB and return increment ID in DB
+		return $this->db->addMms($phonenumber, $message, $imgpath);
+	}
+	function pushMms() {
 		// Tell MMSadmin there is a new MMS available by poking mmsadminserver
 		// We keep the poke as simple as possible so we don't have to implement a PHP WebSocket Client aswell
 		fclose(fsockopen($this->config['ws_ip_lan_bind'], $this->config['ws_port'], $errno, $errstr, 2));
-
-		// Return increment ID in DB
-		return $msgid;
 	}
 }

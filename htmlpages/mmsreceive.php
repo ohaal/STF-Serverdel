@@ -13,6 +13,9 @@ class MMSReceiveHandler {
 	}
 	
 	public function handleMms($phonenumber, $subject, $data) {
+		// If we get an error, we mark this as true, so temporary MMS files are not deleted.
+		// Error can therefore be reproduced easily by using the corresponding ZIP
+		$error = false;
 		// Check if the user sent in any message in the subject - strip keyword from MMS gateway
 		$title = explode(' ', $subject, 2);
 		$message = '';
@@ -22,7 +25,15 @@ class MMSReceiveHandler {
 		
 		// Put data in a zip in a unique folder - Folder structure: mmsfolder/phonenumber/timestamp
 		$timestamp = time();
-		$savepath = $this->config['mms_folder'].SEP.$phonenumber.SEP.$timestamp.SEP;
+
+		// Avoid folders with same name if sent at exact same time -> add a suffix
+		$k = 1;
+		do {
+			$suffix = ($k > 1) ? '-'.$k : '';
+			$k++;
+			$savepath = $this->config['mms_folder'].SEP.$phonenumber.SEP.$timestamp.$suffix.SEP;
+		} while (is_dir($savepath));
+		
 		$this->create_dirs($savepath);
 		$savepath = realpath($savepath);
 		if ($savepath === false || !is_dir($savepath)) {
@@ -50,126 +61,313 @@ class MMSReceiveHandler {
 		// Get name of image and get name of files containing text message from smil.xml
 		$xmlfilepath = $savepath.'smil.xml';
 		if (!file_exists($xmlfilepath)) {
-			error_log('Could not find XML with data, path: '.$xmlfilepath, 0);
-			return false;
+			// Try a different naming scheme
+			$files = glob($savepath.'*.smil');
+			$filescount = count($files);
+			if ($filescount != 1) {
+				error_log('Could not find XML with data. Found '.$filescount.' SMIL files in "'.$savepath.'". Expected 1.', 0);
+				return false;
+			}
+			$xmlfilepath = $files[0];
 		}
 		$xmlobj = simplexml_load_file($xmlfilepath);
 		// Remove xml file
 //		if (!unlink($xmlfilepath)) {
 //			error_log('Unable to delete file '.$xmlfilepath, 0);
 //		}
+
+		echo '<pre>';
 		
 		// Grab each message blob and related media
-		$i = 1;
-		$dataobjects = $xmlobj->body->par;
-		foreach ($dataobjects as $dataobj) {
-			// Get image filename
-			$imgfile = (string)$dataobj->img->attributes()->src;
-			if (empty($imgfile)) {
-				error_log('Could not get image file name from XML', 0);
-				return false;
+		$dataobjs = $xmlobj->body->par;
+		$datablobs = array();
+		// Restructure XML object to a cleaner map with only relevant data (for us)
+		for ($i = 0, $j = 1; isset($dataobjs[$i]); $i++) {
+			
+			echo "##### i = $i #####\n";
+			var_dump($dataobjs[$i]);
+			
+			// Deal with images if they are in the blob
+			if (isset($dataobjs[$i]->img)) {
+				$imgobjs = $dataobjs[$i]->img;
+				
+				// Generate a suffix if more than one picture in same MMS, so we dont overwrite any pictures
+				$suffix = ($j > 1) ? '-'.$j : '';
+				$j++;
+
+				// Iterate through image objects
+				$newpaths = $this->moveAndRenameImgObjsInPathToParent($imgobjs, $savepath, $timestamp.$suffix); 
+				if (count($newpaths) > 0) {
+					$datablobs[$i]['img'] = $newpaths;
+				}
 			}
-			$imgfilepath = $savepath.$imgfile;
+			// Deal with texts if they are in the blob
+			if (isset($dataobjs[$i]->text)) {
+				$textobjs = $dataobjs[$i]->text;
+				$textmsg = $this->findAndConcatTextMessages($textobjs, $savepath);
+				if (!empty($textmsg)) {
+					$datablobs[$i]['text'] = $textmsg;
+				}
+			}
+		}
+
+		$lonelyimg = array();
+		$lonelytext = array();
+		$mms = new mmsReaction();		
+		// Loop through resulting map, add MMS information to database
+		foreach ($datablobs as $blob) {
+			if (!isset($blob['text'])) {
+				$lonelyimg[] = $blob['img'];
+				continue;
+			}
+			else if (!isset($blob['img'])) {
+				$lonelytext[] = $blob['text'];
+				continue;
+			}
+			foreach ($blob['img'] as $imgpath) {
+				$relpath = $this->find_relative_path(dirname(__FILE__), $imgpath);
+				echo "Adding MMS!\n";
+				if ($mms->addMms($phonenumber, $blob['text'], $relpath) < 0) {
+					error_log('Could not add MMS information to database, path: '.$savepath, 0);
+					return false;
+				}
+			}
+		}
+		
+		$lonelyimgcount = count($lonelyimg);
+		if ($lonelyimgcount < count($lonelytext)) {
+			$error = true;
+			error_log('Warning: More texts found than images, see path: '.$savepath, 0);
+		}
+		// Loop through "lonely" images/texts and combine as best possible
+		// "Lonely" are images that have no text (logically) associated with it
+		for ($i = 0; $i < $lonelyimgcount; $i++) {
+			$finaltext = $message; // Default to using MMS subject
+			if (isset($lonelytext[$i]))	{
+				$finaltext = $lonelytext[$i];
+			}
+			foreach ($lonelyimg[$i] as $imgpath) {
+				$relpath = $this->find_relative_path(dirname(__FILE__), $imgpath);
+				echo "Adding (lonely) MMS!\n";
+				if ($mms->addMms($phonenumber, $finaltext, $relpath) < 0) {
+					error_log('Could not add MMS information to database, path: '.$savepath, 0);
+					return false;
+				}
+			}
+		}
+		
+		echo "///// THE END!!!!... result /////\n";
+		var_dump($datablobs);
+		
+		if (!$error) {
+			// Delete files
+			echo "!!!!!!!!!!!!!!!NO ERRORS!!!!!!!\n";
+		}
+		
+		echo '</pre>';
+
+		// Push to MMSadmin
+		$mms->pushMms();
+		return true;
+	}
+	
+	/**
+ 	 * Goes through all files in textobjs and concatenates to a single string
+	 * 
+	 * @param	SimpleXML	$textobjs	SimpleXML text data objects
+	 * @param	string		$path		path containing files
+	 * 
+	 * @return	string					concatenated text message
+	 */
+	private function findAndConcatTextMessages($textobjs, $path) {
+		$textmsg = '';
+		$first = true;
+		foreach ($textobjs as $text) {
+			$textfilename = $text->attributes()->src;
+			$textfilepath = $path.$textfilename;
+			
+			if (file_exists($textfilepath)) {
+				// Grab message from text file
+				$textmsgpart = file_get_contents($textfilepath);
+				echo 'Textmsgpart1: '.$textmsgpart."\n";
+				// ?: Message grab failed
+				if ($textmsgpart === false) {
+					// -> Log a warning
+					error_log('Warning: Could not read text message file, path: '.$textfilepath, 0);
+				}
+				else {
+					// ?: First part of message
+					if ($first) {
+						// -> Remove default keyword from start of sentence
+						$e = preg_split('/\s/', $textmsgpart, 2);
+						if (strtolower($this->config['keywords_default']) == strtolower($e[0])) {
+							$textmsgpart = (count($e) > 1) ? $e[1] : '';
+						}
+						$first = false;
+					}
+					echo 'Textmsgpart2: '.$textmsgpart."\n";
+					// Append text message part to full message
+					$textmsg .= $textmsgpart;
+				}
+			}
+			else {
+				error_log('Warning: Could not find text message file, path: '.$textfilepath, 0);
+			}
+		}
+		if (!empty($textmsg)) {
+			// Trim accidental double whitespace in message
+			$textmsg = preg_replace('/(\s){2,}/', '${1}', $textmsg);
+			// Trim whitespaces at end of message
+			$textmsg = trim($textmsg);
+		}
+		return $textmsg;
+	}
+	
+	/**
+	 * Moves and renames all images in imgobjs to specified name, and falls back to searching in
+	 * path if unable to find filenames in imgobjs in filesystem. 
+	 * 
+	 * @param	SimpleXMLElement	$imgobjs	SimpleXML img data objects
+	 * @param	string				$path		path containing files
+	 * @param	string				$name		base file name to rename to
+	 * 
+	 * @return	string[]						array of paths to image files moved/renamed
+	 */
+	private function moveAndRenameImgObjsInPathToParent($imgobjs, $path, $name) {
+		$paths = array();
+		$i = 1;
+		foreach ($imgobjs as $img) {
+			$imgfilename = $img->attributes()->src;
+			$imgfilepath = $path.$imgfilename;
+			
+			// For some reason, certain MMS file names are listed differently in XML than in the filesystem,
+			// but will have some similarities. Example:
+			// In XML: 			cid:_external_images_media_2$02.jpg
+			// In filesystem: 	02.jpg
+			// This is a workaround/fallback solution: Look for the file in the specific folder
 			if (!file_exists($imgfilepath)) {
-				// For some reason, certain MMS file names are listed differently in XML than in filesystem, this is a workaround
-				// Fallback solution: look for the file in the specific folder
-				$files = glob($savepath.'*.jpg');
+				$jpgfiles = glob($path.'*.jpg'); // Gives us full path to JPG file
 				$match = false;
-				// See if any of the files match the current expected name
-				foreach ($files as $filename) {
-					$basename = basename($filename);
-					// Match basename case-insensitive at end of line of expected name - best guess at which photo belongs to what message
-					//                            .-------´
-					if (preg_match('/'.$basename.'$/i', $imgfile) || count($files) == 1) {
-						$imgfilepath = $filename;
+				// Iterate over all JPG files in folder
+				foreach ($jpgfiles as $jpgfilepath) {
+					$basename = basename($jpgfilepath); // Use base name of JPG file
+					// Match basename case-insensitive at end of line of expected name
+					// This is a best guess method for determing which photo belongs to what message
+					if (preg_match('/'.$basename.'$/i', $imgfilename) || count($jpgfiles) == 1) {
+						$imgfilepath = $jpgfilepath;
 						$match = true;
 						break;
 					}
 				}
 				if (!$match) {
-					error_log('Could not match any files up against imgfile '.$imgfile, 0);
-					return false;
+					error_log('Could not match any files up against imgfile '.$imgfilename, 0);
+					return $paths;
 				}
 				// If it still doesn't exist, we're out of options
 				if (!file_exists($imgfilepath)) {
 					error_log('Could not find MMS image file, path: '.$imgfilepath, 0);
-					return false;
+					return $paths;
 				}
 			}
-			// If more than one picture in same MMS we need to add a suffix, so we dont overwrite any pictures
-			$x = '';
-			if ($i > 1) {
-				$x = '-'.$i;
-			}
-			// Move file to parent directory and rename to something more sensible (its timestamp)
-			$newpath = $savepath.'..'.SEP.$timestamp.$x.'.jpg';
+			
+			// Now we have the full image file path, let's rename it
+			$exists = false;
+			do {
+				// Generate a suffix if more than one picture in same MMS or file with same name exists
+				// so we dont overwrite any pictures
+				$suffix = ($i > 1 || $exists) ? '-'.$i : '';
+				$i++;
+				
+				// Find an available path
+				$newpath = $path.'..'.SEP.$name.$suffix.'.jpg';
+				
+				$exists = file_exists($newpath);
+			} while($exists);
+			// Move file to parent directory and rename to something more sensible (its timestamp+suffix)			
 			$renamesuccess = rename($imgfilepath, $newpath);
 			if (!$renamesuccess) {
 				error_log('Could not rename MMS image file, path: '.$imgfilepath, 0);
-				return false;
+				return $paths;
 			}
 			$newpath = realpath($newpath);
-			
-			// Get texts related to message
-			$texts = $dataobj->text;
-			$first = true;
-			$msg = '';
-			foreach ($texts as $text) {
-				$txtfile = (string)$text->attributes()->src;
-				if (!empty($txtfile)) {
-					$txtfilepath = $savepath.$txtfile;
-					if (file_exists($txtfilepath)) {
-						// Get message from text file
-						$msgpart = file_get_contents($txtfilepath);
-						// ?: First part of message
-						if ($first) {
-							// -> Remove default keyword from start of sentence
-							$e = explode(' ', $msgpart, 2);
-							if (count($e) > 1 && strtolower($this->config['keywords_default']) == strtolower($e[0])) {
-								$msgpart = $e[1];
-							}
-							$first = false;
-						}
-						
-						// Append message part to message
-						$msg .= $msgpart;					
-						// Remove text file
-//						if (!unlink($txtfilepath)) {
-//							error_log('Unable to delete file '.$txtfilepath, 0);
-//						}
-					}
-					else {
-						error_log('Warning: Could not find text message file, path: '.$txtfilepath, 0);
-					}
-				}
-			}
-			if (empty($msg)) {
-				$msg = $message;
-			}
-			
-			// Trim double whitespace in message
-			$msg = preg_replace('/(\s){2,}/', '${1}', $msg);
-			// Trim whitespaces at end of message
-			$msg = trim($msg);			
-			
-			$relpath = $this->find_relative_path(dirname(__FILE__), $newpath);
-			
-			// Add MMS information to database and push to MMSadmin
-			$mms = new mmsReaction();
-			if ($mms->addMms($phonenumber, $msg, $relpath) < 0) {
-				error_log('Could not add MMS information to database, path: '.$savepath, 0);
-				return false;
-			}			
-			
-			$i++;
+			$paths[] = $newpath;
 		}
+		return $paths;
+	}
+
+//			
+//			// Get texts related to message
+//			$first = true;
+//			$msg = '';
+//			foreach ($texts as $text) {
+//				$txtfile = (string)$text->attributes()->src;
+//				if (!empty($txtfile)) {
+//					$txtfilepath = $savepath.$txtfile;
+//					if (file_exists($txtfilepath)) {
+//						// Get message from text file
+//						$msgpart = file_get_contents($txtfilepath);
+//						// ?: First part of message
+//						if ($first) {
+//							// -> Remove default keyword from start of sentence
+//							$e = explode(' ', $msgpart, 2);
+//							if (count($e) > 1 && strtolower($this->config['keywords_default']) == strtolower($e[0])) {
+//								$msgpart = $e[1];
+//							}
+//							$first = false;
+//						}
+//						
+//						// Append message part to message
+//						$msg .= $msgpart;					
+//						// Remove text file
+////						if (!unlink($txtfilepath)) {
+////							error_log('Unable to delete file '.$txtfilepath, 0);
+////						}
+//					}
+//					else {
+//						error_log('Warning: Could not find text message file, path: '.$txtfilepath, 0);
+//					}
+//				}
+//			}
+//			if (empty($msg)) {
+//				if (isset($prevmsg) && empty($newpath)) {
+//					$msg = $prevmsg;
+//					unset($prevmsg);
+//				}
+//				else {
+//					$msg = $message;
+//					// If no image found, we store message for next iteration
+//					if (empty($newpath)) {
+//						echo "Continue 2\n";
+//						$prevmsg = $msg;
+//						continue;
+//					}
+////					else if (empty($newpath)) {
+////						error_log('Message with no picture, and no chance of binding to one');
+////						return false;
+////					}
+//				}
+//			}
+//
+//			
+//			// Trim double whitespace in message
+//			$msg = preg_replace('/(\s){2,}/', '${1}', $msg);
+//			// Trim whitespaces at end of message
+//			$msg = trim($msg);			
+//			
+//			$relpath = $this->find_relative_path(dirname(__FILE__), $newpath);
+//			
+//			// Add MMS information to database and push to MMSadmin
+//			$mms = new mmsReaction();
+//			if ($mms->addMms($phonenumber, $msg, $relpath) < 0) {
+//				error_log('Could not add MMS information to database, path: '.$savepath, 0);
+//				return false;
+//			}			
+//		}
 		// Remove folder
 //		if (!rmdir($savepath)) {
 //			error_log('Unable to delete folder '.$savepath, 0);
 //		}
-
-		return true;
-	}
+	
 	
 	/**
 	 * Unzip the source_file in the destination dir
