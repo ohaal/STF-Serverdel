@@ -35,11 +35,15 @@ function SendToClient($clientID, $type, $data) {
 function eventChatMsg($clientID, $ip, $params) {
 	global $userlist;
 
+	$search = array('<', '>');
+	$replace = array('&#060;', '&#062;');
+	$message = str_replace($search, $replace, $params['chatmsg']);
+	
 	$data = array(
 		'clientid' => $clientID,
 		'ip' => $ip,
 		'nickname' => $userlist[$clientID],
-		'message' => $params['chatmsg']
+		'message' => $message
 	);
 	SendToAllClients('chatmsg', $data);
 }
@@ -105,7 +109,10 @@ function eventSetDeclined($clientID, $ip, $params) {
 // This is triggered whenever someone sets their nick, which at the moment is only when someone connects to the server
 function eventSetNick($clientID, $ip, $params) {
 	global $userlist;
-	$newnickname = $params['newnickname'];
+	
+	$search = array('<', '>');
+	$replace = array('&#060;', '&#062;');
+	$newnickname = str_replace($search, $replace, $params['newnickname']);
 	
 	// Avoid confusion, disallow two users the same nickname, add unique trailing number
 	$i = 0;
