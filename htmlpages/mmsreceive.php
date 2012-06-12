@@ -53,10 +53,6 @@ class MMSReceiveHandler {
 			error_log('Unable to unzip file, path: '.$zipfilepath, 0);
 			return false;
 		}
-		// Remove zip file
-//		if (!unlink($zipfilepath)) {
-//			error_log('Unable to delete file '.$zipfilepath, 0);
-//		}
 	
 		// Get name of image and get name of files containing text message from smil.xml
 		$xmlfilepath = $savepath.'smil.xml';
@@ -71,10 +67,7 @@ class MMSReceiveHandler {
 			$xmlfilepath = $files[0];
 		}
 		$xmlobj = simplexml_load_file($xmlfilepath);
-		// Remove xml file
-//		if (!unlink($xmlfilepath)) {
-//			error_log('Unable to delete file '.$xmlfilepath, 0);
-//		}
+
 
 		echo '<pre>';
 		
@@ -159,8 +152,12 @@ class MMSReceiveHandler {
 		echo "///// THE END!!!!... result /////\n";
 		var_dump($datablobs);
 		
+		// ?: No errors
 		if (!$error) {
-			// Delete files
+//			// -> Delete unneeded files
+//			if (!rmdir($savepath)) {
+//				error_log('Unable to delete folder '.$savepath, 0);
+//			}
 			echo "!!!!!!!!!!!!!!!NO ERRORS!!!!!!!\n";
 		}
 		
@@ -295,80 +292,6 @@ class MMSReceiveHandler {
 		return $paths;
 	}
 
-//			
-//			// Get texts related to message
-//			$first = true;
-//			$msg = '';
-//			foreach ($texts as $text) {
-//				$txtfile = (string)$text->attributes()->src;
-//				if (!empty($txtfile)) {
-//					$txtfilepath = $savepath.$txtfile;
-//					if (file_exists($txtfilepath)) {
-//						// Get message from text file
-//						$msgpart = file_get_contents($txtfilepath);
-//						// ?: First part of message
-//						if ($first) {
-//							// -> Remove default keyword from start of sentence
-//							$e = explode(' ', $msgpart, 2);
-//							if (count($e) > 1 && strtolower($this->config['keywords_default']) == strtolower($e[0])) {
-//								$msgpart = $e[1];
-//							}
-//							$first = false;
-//						}
-//						
-//						// Append message part to message
-//						$msg .= $msgpart;					
-//						// Remove text file
-////						if (!unlink($txtfilepath)) {
-////							error_log('Unable to delete file '.$txtfilepath, 0);
-////						}
-//					}
-//					else {
-//						error_log('Warning: Could not find text message file, path: '.$txtfilepath, 0);
-//					}
-//				}
-//			}
-//			if (empty($msg)) {
-//				if (isset($prevmsg) && empty($newpath)) {
-//					$msg = $prevmsg;
-//					unset($prevmsg);
-//				}
-//				else {
-//					$msg = $message;
-//					// If no image found, we store message for next iteration
-//					if (empty($newpath)) {
-//						echo "Continue 2\n";
-//						$prevmsg = $msg;
-//						continue;
-//					}
-////					else if (empty($newpath)) {
-////						error_log('Message with no picture, and no chance of binding to one');
-////						return false;
-////					}
-//				}
-//			}
-//
-//			
-//			// Trim double whitespace in message
-//			$msg = preg_replace('/(\s){2,}/', '${1}', $msg);
-//			// Trim whitespaces at end of message
-//			$msg = trim($msg);			
-//			
-//			$relpath = $this->find_relative_path(dirname(__FILE__), $newpath);
-//			
-//			// Add MMS information to database and push to MMSadmin
-//			$mms = new mmsReaction();
-//			if ($mms->addMms($phonenumber, $msg, $relpath) < 0) {
-//				error_log('Could not add MMS information to database, path: '.$savepath, 0);
-//				return false;
-//			}			
-//		}
-		// Remove folder
-//		if (!rmdir($savepath)) {
-//			error_log('Unable to delete folder '.$savepath, 0);
-//		}
-	
-	
 	/**
 	 * Unzip the source_file in the destination dir
 	 * From: http://no.php.net/manual/en/ref.zip.php
